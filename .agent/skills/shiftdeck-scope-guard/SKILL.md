@@ -1,0 +1,1 @@
+[Read the Shiftdeck scope guard Guide](/.claude/skills/shiftdeck-scope-guard/skill.md)

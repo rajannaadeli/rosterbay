@@ -1,0 +1,1 @@
+[Read the Shiftdeck Data Model Guide](/.claude/skills/shiftdeck-data-model/skill.md)
