@@ -1,0 +1,18 @@
+# DECISIONS.md — RosterBay decision log
+
+Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
+
+## 2026-07-10
+
+- **Product name** — RosterBay everywhere (domain rosterbay.com), superseding "ShiftDeck" in the spec and skills. *Why:* PROMPT_1 precedence; RosterBay is an approved alternate in spec §0.
+- **Router (web)** — React Router v7 (`react-router` package, data router) instead of TanStack Router. *Why:* spec §1 explicitly allows it; fewer moving parts (no codegen/route-tree step) for a 5-route demo — simplest spec-compliant option.
+- **Cert status computation** — SQL function `cert_status(expires_on)` + view `worker_certs_with_status`, not a generated column. *Why:* status depends on `now()` in Australia/Adelaide; Postgres generated columns require immutable expressions, so a generated column is impossible. A view keeps one server-side source of truth for web + mobile.
+- **`database.types.ts`** — hand-written once, mirrored byte-identical in `admin/src/lib/` and `mobile/lib/`. *Why:* no monorepo workspace tooling exists (two independent npm roots); a shared package would add infra for one file. Rule recorded in CLAUDE.md: schema change ⇒ update both copies in the same session.
+- **Env fixes** — both `.env` files had the project URL with a stray `/rest/v1/` suffix (breaks supabase-js, which appends its own service paths), and mobile used `VITE_`-prefixed vars that Expo never exposes. Fixed to base URL; mobile renamed to `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`. *Why:* required for the clients to work at all.
+- **Mobile icons** — installed `phosphor-react-native` (scaffold shipped lucide only). Lucide left installed because `components/ui/icon.tsx` from react-native-reusables depends on it; RosterBay screens use Phosphor exclusively. *Why:* spec §1 mandates Phosphor on both platforms.
+- **Worker detail (web)** — routed page `/app/workers/:id`, not a sheet. *Why:* deep-linkable (Phase 2 roster hard-block popovers and dashboard rows can link to it), simpler focus/scroll management than a sheet holding a full document wallet + history.
+- **Site required certs (seed)** — modelled purely site-based via `job_sites.required_cert_type_ids`: all sites require White Card; hospital adds Police Check + First Aid; events venue adds SA Security Agents Licence; warehouse adds Working at Heights. *Why:* spec's "security roles → SA licence" is role-based, but the schema hangs requirements off sites; attaching the licence to the security-heavy venue keeps the Phase-1 blocking-line logic honest without inventing a new role→cert table. Phase 2's conflict engine can extend via `shifts.role_required`.
+- **White Card validity** — `cert_types.validity_months` nullable; White Card is `NULL` (doesn't expire in AU) and seeded worker White Cards get long expiry dates. *Why:* domain accuracy; the status view treats far-future expiry as `valid`.
+- **Supabase CLI unavailable** — no CLI in this environment, so migrations ship as numbered files plus a consolidated `supabase/setup.sql` for the SQL editor; auth seeding waits on `SUPABASE_SERVICE_ROLE_KEY` in root `.env`. *Why:* PROMPT_1 §B fallback path.
+- **Mobile image upload** — expo-image-picker with `base64: true`, decoded via Hermes' built-in `atob` to a `Uint8Array`, uploaded as ArrayBuffer. *Why:* avoids extra packages (no base64-arraybuffer/file-system dance); RN blobs are unreliable with supabase-js.
+- **pg_cron nightly reset** — the `cron.schedule` call ships commented in setup.sql. *Why:* pg_cron extension availability varies by Supabase plan/config; enabling it is a one-line uncomment in the dashboard, and scheduling isn't needed until the demo is hosted (Phase 3 deploy).
