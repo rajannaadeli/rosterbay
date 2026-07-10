@@ -3,7 +3,7 @@ const { hairlineWidth } = require('nativewind/theme');
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './features/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
@@ -41,11 +41,21 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // RosterBay tokens (spec §6) — identical meaning to the web app's.
+        surface: '#FAFAF9',
+        ink: '#1C1917',
+        'ink-muted': '#78716C',
+        success: '#16A34A',
+        warning: '#D97706',
+        danger: '#DC2626',
       },
+      // Radius law: 10px everywhere — every step resolves to the same value.
       borderRadius: {
+        DEFAULT: 'var(--radius)',
+        sm: 'var(--radius)',
+        md: 'var(--radius)',
         lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        xl: 'var(--radius)',
       },
       borderWidth: {
         hairline: hairlineWidth(),

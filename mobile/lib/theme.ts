@@ -1,60 +1,39 @@
 import { DarkTheme, DefaultTheme, type Theme } from 'expo-router/react-navigation';
- 
+
+/**
+ * RosterBay tokens (spec §6) for react-navigation chrome. Light mode is
+ * canonical; the dark entry reuses the light values on purpose — dark mode is
+ * deliberately not themed in this phase.
+ */
 export const THEME = {
   light: {
-    background: 'hsl(0 0% 100%)',
-    foreground: 'hsl(0 0% 3.9%)',
+    background: 'hsl(60 9% 98%)', // surface #FAFAF9
+    foreground: 'hsl(24 10% 10%)', // ink #1C1917
     card: 'hsl(0 0% 100%)',
-    cardForeground: 'hsl(0 0% 3.9%)',
+    cardForeground: 'hsl(24 10% 10%)',
     popover: 'hsl(0 0% 100%)',
-    popoverForeground: 'hsl(0 0% 3.9%)',
-    primary: 'hsl(0 0% 9%)',
-    primaryForeground: 'hsl(0 0% 98%)',
-    secondary: 'hsl(0 0% 96.1%)',
-    secondaryForeground: 'hsl(0 0% 9%)',
-    muted: 'hsl(0 0% 96.1%)',
-    mutedForeground: 'hsl(0 0% 45.1%)',
-    accent: 'hsl(0 0% 96.1%)',
-    accentForeground: 'hsl(0 0% 9%)',
-    destructive: 'hsl(0 84.2% 60.2%)',
-    border: 'hsl(0 0% 89.8%)',
-    input: 'hsl(0 0% 89.8%)',
-    ring: 'hsl(0 0% 63%)',
-    radius: '0.625rem',
-    chart1: 'hsl(12 76% 61%)',
-    chart2: 'hsl(173 58% 39%)',
-    chart3: 'hsl(197 37% 24%)',
-    chart4: 'hsl(43 74% 66%)',
-    chart5: 'hsl(27 87% 67%)',
-  },
-  dark: {
-    background: 'hsl(0 0% 3.9%)',
-    foreground: 'hsl(0 0% 98%)',
-    card: 'hsl(0 0% 3.9%)',
-    cardForeground: 'hsl(0 0% 98%)',
-    popover: 'hsl(0 0% 3.9%)',
-    popoverForeground: 'hsl(0 0% 98%)',
-    primary: 'hsl(0 0% 98%)',
-    primaryForeground: 'hsl(0 0% 9%)',
-    secondary: 'hsl(0 0% 14.9%)',
-    secondaryForeground: 'hsl(0 0% 98%)',
-    muted: 'hsl(0 0% 14.9%)',
-    mutedForeground: 'hsl(0 0% 63.9%)',
-    accent: 'hsl(0 0% 14.9%)',
-    accentForeground: 'hsl(0 0% 98%)',
-    destructive: 'hsl(0 70.9% 59.4%)',
-    border: 'hsl(0 0% 14.9%)',
-    input: 'hsl(0 0% 14.9%)',
-    ring: 'hsl(300 0% 45%)',
-    radius: '0.625rem',
-    chart1: 'hsl(220 70% 50%)',
-    chart2: 'hsl(160 60% 45%)',
-    chart3: 'hsl(30 80% 55%)',
-    chart4: 'hsl(280 65% 60%)',
-    chart5: 'hsl(340 75% 55%)',
+    popoverForeground: 'hsl(24 10% 10%)',
+    primary: 'hsl(175 77% 26%)', // teal #0F766E
+    primaryForeground: 'hsl(0 0% 100%)',
+    secondary: 'hsl(60 5% 96%)',
+    secondaryForeground: 'hsl(24 10% 10%)',
+    muted: 'hsl(60 5% 96%)',
+    mutedForeground: 'hsl(25 5% 45%)', // ink-muted #78716C
+    accent: 'hsl(60 5% 96%)',
+    accentForeground: 'hsl(24 10% 10%)',
+    destructive: 'hsl(0 72% 51%)', // #DC2626
+    border: 'hsl(20 6% 90%)', // #E7E5E4
+    input: 'hsl(20 6% 90%)',
+    ring: 'hsl(175 77% 26%)',
+    radius: '10px',
+    chart1: 'hsl(175 77% 26%)',
+    chart2: 'hsl(142 71% 36%)',
+    chart3: 'hsl(32 93% 44%)',
+    chart4: 'hsl(0 72% 51%)',
+    chart5: 'hsl(25 5% 45%)',
   },
 };
- 
+
 export const NAV_THEME: Record<'light' | 'dark', Theme> = {
   light: {
     ...DefaultTheme,
@@ -70,12 +49,12 @@ export const NAV_THEME: Record<'light' | 'dark', Theme> = {
   dark: {
     ...DarkTheme,
     colors: {
-      background: THEME.dark.background,
-      border: THEME.dark.border,
-      card: THEME.dark.card,
-      notification: THEME.dark.destructive,
-      primary: THEME.dark.primary,
-      text: THEME.dark.foreground,
+      background: THEME.light.background,
+      border: THEME.light.border,
+      card: THEME.light.card,
+      notification: THEME.light.destructive,
+      primary: THEME.light.primary,
+      text: THEME.light.foreground,
     },
   },
 };

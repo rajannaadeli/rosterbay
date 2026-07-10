@@ -1,34 +1,58 @@
-# ShiftDeck — Agent Instructions
+# RosterBay — Project Instructions
 
-ShiftDeck is a sales/portfolio demo: a Connecteam-style workforce management SaaS for a fictional Adelaide facility-services company, built to anchor a freelance specialization in deskless-workforce software. It is not a real product with real users — every decision should optimize for **looking and behaving like a production SaaS product**, recorded in two scripted demo sequences, on a tight solo build budget.
+**One-liner:** RosterBay (rosterbay.com) is a workforce-management sales demo — roster, verify, and track a fictional Adelaide facility-services company (Torrens Facility Services) — built as a portfolio anchor for the deskless-workforce freelance vertical. It must look and behave like a production SaaS, on a strict scope budget.
 
-This file holds what should always be loaded. Deeper reference material lives in on-demand skills — read the relevant one(s) before acting, don't ask the user to re-paste spec content that's already in a skill.
+**Naming:** the product is **RosterBay** everywhere. Older material (spec, skills) may say "ShiftDeck" — treat every such reference as RosterBay. The tenant stays Torrens Facility Services; timezone stays `Australia/Adelaide` (ACST, UTC+9:30 — the half-hour offset must be correct everywhere).
 
-## Skills — read before acting, don't wait to be told
+Read the project skills before acting: `shiftdeck-data-model` (SQL/RLS/seed), `shiftdeck-design-system` (tokens/motion), `shiftdeck-ui-screens` (layout/copy), `shiftdeck-scope-guard` (kill list). `COMPLETE_SPECS.md` is the product source of truth; the active phase prompt takes precedence over it.
 
-- **`shiftdeck-design-system`** — colors, tokens, spacing, motion. Read before building or styling *any* screen or component, on either platform.
-- **`shiftdeck-data-model`** — schema, RLS, auto-flag thresholds, the compliance hard-block rule, seed logic. Read before writing any SQL, migration, or query.
-- **`shiftdeck-ui-screens`** — screen-by-screen layout, interaction, and copy spec, plus the two Magic Moment choreographies. Read before building or reviewing a specific screen.
-- **`shiftdeck-scope-guard`** — the feature kill-list and brand constraints. Read before implementing anything that isn't explicitly in the build sequence, and self-check against it before ending a session.
+## Folder map
 
-## Stack (fixed — do not substitute without being asked)
+```
+admin/     Web admin console — React 19 + Vite 8 + TypeScript 6 (strict) + Tailwind v4
+           + shadcn (base-maia style, @base-ui/react) + Phosphor icons.
+           src/features/<module>/{api.ts,hooks.ts,components/} · src/components/ (shared)
+           · src/components/ui/ (shadcn primitives) · src/lib/ (supabase, types, format)
+mobile/    Worker app — Expo SDK 56 + expo-router + NativeWind v4 + react-native-reusables
+           (@rn-primitives) + phosphor-react-native.
+           app/ (routes) · features/<module>/ · components/ · lib/
+supabase/  Numbered SQL migrations + setup.sql (consolidated, paste-into-SQL-editor)
+scripts/   Node scripts (auth seeding). demo-ids.ts is the single source of fixed demo UUIDs.
+```
 
-**Web admin console:** React 19 + Vite + TypeScript, shadcn/ui + Tailwind v4, Phosphor icons, TanStack Router + Query, Zustand (sparingly), react-hook-form + zod, dnd-kit, date-fns + @date-fns/tz, react-leaflet + OSM tiles, recharts, papaparse.
+Package manager: **npm** in both apps. Env: `admin/.env` uses `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`; `mobile/.env` uses `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`. URLs are the **base** project URL (no `/rest/v1/`). Root `.env` holds `SUPABASE_SERVICE_ROLE_KEY` for scripts only — never committed, never imported by app code.
 
-**Worker mobile app:** Expo (latest SDK) + expo-router, NativeWind v4 + react-native-reusables, phosphor-react-native, TanStack Query + supabase-js, expo-location (foreground only), expo-image-picker, expo-secure-store.
+## Design tokens (spec §6 — law)
 
-**Backend:** Supabase only — Postgres + RLS, email/password auth with seeded demo accounts, Storage (`certificates`, `task-proof` buckets), Realtime on `time_entries` / `shift_offers` / `shifts`, pg_cron for the nightly reset. No custom server. Edge Functions only if something genuinely can't run client-side.
+Surface `#FAFAF9` · ink `#1C1917` (stone-900) · ink-muted `#78716C` · border `#E7E5E4` · **one accent: teal `#0F766E`** · radius **10px** everywhere · Inter on web, system font on mobile · shadows whisper-quiet, 1px borders separate.
 
-**Deploy:** Web console + Expo web export → Vercel/Cloudflare Pages. Supabase free tier. UptimeRobot on both URLs.
+**Semantic status-color law:** green `#16A34A` = compliant/approved/on-site/filled · amber `#D97706` = expiring/pending/warning · red `#DC2626` = expired/unfilled/flagged/blocked. **No status may ever be communicated with an off-system color.** No new hex values anywhere; no blue "info" badge; grays come from the Stone scale only. `StatusPill` (one per app) is the canonical rendering of these states — reuse it, don't re-implement.
 
-## Conventions
+Skeletons wherever loading happens — no spinner-only screens. Every list gets a designed empty state.
 
-- TypeScript strict mode, both repos.
-- One `.env` per app, both read via a single `lib/supabase.ts` client file — never hardcode the Supabase URL/anon key elsewhere. `.env` is gitignored; `.env.example` ships with blank values.
-- Named exports for components; colocate a component's types with the component unless shared across screens.
-- Every list/table screen gets a real empty state — it's reused across every future client build off this skeleton, not a throwaway.
-- Session discipline: one module per coding session, `/clear` between sessions. Run the `shiftdeck-scope-guard` self-check before ending a session.
+## TypeScript & data conventions
 
-## What this project is not
+- Strict mode, no `any`, no `@ts-ignore` without a DECISIONS.md entry. zod validates every form and every external boundary.
+- Data fetching: TanStack Query hooks per feature (`features/<module>/hooks.ts` wrapping `api.ts`). **No fetch-in-component, no useEffect fetching.** Query defaults: `staleTime` 60s, `refetchOnWindowFocus: false`.
+- One typed Supabase client singleton per app (`lib/supabase.ts`) — never instantiate elsewhere, never hardcode URL/keys.
+- `database.types.ts` is hand-written and **mirrored** in `admin/src/lib/` and `mobile/lib/` — when the schema changes, update both in the same session.
+- Cert status (`valid`/`expiring_soon`/`expired`) is computed **in Postgres** (view `worker_certs_with_status`) — clients read it, never recompute it.
+- All timestamps stored UTC; all display formatting goes through each app's single `formatACST()` util (`lib/format.ts`). Never call date-fns format with a timezone inline in a component.
+- Named exports for components; components small and feature-scoped; pages compose features, they don't contain them.
+- Accessibility floor: real `<button>`/`<label>`, focus-visible states, proper table semantics.
 
-See `shiftdeck-scope-guard` for the full kill list and reasoning. In short: no payroll calculation, invoicing, chat, push infra, leave/HR, client portal, marketplace, background location tracking, or multi-company switching UI — regardless of how small or "just the UI" a version of one of these might seem in the moment.
+## Commits
+
+Conventional commits: `feat(scope): …`, `fix(scope): …`, `chore(scope): …`, `docs: …`. Scope = `db`, `admin`, `mobile`, `scripts`, `repo`. One commit per milestone minimum.
+
+## Phase boundaries
+
+- **Phase 1 (done in this repo):** schema + RLS + seed, auth seeding, tokens, web entry/shell + Workers + Job Sites, mobile auth/tabs + Wallet.
+- **Phase 2:** Roster board (week grid, drag-assign, conflict engine, shift CRUD, broadcast creation), web Timesheets (flags, approve, CSV).
+- **Phase 3:** Mobile Today (clock-in + geofence confirm, in-shift tasks/photos), Schedule, Offers (first-accept-wins), notifications list, Dashboard (KPIs, live map, feed), realtime, Magic Moments, landing polish, deploy.
+
+Placeholder rule: future-phase nav items route to the single "Coming in this demo" placeholder — never stub partial screens.
+
+## Standing order
+
+**No features beyond the spec, ever — the kill list in spec §10 is law:** no payroll calculation, invoicing, chat, push infra, leave/HR, client portal, marketplace, background location, or multi-company UI — not even "just the UI shell." If a screen feels sparse, the answer is seeded-data density and polish, not new features. Run the `shiftdeck-scope-guard` self-check before ending any session.

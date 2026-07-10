@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
+    "@rn-primitives/avatar": "^1.5.2",
+    "@rn-primitives/label": "^1.5.2",
     "@rn-primitives/portal": "~1.4.0",
+    "@rn-primitives/separator": "^1.5.2",
     "@rn-primitives/slot": "^1.5.2",
     "@supabase/supabase-js": "^2.110.2",
     "@tanstack/react-query": "^5.101.2",

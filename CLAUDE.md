@@ -39,6 +39,7 @@ Skeletons wherever loading happens — no spinner-only screens. Every list gets 
 - Cert status (`valid`/`expiring_soon`/`expired`) is computed **in Postgres** (view `worker_certs_with_status`) — clients read it, never recompute it.
 - All timestamps stored UTC; all display formatting goes through each app's single `formatACST()` util (`lib/format.ts`). Never call date-fns format with a timezone inline in a component.
 - Named exports for components; components small and feature-scoped; pages compose features, they don't contain them.
+- UI primitives are **installed via CLI**, never hand-written: `npx shadcn@latest add <component>` (admin) / `npx @react-native-reusables/cli@latest add <component>` (mobile). Only product-specific components (StatusPill, empty states, feature components) are custom, and they build on the installed primitives.
 - Accessibility floor: real `<button>`/`<label>`, focus-visible states, proper table semantics.
 
 ## Commits
