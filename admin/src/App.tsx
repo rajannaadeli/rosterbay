@@ -1,21 +1,35 @@
-import { Button } from "@/components/ui/button"
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+
+import { AppShell } from '@/components/app-shell';
+import { ComingSoon } from '@/components/coming-soon';
+import { EntryPage } from '@/pages/entry-page';
+import { SiteDetailPage } from '@/pages/site-detail-page';
+import { SitesPage } from '@/pages/sites-page';
+import { WorkerDetailPage } from '@/pages/worker-detail-page';
+import { WorkersPage } from '@/pages/workers-page';
+
+const router = createBrowserRouter([
+  { path: '/', element: <EntryPage /> },
+  {
+    path: '/app',
+    element: <AppShell />,
+    children: [
+      { index: true, element: <Navigate to="/app/dashboard" replace /> },
+      { path: 'dashboard', element: <ComingSoon title="Dashboard" /> },
+      { path: 'roster', element: <ComingSoon title="Roster" /> },
+      { path: 'timesheets', element: <ComingSoon title="Timesheets" /> },
+      { path: 'workers', element: <WorkersPage /> },
+      { path: 'workers/:workerId', element: <WorkerDetailPage /> },
+      { path: 'sites', element: <SitesPage /> },
+      { path: 'sites/new', element: <SiteDetailPage /> },
+      { path: 'sites/:siteId', element: <SiteDetailPage /> },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+]);
 
 export function App() {
-  return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

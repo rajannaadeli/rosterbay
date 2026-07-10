@@ -19,4 +19,12 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // CLI-installed shadcn primitives export cva variant helpers alongside
+    // components by design — don't edit registry-owned files to satisfy lint.
+    files: ['src/components/ui/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

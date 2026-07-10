@@ -42,7 +42,7 @@ export function StatusPill({ tone, label, showIcon = true, className }: StatusPi
   );
 }
 
-export const CERT_STATUS_TONE: Record<CertStatus, StatusTone> = {
+const CERT_STATUS_TONE: Record<CertStatus, StatusTone> = {
   valid: 'success',
   expiring_soon: 'warning',
   expired: 'danger',
