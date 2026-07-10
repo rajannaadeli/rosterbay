@@ -68,6 +68,7 @@ export const CERT_STATUS_TONE: Record<CertStatus, StatusTone> = {
 
 /** Cert-card pill: Valid / Expiring soon / Expired. */
 export function CertPill({ status, className }: { status: CertStatus; className?: string }) {
-  const label = status === 'valid' ? 'Valid' : status === 'expiring_soon' ? 'Expiring soon' : 'Expired';
+  const label =
+    status === 'valid' ? 'Valid' : status === 'expiring_soon' ? 'Expiring soon' : 'Expired';
   return <StatusPill tone={CERT_STATUS_TONE[status]} label={label} className={className} />;
 }
