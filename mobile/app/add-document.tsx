@@ -1,11 +1,12 @@
 import { addMonths, format } from 'date-fns';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, router } from 'expo-router';
-import { CameraIcon, CheckCircleIcon, ImageSquareIcon } from 'phosphor-react-native';
+import { CheckCircleIcon } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { z } from 'zod';
 
+import { DocumentAttachment } from '@/components/document-attachment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +38,7 @@ export default function AddDocumentScreen() {
   const [expiresOn, setExpiresOn] = useState('');
   const [image, setImage] = useState<PickedImage | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [attachError, setAttachError] = useState<string | null>(null);
 
   const chooseCertType = (id: string) => {
     setCertTypeId(id);
@@ -52,15 +54,17 @@ export default function AddDocumentScreen() {
     setImage({
       base64: asset.base64,
       mimeType: asset.mimeType ?? 'image/jpeg',
-      fileName: asset.fileName ?? 'photo',
+      fileName: asset.fileName ?? 'photo.jpg',
     });
     setFormError(null);
+    setAttachError(null);
+    addCert.reset();
   };
 
   const pickFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      setFormError('Camera permission is needed to photograph the document.');
+      setAttachError('Camera permission is needed to photograph the document.');
       return;
     }
     handlePicked(await ImagePicker.launchCameraAsync({ base64: true, quality: 0.7 }));
@@ -83,7 +87,7 @@ export default function AddDocumentScreen() {
       return;
     }
     if (!image) {
-      setFormError('Attach a photo of the document');
+      setAttachError('Attach a photo of the document');
       return;
     }
     if (!profile.data) return;
@@ -157,26 +161,24 @@ export default function AddDocumentScreen() {
 
         <View className="gap-2">
           <Label>Document photo</Label>
-          <View className="flex-row gap-3">
-            <Button variant="outline" className="flex-1" onPress={() => void pickFromCamera()}>
-              <CameraIcon size={18} color="#0F766E" />
-              <Text>Camera</Text>
-            </Button>
-            <Button variant="outline" className="flex-1" onPress={() => void pickFromLibrary()}>
-              <ImageSquareIcon size={18} color="#0F766E" />
-              <Text>Library</Text>
-            </Button>
-          </View>
-          {image && (
-            <Text className="text-xs text-muted-foreground">Attached: {image.fileName}</Text>
-          )}
+          <DocumentAttachment
+            image={image}
+            uploading={addCert.isPending}
+            errorMessage={
+              attachError ?? (addCert.isError ? `Upload failed: ${addCert.error.message}` : null)
+            }
+            onPickCamera={() => void pickFromCamera()}
+            onPickLibrary={() => void pickFromLibrary()}
+            onRemove={() => {
+              setImage(null);
+              setAttachError(null);
+              addCert.reset();
+            }}
+            onRetry={submit}
+          />
         </View>
 
-        {(formError ?? (addCert.isError ? addCert.error.message : null)) && (
-          <Text className="text-sm text-danger">
-            {formError ?? `Upload failed: ${addCert.error?.message ?? ''}`}
-          </Text>
-        )}
+        {formError && <Text className="text-sm text-danger">{formError}</Text>}
 
         <Button size="lg" disabled={addCert.isPending || profile.isPending} onPress={submit}>
           <Text>{addCert.isPending ? 'Uploading…' : 'Add to wallet'}</Text>

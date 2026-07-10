@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import { CertificateIcon, FileTextIcon, PlusIcon, SignOutIcon } from 'phosphor-react-native';
 import { FlatList, Pressable, View } from 'react-native';
 
-import { DemoBanner } from '@/components/demo-banner';
 import { CertPill } from '@/components/status-pill';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,8 +39,6 @@ export default function WalletScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <DemoBanner />
-
       {isPending ? (
         <View className="gap-3 p-4">
           {Array.from({ length: 4 }, (_, i) => (
