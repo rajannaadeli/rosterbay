@@ -134,7 +134,7 @@ export function SiteDetailPage() {
       </div>
 
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold">{isNew ? 'New job site' : site.data?.name}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">{isNew ? 'New job site' : site.data?.name}</h1>
         {!isNew && (
           <Button
             variant="destructive"

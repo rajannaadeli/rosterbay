@@ -2,6 +2,16 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-10 — WhiteFleet UI-parity pass
+
+- **Pattern source** — WhiteFleet admin source (in-workspace `whitefleet-agency-admin/`) is the source of truth for shell/table/drawer patterns; components were ported and re-tokened (teal/Stone/Phosphor), not rebuilt from prose. `whitefleet-mobile/` is missing its `src/` directory, so the mobile header/floating tab bar follow its layout contract + screenshots; a pixel pass needs that folder. *Why:* pixel parity drifts when styled from description.
+- **Shell** — fixed sidebar (collapsible 240px↔52px icon rail, 400ms cross-fade, tooltips, localStorage-persisted) + fixed h-13 header (collapse toggle, breadcrumbs, ⌘K search trigger, bell, avatar dropdown); only the main pane scrolls (`h-screen overflow-hidden`, `overflow-y-auto` scoped to content). Sidebar nav stays **flat** (5 items) — WhiteFleet's grouped sections exist because it has ~30 items; forcing groups onto 5 reads as fake IA.
+- **Tables** — shared `DataTable` uses **TanStack Table** (sorting, column filters via controlled state, pagination pageSize 10, `includesString` global filter) inside WhiteFleet's visual shell (toolbar w/ search + filter slot, bordered card, footer count + pager). All search inputs debounced **300ms** (WhiteFleet's value) via `use-debounce`. *Note:* `useReactTable` triggers one React-Compiler lint *warning* (known library incompatibility) — 0 errors.
+- **Drawers** — Workers get the Supabase-style ~50vw drawer (row click → quick view + edit-in-place: availability notes, add document; "Full profile" link keeps the routed page for deep links). **Job Sites stay full pages**: WhiteFleet hosts its own GeoFencePicker in a page, and the draggable-map editor needs the width. Stat cards → WhiteFleet low-height chip strips (`StatChips`).
+- **⌘K palette** — navigation-only (pages + recent, localStorage), per the parity brief's recommendation; quick actions would be scope creep.
+- **Mobile shell** — one `AppHeader` (+ demo banner) mounted **above** the Tabs navigator and one in-flow floating-pill tab bar below it, so tab switches never remount chrome; `freezeOnBlur` on. Kept the spec's 4 tabs with **no "More" sheet** — the demo IA has no overflow items and inventing menu entries violates the scope guard.
+- **Mobile upload** — `DocumentAttachment` component: pick → preview card (thumbnail, filename) with remove, indeterminate progress bar while uploading (supabase-js exposes no byte progress), inline error + retry. Never a bare input.
+
 ## 2026-07-10
 
 - **Product name** — RosterBay everywhere (domain rosterbay.com), superseding "ShiftDeck" in the spec and skills. *Why:* PROMPT_1 precedence; RosterBay is an approved alternate in spec §0.

@@ -2,6 +2,7 @@ import { MapPinArea, Plus } from '@phosphor-icons/react';
 import { Link } from 'react-router';
 
 import { EmptyState } from '@/components/empty-state';
+import { StatChips } from '@/components/stat-chips';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCertTypes } from '@/features/certs/hooks';
@@ -17,10 +18,10 @@ export function SitesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold">Job Sites</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl font-semibold tracking-tight">Job Sites</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Client sites, geofences and task checklists.
           </p>
         </div>
@@ -29,6 +30,21 @@ export function SitesPage() {
           New site
         </Button>
       </div>
+
+      <StatChips
+        loading={isPending}
+        chips={[
+          { label: 'Sites', value: sites.data?.length ?? 0 },
+          {
+            label: 'Clients',
+            value: new Set((sites.data ?? []).map((s) => s.client_name).filter(Boolean)).size,
+          },
+          {
+            label: 'Task templates',
+            value: [...(taskCounts.data?.values() ?? [])].reduce((sum, n) => sum + n, 0),
+          },
+        ]}
+      />
 
       {isPending ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
