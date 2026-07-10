@@ -493,6 +493,35 @@ export interface Database {
         };
         Relationships: [];
       };
+      time_entries_with_status: {
+        Row: {
+          id: string;
+          company_id: string;
+          shift_id: string;
+          worker_id: string;
+          clock_in_at: string;
+          clock_out_at: string | null;
+          in_lat: number | null;
+          in_lng: number | null;
+          out_lat: number | null;
+          out_lng: number | null;
+          distance_from_site_m: number | null;
+          within_geofence: boolean | null;
+          flags: TimeEntryFlag[];
+          status: TimeEntryStatus;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          shift_starts_at: string;
+          shift_ends_at: string;
+          site_id: string;
+          shift_status: ShiftStatus;
+          missing_clock_out: boolean;
+          effective_flags: TimeEntryFlag[];
+          effective_status: TimeEntryStatus;
+        };
+        Relationships: [];
+      };
       worker_overview: {
         Row: {
           id: string;
