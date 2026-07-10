@@ -17,6 +17,7 @@ create table public.profiles (
   phone text,
   avatar_url text,
   job_title text,
+  availability_notes text,
   created_at timestamptz not null default now()
 );
 create index profiles_company_id_idx on public.profiles (company_id);

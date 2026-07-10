@@ -47,6 +47,7 @@ export interface Database {
           phone: string | null;
           avatar_url: string | null;
           job_title: string | null;
+          availability_notes: string | null;
           created_at: string;
         };
         Insert: {
@@ -57,6 +58,7 @@ export interface Database {
           phone?: string | null;
           avatar_url?: string | null;
           job_title?: string | null;
+          availability_notes?: string | null;
           created_at?: string;
         };
         Update: {
@@ -67,6 +69,7 @@ export interface Database {
           phone?: string | null;
           avatar_url?: string | null;
           job_title?: string | null;
+          availability_notes?: string | null;
           created_at?: string;
         };
         Relationships: [];

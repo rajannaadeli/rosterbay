@@ -104,23 +104,23 @@ begin
   insert into public.companies (id, name, timezone)
   values (cid, 'Torrens Facility Services', tz);
 
-  insert into public.profiles (id, company_id, role, full_name, phone, avatar_url, job_title) values
-    (u_marcus, cid, 'admin',      'Marcus Webb',        '0400 118 224', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MarcusWebb',        'Operations Manager'),
-    (u_sofia,  cid, 'supervisor', 'Sofia Marino',       '0400 271 903', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=SofiaMarino',       'Site Supervisor'),
-    (w_liam,   cid, 'worker',     'Liam Nguyen',        '0401 334 566', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=LiamNguyen',        'Security Guard'),
-    (w_priya,  cid, 'worker',     'Priya Sharma',       '0402 445 677', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=PriyaSharma',       'Cleaner'),
-    (w_jack,   cid, 'worker',     'Jack O''Connell',    '0403 556 788', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=JackOConnell',      'Cleaner'),
-    (w_fatima, cid, 'worker',     'Fatima Hassan',      '0404 667 899', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=FatimaHassan',      'Cleaner'),
-    (w_ethan,  cid, 'worker',     'Ethan Walker',       '0405 778 900', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=EthanWalker',       'Security Guard'),
-    (w_mei,    cid, 'worker',     'Mei Chen',           '0406 889 011', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MeiChen',           'Cleaner'),
-    (w_noah,   cid, 'worker',     'Noah Taylor',        '0407 990 122', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=NoahTaylor',        'Security Guard'),
-    (w_aisha,  cid, 'worker',     'Aisha Okafor',       '0408 101 233', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=AishaOkafor',       'Cleaner'),
-    (w_dylan,  cid, 'worker',     'Dylan Murphy',       '0409 212 344', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=DylanMurphy',       'Security Guard'),
-    (w_hannah, cid, 'worker',     'Hannah Kim',         '0410 323 455', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=HannahKim',         'Cleaner'),
-    (w_marco,  cid, 'worker',     'Marco Rossi',        '0411 434 566', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MarcoRossi',        'Security Guard'),
-    (w_grace,  cid, 'worker',     'Grace Papadopoulos', '0412 545 677', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=GracePapadopoulos', 'Cleaner'),
-    (w_raj,    cid, 'worker',     'Raj Patel',          '0413 656 788', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=RajPatel',          'Cleaner'),
-    (w_sarah,  cid, 'worker',     'Sarah Bennett',      '0414 767 899', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=SarahBennett',      'Security Guard');
+  insert into public.profiles (id, company_id, role, full_name, phone, avatar_url, job_title, availability_notes) values
+    (u_marcus, cid, 'admin',      'Marcus Webb',        '0400 118 224', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MarcusWebb',        'Operations Manager', null),
+    (u_sofia,  cid, 'supervisor', 'Sofia Marino',       '0400 271 903', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=SofiaMarino',       'Site Supervisor', null),
+    (w_liam,   cid, 'worker',     'Liam Nguyen',        '0401 334 566', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=LiamNguyen',        'Security Guard', 'Prefers arvo and night shifts. Studying Tue/Thu mornings.'),
+    (w_priya,  cid, 'worker',     'Priya Sharma',       '0402 445 677', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=PriyaSharma',       'Cleaner', 'Mornings only — school pickup at 3pm.'),
+    (w_jack,   cid, 'worker',     'Jack O''Connell',    '0403 556 788', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=JackOConnell',      'Cleaner', 'Renewing First Aid — booked in for a course next week.'),
+    (w_fatima, cid, 'worker',     'Fatima Hassan',      '0404 667 899', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=FatimaHassan',      'Cleaner', 'Not available Fridays.'),
+    (w_ethan,  cid, 'worker',     'Ethan Walker',       '0405 778 900', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=EthanWalker',       'Security Guard', null),
+    (w_mei,    cid, 'worker',     'Mei Chen',           '0406 889 011', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MeiChen',           'Cleaner', 'Happy to pick up extra weekend shifts.'),
+    (w_noah,   cid, 'worker',     'Noah Taylor',        '0407 990 122', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=NoahTaylor',        'Security Guard', null),
+    (w_aisha,  cid, 'worker',     'Aisha Okafor',       '0408 101 233', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=AishaOkafor',       'Cleaner', 'Max 30 hrs/week.'),
+    (w_dylan,  cid, 'worker',     'Dylan Murphy',       '0409 212 344', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=DylanMurphy',       'Security Guard', null),
+    (w_hannah, cid, 'worker',     'Hannah Kim',         '0410 323 455', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=HannahKim',         'Cleaner', null),
+    (w_marco,  cid, 'worker',     'Marco Rossi',        '0411 434 566', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=MarcoRossi',        'Security Guard', 'No Sundays.'),
+    (w_grace,  cid, 'worker',     'Grace Papadopoulos', '0412 545 677', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=GracePapadopoulos', 'Cleaner', null),
+    (w_raj,    cid, 'worker',     'Raj Patel',          '0413 656 788', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=RajPatel',          'Cleaner', 'Also holds Working at Heights — good for Wingfield racking.'),
+    (w_sarah,  cid, 'worker',     'Sarah Bennett',      '0414 767 899', 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=SarahBennett',      'Security Guard', null);
 
   -- 3 · cert types ------------------------------------------------------------
   insert into public.cert_types (id, company_id, name, code, validity_months, requires_document) values
