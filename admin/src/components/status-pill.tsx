@@ -49,9 +49,19 @@ const CERT_STATUS_TONE: Record<CertStatus, StatusTone> = {
 };
 
 /** Worker-level compliance pill: ✓ Compliant / ⚠ Expiring / ✕ Expired. */
-export function CompliancePill({ status, className }: { status: CertStatus; className?: string }) {
+export function CompliancePill({
+  status,
+  className,
+  showIcon = true,
+}: {
+  status: CertStatus;
+  className?: string;
+  showIcon?: boolean;
+}) {
   const label = status === 'valid' ? 'Compliant' : status === 'expiring_soon' ? 'Expiring' : 'Expired';
-  return <StatusPill tone={CERT_STATUS_TONE[status]} label={label} className={className} />;
+  return (
+    <StatusPill tone={CERT_STATUS_TONE[status]} label={label} className={className} showIcon={showIcon} />
+  );
 }
 
 /** Cert-card pill: Valid / Expiring soon / Expired. */
