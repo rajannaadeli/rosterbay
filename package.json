@@ -1,0 +1,16 @@
+{
+  "name": "rosterbay",
+  "private": true,
+  "version": "0.0.1",
+  "description": "RosterBay demo — root scripts (auth seeding). Apps live in admin/ and mobile/.",
+  "scripts": {
+    "seed:auth": "tsx scripts/seed-auth.ts"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "@types/node": "^24.0.0",
+    "dotenv": "^17.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.0"
+  }
+}
