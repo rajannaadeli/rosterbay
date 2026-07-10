@@ -4,6 +4,7 @@ import { AppShell } from '@/components/app-shell';
 import { ComingSoon } from '@/components/coming-soon';
 import { EntryPage } from '@/pages/entry-page';
 import { RosterPage } from '@/pages/roster-page';
+import { TimesheetsPage } from '@/pages/timesheets-page';
 import { SiteDetailPage } from '@/pages/site-detail-page';
 import { SitesPage } from '@/pages/sites-page';
 import { WorkerDetailPage } from '@/pages/worker-detail-page';
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
       { path: 'dashboard', element: <ComingSoon title="Dashboard" /> },
       { path: 'roster', element: <RosterPage /> },
-      { path: 'timesheets', element: <ComingSoon title="Timesheets" /> },
+      { path: 'timesheets', element: <TimesheetsPage /> },
       { path: 'workers', element: <WorkersPage /> },
       { path: 'workers/:workerId', element: <WorkerDetailPage /> },
       { path: 'sites', element: <SitesPage /> },
