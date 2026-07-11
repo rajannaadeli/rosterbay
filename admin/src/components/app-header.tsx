@@ -1,5 +1,4 @@
 import {
-  Bell,
   MagnifyingGlass,
   SidebarSimple,
   SignOut,
@@ -9,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import { CommandSearch } from '@/components/command-search';
+import { NotificationsBell } from '@/components/notifications-bell';
 import { useSidebar } from '@/components/sidebar-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -147,21 +147,7 @@ export function AppHeader() {
             </kbd>
           </button>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="relative text-muted-foreground"
-                  aria-label="Notifications"
-                />
-              }
-            >
-              <Bell size={16} aria-hidden />
-            </TooltipTrigger>
-            <TooltipContent>Notifications — coming in this demo</TooltipContent>
-          </Tooltip>
+          <NotificationsBell />
 
           <DropdownMenu>
             <DropdownMenuTrigger

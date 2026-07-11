@@ -6,6 +6,9 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCertTypes } from '@/features/certs/hooks';
+import { BroadcastDialog } from '@/features/offers/components/broadcast-dialog';
+import { eligibleWorkers } from '@/features/offers/eligibility';
+import { useBroadcastOffer, useOffersRealtime, useOpenOffers } from '@/features/offers/hooks';
 import { useCompany } from '@/features/company/hooks';
 import { useShiftsRealtime } from '@/features/realtime/hooks';
 import { checkAssignment } from '@/features/roster/conflict-engine';
@@ -49,7 +52,10 @@ export function RosterPage() {
   const workers = useWorkers();
   const certTypes = useCertTypes();
   const allCerts = useAllWorkerCerts();
+  const openOffers = useOpenOffers();
+  const broadcast = useBroadcastOffer();
   useShiftsRealtime(fromIso, toIso);
+  useOffersRealtime();
 
   const assign = useAssignShift(fromIso);
   const unassign = useUnassignShift(fromIso);
@@ -63,6 +69,7 @@ export function RosterPage() {
   const [pendingAssignment, setPendingAssignment] = useState<PendingAssignment | null>(null);
   const [createCell, setCreateCell] = useState<{ siteId: string; dateYmd: string } | null>(null);
   const [detailShiftId, setDetailShiftId] = useState<string | null>(null);
+  const [broadcastShiftId, setBroadcastShiftId] = useState<string | null>(null);
 
   const workerById = useMemo(
     () => new Map((workers.data ?? []).map((w) => [w.id, w])),
@@ -86,6 +93,11 @@ export function RosterPage() {
     }
     return map;
   }, [certRows]);
+
+  const offerShiftIds = useMemo(
+    () => new Set((openOffers.data ?? []).map((offer) => offer.shift_id)),
+    [openOffers.data],
+  );
 
   const visibleShifts = useMemo(
     () => (shifts.data ?? []).filter((s) => s.status !== 'cancelled'),
@@ -282,7 +294,9 @@ export function RosterPage() {
                               key={shift.id}
                               shift={shift}
                               worker={shift.worker_id ? workerById.get(shift.worker_id) : undefined}
+                              hasOpenOffer={offerShiftIds.has(shift.id)}
                               onClick={() => setDetailShiftId(shift.id)}
+                              onBroadcast={() => setBroadcastShiftId(shift.id)}
                             />
                           ))}
                           <button
@@ -353,6 +367,40 @@ export function RosterPage() {
           );
         }}
       />
+
+      {broadcastShiftId &&
+        (() => {
+          const shift = visibleShifts.find((s) => s.id === broadcastShiftId);
+          const site = (sites.data ?? []).find((s) => s.id === shift?.site_id);
+          if (!shift || !site) return null;
+          const eligible = eligibleWorkers({
+            shift,
+            site,
+            workers: workers.data ?? [],
+            certsByWorker,
+            weekShifts: visibleShifts,
+            certTypeNames,
+          });
+          return (
+            <BroadcastDialog
+              shift={shift}
+              siteName={site.name}
+              eligible={eligible}
+              pending={broadcast.isPending}
+              onClose={() => setBroadcastShiftId(null)}
+              onConfirm={() =>
+                broadcast.mutate(
+                  {
+                    shift,
+                    siteName: site.name,
+                    eligibleWorkerIds: eligible.map((w) => w.id),
+                  },
+                  { onSuccess: () => setBroadcastShiftId(null) },
+                )
+              }
+            />
+          );
+        })()}
 
       <ConflictDialog
         pendingAssignment={pendingAssignment}

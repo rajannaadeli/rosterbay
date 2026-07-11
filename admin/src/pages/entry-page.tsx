@@ -1,23 +1,17 @@
-import { DeviceMobile, UserGear } from '@phosphor-icons/react';
-import { useState } from 'react';
+import { DeviceMobile, DownloadSimple, UserGear } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router';
 
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { useSignInAsAdmin } from '@/features/auth/hooks';
+
+const APK_URL = import.meta.env.VITE_APK_URL ?? '';
+const PORTFOLIO_URL = import.meta.env.VITE_PORTFOLIO_URL ?? 'https://rajanna.dev';
+const UPWORK_URL = import.meta.env.VITE_UPWORK_URL ?? '#';
 
 export function EntryPage() {
   const navigate = useNavigate();
   const signIn = useSignInAsAdmin();
-  const [workerNoteOpen, setWorkerNoteOpen] = useState(false);
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-10 px-6">
@@ -41,38 +35,48 @@ export function EntryPage() {
           {signIn.isPending ? 'Signing in…' : 'Explore as Agency Admin'}
         </Button>
 
-        <Dialog open={workerNoteOpen} onOpenChange={setWorkerNoteOpen}>
-          <DialogTrigger
-            render={
-              <Button variant="outline" size="lg" className="h-12 text-base">
-                <DeviceMobile size={20} weight="duotone" aria-hidden />
-                Explore as Worker (Liam)
-              </Button>
-            }
-          />
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>The worker experience lives in the mobile app</DialogTitle>
-              <DialogDescription>
-                Liam&apos;s side of RosterBay — Today, Schedule, Offers and the document Wallet —
-                runs in the Expo worker app. Open the mobile project and tap &ldquo;Use demo
-                worker&rdquo; to sign in as Liam Nguyen. A hosted phone-frame web version arrives
-                in a later phase of this demo.
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-12 text-base"
+          onClick={() => void navigate('/worker')}
+        >
+          <DeviceMobile size={20} weight="duotone" aria-hidden />
+          Explore as Worker (Liam, Security Guard)
+        </Button>
 
         {signIn.isError && (
           <p role="alert" className="text-center text-sm text-danger">
             Couldn&apos;t sign in — has the database been seeded yet?
           </p>
         )}
+
+        <a
+          href={APK_URL || '#'}
+          aria-disabled={APK_URL === ''}
+          className="inline-flex items-center justify-center gap-1.5 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          onClick={(event) => {
+            if (APK_URL === '') event.preventDefault();
+          }}
+        >
+          <DownloadSimple size={15} aria-hidden />
+          Install the worker app (APK{APK_URL === '' ? ' — coming soon' : ''})
+        </a>
       </div>
 
-      <footer className="fixed bottom-5 text-center text-xs text-muted-foreground">
-        RosterBay is a demonstration platform built by Rajesh Adeli — full-stack developer
-        specialising in workforce management software.
+      <footer className="fixed bottom-5 flex flex-col items-center gap-0.5 px-6 text-center text-xs text-muted-foreground">
+        <p>
+          RosterBay is a demonstration platform built by Rajanna Adeli — full-stack developer
+          specialising in workforce management software.
+        </p>
+        <p className="flex gap-3">
+          <a href={PORTFOLIO_URL} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
+            rajanna.dev
+          </a>
+          <a href={UPWORK_URL} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
+            Upwork profile
+          </a>
+        </p>
       </footer>
     </div>
   );

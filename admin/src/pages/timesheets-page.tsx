@@ -1,5 +1,6 @@
 import { ClockCountdown, DownloadSimple } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { EmptyState } from '@/components/empty-state';
 import { StatChips } from '@/components/stat-chips';
@@ -55,7 +56,13 @@ export function TimesheetsPage() {
     };
   }, []);
 
-  const [status, setStatus] = useState<StatusFilter>('all');
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState<StatusFilter>(() => {
+    const param = searchParams.get('status');
+    return param === 'pending' || param === 'flagged' || param === 'approved' || param === 'rejected'
+      ? param
+      : 'all';
+  });
   const [workerId, setWorkerId] = useState('all');
   const [siteId, setSiteId] = useState('all');
   const [from, setFrom] = useState(defaultWeek.from);

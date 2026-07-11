@@ -1,7 +1,7 @@
 import { ArrowSquareOut, UsersThree } from '@phosphor-icons/react';
 import type { ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
@@ -99,7 +99,13 @@ const columns: ColumnDef<WorkerRow>[] = [
 
 export function WorkersPage() {
   const workers = useWorkers();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [searchParams] = useSearchParams();
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
+    const compliance = searchParams.get('compliance');
+    return compliance === 'valid' || compliance === 'expiring_soon' || compliance === 'expired'
+      ? [{ id: 'compliance_status', value: compliance }]
+      : [];
+  });
   const [drawerWorkerId, setDrawerWorkerId] = useState<string | null>(null);
 
   const data = useMemo(() => workers.data ?? [], [workers.data]);
