@@ -478,6 +478,22 @@ export interface Database {
       };
     };
     Views: {
+      shift_offers_with_status: {
+        Row: {
+          id: string;
+          company_id: string;
+          shift_id: string;
+          broadcast_at: string;
+          status: OfferStatus;
+          created_at: string;
+          shift_starts_at: string;
+          shift_ends_at: string;
+          site_id: string;
+          role_required: string | null;
+          effective_status: OfferStatus;
+        };
+        Relationships: [];
+      };
       worker_certs_with_status: {
         Row: {
           id: string;
