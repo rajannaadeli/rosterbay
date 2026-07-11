@@ -1,0 +1,2 @@
+cd mobile && EXPO_PUBLIC_SUPABASE_URL=https://pjlpfutdktviadtpimcc.supabase.co \
+     EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_g7C35fllDKgK92j78XE6dQ_7TlGT76j npx expo export --platform web
