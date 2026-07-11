@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { LightningIcon } from 'phosphor-react-native';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
@@ -23,6 +23,7 @@ export default function SignInScreen() {
   const [email, setEmail] = useState(DEMO_WORKER_EMAIL);
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const autoSubmitted = useRef(false);
 
   const submit = (credentials: { email: string; password: string }) => {
     const parsed = credentialsSchema.safeParse(credentials);
@@ -33,6 +34,19 @@ export default function SignInScreen() {
     setValidationError(null);
     signIn.mutate(parsed.data, { onSuccess: () => router.replace('/(tabs)') });
   };
+
+  // Phone-frame web embed: ?demo=1 auto-signs-in as Liam (spec §3 entry flow).
+  useEffect(() => {
+    if (autoSubmitted.current || Platform.OS !== 'web' || typeof window === 'undefined') return;
+    if (new URLSearchParams(window.location.search).get('demo') === '1') {
+      autoSubmitted.current = true;
+      signIn.mutate(
+        { email: DEMO_WORKER_EMAIL, password: DEMO_PASSWORD },
+        { onSuccess: () => router.replace('/(tabs)') }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-background">

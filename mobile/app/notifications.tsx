@@ -1,13 +1,77 @@
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
+import { BellIcon, CheckCircleIcon, MegaphoneIcon, TrayIcon } from 'phosphor-react-native';
+import { useEffect } from 'react';
+import { FlatList, View } from 'react-native';
+import { formatDistanceToNow } from 'date-fns';
 
-import { ScreenPlaceholder } from '@/components/screen-placeholder';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Text } from '@/components/ui/text';
+import { useMarkAllNotificationsRead, useMyNotifications } from '@/features/offers/hooks';
+import { cn } from '@/lib/utils';
+
+function kindIcon(kind: string) {
+  if (kind === 'offer') return MegaphoneIcon;
+  if (kind === 'offer_won' || kind === 'offer_filled') return CheckCircleIcon;
+  return BellIcon;
+}
 
 export default function NotificationsScreen() {
+  const notifications = useMyNotifications();
+  const markAllRead = useMarkAllNotificationsRead();
+
+  const hasUnread = (notifications.data ?? []).some((row) => !row.read);
+  useEffect(() => {
+    if (hasUnread) markAllRead.mutate();
+    // mark-read once per open, when unread rows exist
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasUnread]);
+
   return (
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: true, title: 'Notifications' }} />
-      <ScreenPlaceholder title="Notifications" />
+      {notifications.isPending ? (
+        <View className="gap-2 p-4">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Skeleton key={i} className="h-16 rounded-lg" />
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          data={notifications.data ?? []}
+          keyExtractor={(row) => row.id}
+          contentContainerClassName="gap-2 p-4 pb-10"
+          ListEmptyComponent={
+            <View className="items-center gap-3 rounded-lg border border-dashed border-border px-6 py-14">
+              <View className="rounded-lg bg-muted p-3">
+                <TrayIcon size={26} weight="duotone" color="#78716C" />
+              </View>
+              <Text className="text-sm font-medium">Nothing yet</Text>
+              <Text className="text-center text-sm text-muted-foreground">
+                Shift offers and confirmations land here the moment they happen.
+              </Text>
+            </View>
+          }
+          renderItem={({ item: row }) => {
+            const KindIcon = kindIcon(row.kind);
+            return (
+              <View
+                className={cn(
+                  'flex-row gap-3 rounded-lg border border-border bg-card p-3',
+                  !row.read && 'border-primary/30 bg-primary/5'
+                )}>
+                <KindIcon size={18} weight="duotone" color="#0F766E" />
+                <View className="min-w-0 flex-1 gap-0.5">
+                  <Text className="text-sm font-medium">{row.title}</Text>
+                  {row.body && <Text className="text-xs text-muted-foreground">{row.body}</Text>}
+                  <Text className="text-[11px] text-muted-foreground">
+                    {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
+                  </Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+      )}
     </View>
   );
 }

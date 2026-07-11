@@ -1,11 +1,12 @@
 import { router, usePathname } from 'expo-router';
-import { BellIcon, SquaresFourIcon } from 'phosphor-react-native';
+import { BellIcon, CalendarCheckIcon } from 'phosphor-react-native';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DemoBanner } from '@/components/demo-banner';
 import { Text } from '@/components/ui/text';
 import { useSession } from '@/features/auth/hooks';
+import { useMyNotifications, useNotificationsRealtime } from '@/features/offers/hooks';
 
 const TITLES: Record<string, string> = {
   '/': 'Today',
@@ -21,13 +22,16 @@ const TITLES: Record<string, string> = {
 export function AppHeader() {
   const pathname = usePathname();
   const session = useSession();
+  const notifications = useMyNotifications();
+  useNotificationsRealtime();
+  const unread = (notifications.data ?? []).filter((row) => !row.read).length;
   const initial = (session.data?.user.email?.[0] ?? 'L').toUpperCase();
 
   return (
     <SafeAreaView edges={['top']} className="border-b border-border bg-card">
       <View className="h-13 flex-row items-center gap-2.5 px-4">
         <View className="size-7 items-center justify-center rounded-lg bg-primary">
-          <SquaresFourIcon size={16} weight="duotone" color="#FFFFFF" />
+          <CalendarCheckIcon size={16} weight="duotone" color="#FFFFFF" />
         </View>
         <Text className="flex-1 text-base font-semibold">{TITLES[pathname] ?? 'RosterBay'}</Text>
         <Pressable
@@ -37,6 +41,13 @@ export function AppHeader() {
           className="size-9 items-center justify-center rounded-lg active:bg-muted"
           onPress={() => router.push('/notifications')}>
           <BellIcon size={20} weight="duotone" color="#1C1917" />
+          {unread > 0 && (
+            <View className="absolute right-0.5 top-0.5 size-4 items-center justify-center rounded-full bg-danger">
+              <Text className="text-[9px] font-semibold text-white">
+                {unread > 9 ? '9+' : unread}
+              </Text>
+            </View>
+          )}
         </Pressable>
         <View className="size-8 items-center justify-center rounded-full bg-primary/10">
           <Text className="text-xs font-semibold text-primary">{initial}</Text>

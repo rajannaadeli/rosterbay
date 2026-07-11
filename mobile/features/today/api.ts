@@ -64,6 +64,24 @@ export async function clockIn({ shift, site, coords, distanceM }: ClockInInput) 
     geofenceRadiusM: site.geofence_radius_m,
   });
 
+  // Clean up any orphaned time entries from previous failed clock-in attempts.
+  // These can accumulate when the shift status update fails (e.g. missing RLS
+  // policy) leaving entries with no clock_out that block .maybeSingle() reads.
+  const { data: orphans } = await supabase
+    .from('time_entries')
+    .select('id')
+    .eq('shift_id', shift.id)
+    .is('clock_out_at', null);
+  if (orphans && orphans.length > 0) {
+    await supabase
+      .from('time_entries')
+      .update({ clock_out_at: new Date().toISOString() })
+      .in(
+        'id',
+        orphans.map((o) => o.id)
+      );
+  }
+
   const { data: entry, error } = await supabase
     .from('time_entries')
     .insert({
@@ -82,11 +100,18 @@ export async function clockIn({ shift, site, coords, distanceM }: ClockInInput) 
     .single();
   if (error) throw error;
 
-  const { error: shiftError } = await supabase
+  // Use .select() to verify the update actually took effect (RLS can silently
+  // make .update() affect 0 rows without raising an error).
+  const { data: updatedShift, error: shiftError } = await supabase
     .from('shifts')
     .update({ status: 'in_progress' })
-    .eq('id', shift.id);
+    .eq('id', shift.id)
+    .select('status')
+    .single();
   if (shiftError) throw shiftError;
+  if (updatedShift?.status !== 'in_progress') {
+    throw new Error('Failed to update shift status — check RLS policies');
+  }
 
   // First clock-in at this shift: copy the site's checklist onto the shift.
   const { count, error: countError } = await supabase

@@ -22,6 +22,10 @@ export default function RootLayout() {
       <ThemeProvider value={NAV_THEME.light}>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="sign-in" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="notifications" />
           <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
         </Stack>
         <PortalHost />
