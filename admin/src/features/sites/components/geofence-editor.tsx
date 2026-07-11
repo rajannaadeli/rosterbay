@@ -30,7 +30,7 @@ function RecenterOnChange({ lat, lng }: { lat: number; lng: number }) {
 
 export function GeofenceEditor({ value, onChange }: GeofenceEditorProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 z-0">
       <div className="h-72 overflow-hidden rounded-lg border">
         <MapContainer center={[value.lat, value.lng]} zoom={15} className="h-full w-full">
           <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />

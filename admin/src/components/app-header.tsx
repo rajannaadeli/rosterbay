@@ -81,7 +81,7 @@ export function AppHeader() {
 
   return (
     <TooltipProvider delay={200}>
-      <header className="flex h-13 shrink-0 items-center gap-2 border-b bg-card px-3">
+      <header className="flex h-[49px] shrink-0 items-center gap-2 border-b bg-card px-3">
         <Tooltip>
           <TooltipTrigger
             render={
@@ -99,9 +99,9 @@ export function AppHeader() {
           <TooltipContent>{collapsed ? 'Expand sidebar' : 'Collapse sidebar'}</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="h-[40%] my-auto" />
 
-        <Breadcrumb className="min-w-0 flex-1">
+        <Breadcrumb className="min-w-0 flex-1 ml-1">
           <BreadcrumbList>
             {segments.map((segment, index) => {
               const isLast = index === segments.length - 1;
@@ -125,8 +125,8 @@ export function AppHeader() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex items-center gap-1.5">
-          <span className="hidden text-xs text-muted-foreground lg:inline">
+        <div className="flex items-center gap-2">
+          <span className="hidden text-xs text-muted-foreground lg:inline mr-2">
             {formatACST(new Date(), 'EEE, d MMM yyyy')}
           </span>
 
@@ -142,7 +142,7 @@ export function AppHeader() {
             <MagnifyingGlass size={14} aria-hidden />
             <span className="hidden text-xs sm:inline">Search…</span>
             <Separator orientation="vertical" className="mx-0.5 hidden h-4 sm:block" />
-            <kbd className="pointer-events-none hidden rounded border bg-background px-1 py-0.5 font-mono text-[10px] font-medium shadow-sm select-none sm:inline">
+            <kbd className="pointer-events-none hidden rounded border bg-background px-1 py-0.5 font-mono text-[10px] font-medium select-none sm:inline">
               {isMac ? '⌘K' : 'Ctrl K'}
             </kbd>
           </button>
@@ -155,21 +155,21 @@ export function AppHeader() {
                 <button
                   type="button"
                   aria-label="Account menu"
-                  className="ml-1 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="ml-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
               }
             >
-              <Avatar className="size-8 rounded-lg">
-                <AvatarFallback className="rounded-lg bg-primary text-xs font-semibold text-primary-foreground">
-                  MW
+              <Avatar className="size-8 rounded-full">
+                <AvatarFallback className="rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  M
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" side="bottom" align="end" sideOffset={6}>
               <div className="flex items-center gap-3 px-3 py-2.5">
                 <Avatar className="size-9 rounded-lg">
-                  <AvatarFallback className="rounded-lg bg-primary text-xs font-semibold text-primary-foreground">
-                    MW
+                  <AvatarFallback className="rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    M
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

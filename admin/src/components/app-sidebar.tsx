@@ -1,5 +1,6 @@
 import {
   CalendarCheck,
+  CalendarCheckIcon,
   ClockCountdown,
   MapPinArea,
   SignOut,
@@ -32,7 +33,7 @@ const NAV_ITEMS: NavEntry[] = [
 
 const expandedItemClasses = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+    'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
     isActive
       ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
       : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground',
@@ -65,13 +66,13 @@ export function AppSidebar() {
         aria-label="Main"
         className={cn(
           'relative h-screen shrink-0 border-r bg-sidebar transition-[width] duration-[400ms] ease-in-out',
-          collapsed ? 'w-[52px]' : 'w-60',
+          collapsed ? 'w-[65px]' : 'w-60',
         )}
       >
         {/* ── Collapsed rail ── */}
         <div
           className={cn(
-            'absolute inset-0 flex w-[52px] flex-col items-center gap-0.5 py-3 transition-opacity duration-[400ms] ease-in-out',
+            'absolute inset-0 flex w-[65px] flex-col items-center gap-0.5 py-2.5 transition-opacity duration-[400ms] ease-in-out',
             collapsed ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0',
           )}
         >
@@ -79,20 +80,20 @@ export function AppSidebar() {
             type="button"
             aria-label="Expand sidebar"
             onClick={() => setCollapsed(false)}
-            className="mb-1 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+            className="flex size-7.5 mb-0.5 shrink-0 items-center justify-center rounded-lg"
           >
-            <SquaresFour size={16} weight="duotone" aria-hidden />
+            <CalendarCheckIcon size={24} weight="fill" className="text-green-800" aria-hidden />
           </button>
 
-          <div className="my-1 h-px w-8 shrink-0 bg-border" />
+          <div className="my-1 h-px w-full shrink-0 bg-border" />
 
-          <div className="flex w-full flex-1 flex-col items-center gap-0.5 overflow-y-auto">
+          <div className="flex w-full flex-1 flex-col items-center gap-1 py-2 overflow-y-auto">
             {NAV_ITEMS.map(({ label, href, icon: ItemIcon }) => (
               <Tooltip key={href}>
                 <TooltipTrigger
                   render={<NavLink to={href} className={railItemClasses} aria-label={label} />}
                 >
-                  <ItemIcon size={18} weight="duotone" aria-hidden />
+                  <ItemIcon size={22} weight="duotone" aria-hidden />
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
               </Tooltip>
@@ -125,10 +126,15 @@ export function AppSidebar() {
             collapsed ? 'pointer-events-none z-0 opacity-0' : 'z-10 opacity-100',
           )}
         >
-          <div className="flex h-[49px] shrink-0 items-center gap-2.5 border-b px-4">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <SquaresFour size={16} weight="duotone" aria-hidden />
-            </div>
+          <div className="flex h-[49px] shrink-0 items-center gap-2.5 border-b px-[18px]">
+            <button
+              type="button"
+              aria-label="Expand sidebar"
+              onClick={() => setCollapsed(false)}
+              className="flex size-7.5 mt-[1px] shrink-0 items-center justify-center rounded-lg"
+            >
+              <CalendarCheckIcon size={24} weight="fill" className="text-green-800" aria-hidden />
+            </button>
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-semibold leading-tight">RosterBay</span>
               <span className="truncate text-[11px] leading-tight text-muted-foreground">
@@ -137,10 +143,10 @@ export function AppSidebar() {
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+          <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto py-3 px-[10px]">
             {NAV_ITEMS.map(({ label, href, icon: ItemIcon }) => (
               <NavLink key={href} to={href} className={expandedItemClasses}>
-                <ItemIcon size={16} weight="duotone" className="shrink-0" aria-hidden />
+                <ItemIcon size={22} weight="duotone" className="shrink-0" aria-hidden />
                 <span className="truncate">{label}</span>
               </NavLink>
             ))}

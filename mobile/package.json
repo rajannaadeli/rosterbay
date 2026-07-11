@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
+    "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@rn-primitives/avatar": "^1.5.2",
     "@rn-primitives/label": "^1.5.2",
     "@rn-primitives/portal": "~1.4.0",
@@ -23,6 +24,7 @@
     "date-fns": "^4.4.0",
     "expo": "~56.0.13",
     "expo-constants": "~56.0.19",
+    "expo-font": "~56.0.7",
     "expo-image-picker": "~56.0.20",
     "expo-linking": "~56.0.14",
     "expo-location": "~56.0.20",

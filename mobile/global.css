@@ -10,22 +10,29 @@
  */
 @layer base {
   :root {
-    --background: 60 9% 98%; /* surface #FAFAF9 — Stone 50 */
-    --foreground: 24 10% 10%; /* ink #1C1917 — Stone 900 */
+    --background: 60 9% 98%;
+    /* surface #FAFAF9 — Stone 50 */
+    --foreground: 24 10% 10%;
+    /* ink #1C1917 — Stone 900 */
     --card: 0 0% 100%;
     --card-foreground: 24 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 24 10% 10%;
-    --primary: 175 77% 26%; /* the ONE accent: deep teal #0F766E */
+    --primary: 175 77% 26%;
+    /* the ONE accent: deep teal #0F766E */
     --primary-foreground: 0 0% 100%;
-    --secondary: 60 5% 96%; /* Stone 100 */
+    --secondary: 60 5% 96%;
+    /* Stone 100 */
     --secondary-foreground: 24 10% 10%;
     --muted: 60 5% 96%;
-    --muted-foreground: 25 5% 45%; /* ink-muted #78716C — Stone 500 */
+    --muted-foreground: 25 5% 45%;
+    /* ink-muted #78716C — Stone 500 */
     --accent: 60 5% 96%;
     --accent-foreground: 24 10% 10%;
-    --destructive: 0 72% 51%; /* semantic red #DC2626 */
-    --border: 20 6% 90%; /* Stone 200 hairlines #E7E5E4 */
+    --destructive: 0 72% 51%;
+    /* semantic red #DC2626 */
+    --border: 20 6% 90%;
+    /* Stone 200 hairlines #E7E5E4 */
     --input: 20 6% 90%;
     --ring: 175 77% 26%;
     --radius: 10px;

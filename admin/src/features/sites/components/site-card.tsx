@@ -25,7 +25,7 @@ export function SiteCard({ site, certTypes, taskCount }: SiteCardProps) {
         <MapContainer
           center={[site.lat, site.lng]}
           zoom={14}
-          className="h-full w-full"
+          className="h-full w-full z-0"
           zoomControl={false}
           dragging={false}
           scrollWheelZoom={false}

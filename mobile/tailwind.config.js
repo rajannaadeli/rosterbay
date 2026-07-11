@@ -7,6 +7,12 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['PlusJakartaSans-Regular'],
+        medium: ['PlusJakartaSans-Medium'],
+        semibold: ['PlusJakartaSans-SemiBold'],
+        bold: ['PlusJakartaSans-Bold'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

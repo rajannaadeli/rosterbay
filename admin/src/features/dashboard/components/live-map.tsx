@@ -27,7 +27,7 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
   const center: [number, number] = [-34.928, 138.59];
 
   return (
-    <MapContainer center={center} zoom={11} className="h-full w-full" scrollWheelZoom={false}>
+    <MapContainer center={center} zoom={11} className="h-full w-full z-0" scrollWheelZoom={false}>
       <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
       {sites.map((site) => (
         <Marker key={site.id} position={[site.lat, site.lng]}>
