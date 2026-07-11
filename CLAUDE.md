@@ -50,7 +50,7 @@ Conventional commits: `feat(scope): …`, `fix(scope): …`, `chore(scope): …`
 
 - **Phase 1 (done):** schema + RLS + seed, auth seeding, tokens, web entry/shell + Workers + Job Sites, mobile auth/tabs + Wallet.
 - **Phase 2 (done):** Roster board (week grid, drag-assign, conflict engine + vitest, shift CRUD), web Timesheets (flags, review, bulk approve, CSV), mobile Today (geofence clock-in, in-shift tasks/photos, report issue) + Schedule, realtime MM1-lite (live timesheet rows + roster chips). Broadcast affordances deliberately absent — Phase 3.
-- **Phase 3:** Offers (first-accept-wins) + broadcast from roster, notifications list, Dashboard (KPIs, live map, feed), full Magic Moments staging, landing polish, deploy + pg_cron.
+- **Phase 3 (done):** Offers (first-accept-wins via DB trigger) + broadcast from roster/dashboard, notifications (both surfaces), Dashboard (KPIs, live map, feed — MM1 staged), landing final + OG meta, phone-frame worker web, ops (pg_cron, keep-alive, vercel configs, DEPLOY.md). Deploy itself follows the DEPLOY.md runbook (account-level steps are manual).
 
 Placeholder rule: future-phase nav items route to the single "Coming in this demo" placeholder — never stub partial screens.
 

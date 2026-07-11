@@ -1,0 +1,25 @@
+name: Supabase keep-alive
+
+# Free-tier projects pause after inactivity; one harmless read a day prevents it.
+on:
+  schedule:
+    - cron: '0 5 * * *' # daily, 05:00 UTC (14:30 ACST)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/companies?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "Supabase responded with HTTP ${status}"
+          # 200 (RLS row) or 401/406 variants still prove the project is awake;
+          # only treat network-level failures as errors.
+          if [ "${status}" -ge 500 ] || [ "${status}" -eq 000 ]; then exit 1; fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}

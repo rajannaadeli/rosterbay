@@ -2,6 +2,16 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-11 — Phase 3 (Offers, Dashboard, Landing, Ship)
+
+- **Offer resolution in a trigger** — a security-definer trigger on accepted `offer_responses` marks the offer filled, assigns the shift, and writes winner + admin notifications. *Why:* workers can't (and shouldn't) update unassigned shifts through RLS, and doing it client-side would leave a half-resolved offer if the winner disconnected mid-sequence; the partial unique index remains the sole race arbiter, so the trigger only ever runs in the winning transaction.
+- **Activity feed has no events table** — derived client-side from the already-live time-entry, offer, and notification streams (the prompt's preferred path). Session-scoped items animate in when their timestamp postdates page mount.
+- **Eligibility = engine verdict ≠ block** — role match + cert compliance + no overlap; a 38h *warning* does not exclude a worker from a broadcast (accepting overtime is the worker's call, consistent with the roster's assign-anyway).
+- **"Others viewing" is real** — Supabase presence on an `offers-presence` channel, not a faked number; shows only when > 0.
+- **OG image** — generated at build-prep time from an SVG via macOS `qlmanage`/`sips` into `admin/public/og.png` (1200×630); no runtime dependency. Regenerate by editing the SVG in the repo history if branding changes.
+- **Keep-alive treats any HTTP response < 500 as alive** — anon REST hits an RLS-guarded table; an empty 200 or a 4xx still proves the project is unpaused.
+- **Dark mode skipped** — the token architecture makes it *possible* but re-tinting six semantic colors + leaflet tiles + OG assets is not under the prompt's ~1h bar; light mode is canonical per spec §6.
+
 ## 2026-07-11 — Phase 2 (Roster, Timesheets, Today, Realtime)
 
 - **Override convention** — cert-compliance overrides store the reason in `shifts.notes` prefixed `OVERRIDE: ` (per the phase prompt) *and* in the Phase-1 `override_reason/by/at` columns. The notes prefix is what the UI renders (amber note on the shift detail); the columns are the audit trail. Double-booking has no override path anywhere.
