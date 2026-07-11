@@ -2,6 +2,17 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-11 — Phase 2 (Roster, Timesheets, Today, Realtime)
+
+- **Override convention** — cert-compliance overrides store the reason in `shifts.notes` prefixed `OVERRIDE: ` (per the phase prompt) *and* in the Phase-1 `override_reason/by/at` columns. The notes prefix is what the UI renders (amber note on the shift detail); the columns are the audit trail. Double-booking has no override path anywhere.
+- **missing_clock_out at read time** — `time_entries_with_status` view (0006) computes it (no clock-out 2 h past shift end) plus `effective_flags`/`effective_status`; late/out_of_zone are stored at clock-in mutation time by the shared `compliance.ts` module (mirrored both apps, like database.types).
+- **Timesheets data shape** — whole view loaded once (~165 rows at demo volume), filters client-side; realtime INSERT/UPDATE merges via a single targeted view-row fetch (correct shape incl. shift schedule fields), falling back to one invalidate. No refetch storms.
+- **Roster drop targets** — drops are accepted on `open`/`assigned` chips only (re-drop replaces the worker); `in_progress`/`completed` are immutable from the board; cancelled shifts are hidden from the grid rather than struck through.
+- **Location unavailable at clock-in** — confirm sheet appears with honest copy ("recorded without a location"); the entry stores null coords/distance and `within_geofence = null` with **no synthetic flags** — out_of_zone means "measured outside the fence", not "unmeasurable".
+- **shift_tasks materialisation** — copied from `task_templates` on the worker's *first clock-in* (0006 adds the worker insert policy). Seeded in-progress shift already carries tasks, so both paths exist in the demo.
+- **Flag icon substitution** — `@phosphor-icons/react` has no `MapPinSlash`; out_of_zone uses a danger-toned `MapPin` with a tooltip. Clock = late, Question = missing clock-out, per spec.
+- **Vitest scope** — installed in `admin/` only (`npm test` = `vitest run`), covering the conflict engine — the single suite this phase requires.
+
 ## 2026-07-10 — WhiteFleet UI-parity pass
 
 - **Pattern source** — WhiteFleet admin source (in-workspace `whitefleet-agency-admin/`) is the source of truth for shell/table/drawer patterns; components were ported and re-tokened (teal/Stone/Phosphor), not rebuilt from prose. `whitefleet-mobile/` is missing its `src/` directory, so the mobile header/floating tab bar follow its layout contract + screenshots; a pixel pass needs that folder. *Why:* pixel parity drifts when styled from description.

@@ -48,9 +48,9 @@ Conventional commits: `feat(scope): …`, `fix(scope): …`, `chore(scope): …`
 
 ## Phase boundaries
 
-- **Phase 1 (done in this repo):** schema + RLS + seed, auth seeding, tokens, web entry/shell + Workers + Job Sites, mobile auth/tabs + Wallet.
-- **Phase 2:** Roster board (week grid, drag-assign, conflict engine, shift CRUD, broadcast creation), web Timesheets (flags, approve, CSV).
-- **Phase 3:** Mobile Today (clock-in + geofence confirm, in-shift tasks/photos), Schedule, Offers (first-accept-wins), notifications list, Dashboard (KPIs, live map, feed), realtime, Magic Moments, landing polish, deploy.
+- **Phase 1 (done):** schema + RLS + seed, auth seeding, tokens, web entry/shell + Workers + Job Sites, mobile auth/tabs + Wallet.
+- **Phase 2 (done):** Roster board (week grid, drag-assign, conflict engine + vitest, shift CRUD), web Timesheets (flags, review, bulk approve, CSV), mobile Today (geofence clock-in, in-shift tasks/photos, report issue) + Schedule, realtime MM1-lite (live timesheet rows + roster chips). Broadcast affordances deliberately absent — Phase 3.
+- **Phase 3:** Offers (first-accept-wins) + broadcast from roster, notifications list, Dashboard (KPIs, live map, feed), full Magic Moments staging, landing polish, deploy + pg_cron.
 
 Placeholder rule: future-phase nav items route to the single "Coming in this demo" placeholder — never stub partial screens.
 
