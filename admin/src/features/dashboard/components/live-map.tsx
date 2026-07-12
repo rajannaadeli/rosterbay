@@ -1,19 +1,10 @@
-import L from 'leaflet';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
 import type { Tables } from '@/lib/database.types';
 import type { TimesheetRow } from '@/features/timesheets/hooks';
 import { formatACST } from '@/lib/format';
 import { OSM_ATTRIBUTION, OSM_TILE_URL } from '@/lib/leaflet';
-
-// Green pulsing dot for a clocked-in worker (MM1's map moment). The classes
-// exist in the bundle already, so the divIcon HTML picks them up.
-const onSiteIcon = L.divIcon({
-  className: '',
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
-  html: '<span class="relative flex size-3.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60"></span><span class="relative inline-flex size-3.5 rounded-full border-2 border-white bg-success"></span></span>',
-});
+import { FitBounds, SiteLabelVisibility, siteIcon, workerDotIcon } from '@/lib/map-markers';
 
 interface LiveMapProps {
   sites: Tables<'job_sites'>[];
@@ -24,13 +15,25 @@ interface LiveMapProps {
 }
 
 export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps) {
-  const center: [number, number] = [-34.928, 138.59];
+  const points: [number, number][] = [
+    ...sites.map((s) => [s.lat, s.lng] as [number, number]),
+    ...onSite
+      .filter((e) => e.in_lat !== null && e.in_lng !== null)
+      .map((e) => [e.in_lat as number, e.in_lng as number] as [number, number]),
+  ];
 
   return (
-    <MapContainer center={center} zoom={11} className="h-full w-full z-0" scrollWheelZoom={false}>
+    <MapContainer
+      center={[-34.928, 138.59]}
+      zoom={11}
+      className="z-0 h-full w-full"
+      scrollWheelZoom={false}
+    >
       <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+      <FitBounds points={points} maxZoom={13} />
+      <SiteLabelVisibility />
       {sites.map((site) => (
-        <Marker key={site.id} position={[site.lat, site.lng]}>
+        <Marker key={site.id} position={[site.lat, site.lng]} icon={siteIcon(site.name)}>
           <Popup>
             <span className="text-sm font-medium">{site.name}</span>
             <br />
@@ -43,7 +46,7 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
           <Marker
             key={entry.id}
             position={[entry.in_lat, entry.in_lng]}
-            icon={onSiteIcon}
+            icon={workerDotIcon}
             zIndexOffset={1000}
           >
             <Popup>

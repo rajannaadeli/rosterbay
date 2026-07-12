@@ -123,4 +123,59 @@
   html {
     @apply font-sans;
   }
+
+  /* ── Leaflet: quiet the default OSM tiles into the brand ───────────────── */
+  .leaflet-tile-pane {
+    filter: saturate(0.75) contrast(0.95) brightness(1.03);
+  }
+  .leaflet-container {
+    background: #eae7e3;
+    font-family: inherit;
+  }
+  /* Site-name chips hide until zoomed close enough to read them. */
+  .map-labels-hidden .site-label {
+    display: none;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
+  }
+  .leaflet-popup-content {
+    margin: 8px 12px;
+    font-size: 12px;
+  }
+  .leaflet-bar a {
+    border-radius: 8px !important;
+  }
+  .leaflet-control-attribution {
+    font-size: 9px;
+    opacity: 0.6;
+  }
+}
+
+@layer utilities {
+  /* Bottom fade for internally-scrolling panels — no abrupt cut. */
+  .scroll-fade-y {
+    mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+  }
+  /* Thin scrollbar, visible on hover only. */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scrollbar-thin:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+  }
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
 }

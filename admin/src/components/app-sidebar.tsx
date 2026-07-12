@@ -33,18 +33,21 @@ const NAV_ITEMS: NavEntry[] = [
 
 const expandedItemClasses = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+    'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+    // Teal accent bar on the active route.
+    'before:absolute before:top-1/2 before:left-0 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:transition-opacity',
     isActive
-      ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-      : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground',
+      ? 'bg-primary/10 font-medium text-primary before:opacity-100'
+      : 'text-muted-foreground before:opacity-0 hover:bg-sidebar-accent/50 hover:text-foreground',
   );
 
 const railItemClasses = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors',
+    'relative flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors',
+    'before:absolute before:top-1/2 before:-left-2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:transition-opacity',
     isActive
-      ? 'bg-sidebar-accent text-primary'
-      : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground',
+      ? 'bg-primary/10 text-primary before:opacity-100'
+      : 'text-muted-foreground before:opacity-0 hover:bg-sidebar-accent/50 hover:text-foreground',
   );
 
 export function AppSidebar() {

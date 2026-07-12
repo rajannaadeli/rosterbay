@@ -22,7 +22,9 @@ export default defineConfig([
   {
     // CLI-installed shadcn primitives export cva variant helpers alongside
     // components by design — don't edit registry-owned files to satisfy lint.
-    files: ['src/components/ui/**/*.tsx'],
+    // map-markers co-locates leaflet divIcon factories with two tiny map
+    // helper components by design (one module = one map vocabulary).
+    files: ['src/components/ui/**/*.tsx', 'src/lib/map-markers.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },
