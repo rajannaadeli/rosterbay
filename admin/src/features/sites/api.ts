@@ -77,19 +77,17 @@ export async function deleteTaskTemplate(id: string) {
   if (error) throw error;
 }
 
-/** Swap the sort_order of two adjacent templates (up/down reorder). */
-export async function swapTaskTemplates(
-  a: { id: string; sort_order: number },
-  b: { id: string; sort_order: number },
-) {
-  const { error: e1 } = await supabase
-    .from('task_templates')
-    .update({ sort_order: b.sort_order })
-    .eq('id', a.id);
-  if (e1) throw e1;
-  const { error: e2 } = await supabase
-    .from('task_templates')
-    .update({ sort_order: a.sort_order })
-    .eq('id', b.id);
-  if (e2) throw e2;
+/** Persist a full drag-reordered list — sort_order becomes 1-based position. */
+export async function reorderTaskTemplates(orderedIds: string[]) {
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase
+        .from('task_templates')
+        .update({ sort_order: index + 1 })
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) throw error;
+        }),
+    ),
+  );
 }

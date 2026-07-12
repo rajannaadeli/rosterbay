@@ -10,7 +10,7 @@ import {
   fetchSites,
   fetchTaskCounts,
   fetchTaskTemplates,
-  swapTaskTemplates,
+  reorderTaskTemplates,
   updateSite,
   updateTaskTemplate,
 } from './api';
@@ -82,13 +82,10 @@ export function useTaskTemplateMutations(siteId: string) {
     mutationFn: (id: string) => deleteTaskTemplate(id),
     onSuccess: invalidate,
   });
-  const swap = useMutation({
-    mutationFn: (pair: {
-      a: { id: string; sort_order: number };
-      b: { id: string; sort_order: number };
-    }) => swapTaskTemplates(pair.a, pair.b),
+  const reorder = useMutation({
+    mutationFn: (orderedIds: string[]) => reorderTaskTemplates(orderedIds),
     onSuccess: invalidate,
   });
 
-  return { create, update, remove, swap };
+  return { create, update, remove, reorder };
 }

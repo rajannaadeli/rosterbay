@@ -1,14 +1,13 @@
-import { ArrowSquareOut, UsersThree } from '@phosphor-icons/react';
+import { CalendarCheck, CaretRight, CheckCircle, UsersThree, Warning, XCircle } from '@phosphor-icons/react';
 import type { ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
-import { StatChips } from '@/components/stat-chips';
+import { StatStrip } from '@/components/stat-strip';
 import { CompliancePill } from '@/components/status-pill';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -81,32 +80,35 @@ const columns: ColumnDef<WorkerRow>[] = [
     header: '',
     enableSorting: false,
     enableGlobalFilter: false,
-    meta: { className: 'w-24 text-right' },
-    cell: ({ row }) => (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-muted-foreground"
-        onClick={(event: React.MouseEvent) => event.stopPropagation()}
-        render={<Link to={`/app/workers/${row.original.id}`} />}
-      >
-        Profile
-        <ArrowSquareOut aria-hidden />
-      </Button>
-    ),
+    meta: { className: 'w-10 text-right' },
+    cell: () => <CaretRight size={14} className="text-muted-foreground/50" aria-hidden />,
   },
 ];
 
 export function WorkersPage() {
   const workers = useWorkers();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() => {
     const compliance = searchParams.get('compliance');
     return compliance === 'valid' || compliance === 'expiring_soon' || compliance === 'expired'
       ? [{ id: 'compliance_status', value: compliance }]
       : [];
   });
-  const [drawerWorkerId, setDrawerWorkerId] = useState<string | null>(null);
+
+  // Drawer state lives in the URL (?open=<id>) so palette/dashboard deep-link.
+  const drawerWorkerId = searchParams.get('open');
+  const openWorker = (workerId: string) =>
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('open', workerId);
+      return next;
+    });
+  const closeWorker = () =>
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('open');
+      return next;
+    });
 
   const data = useMemo(() => workers.data ?? [], [workers.data]);
 
@@ -140,20 +142,20 @@ export function WorkersPage() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">Workers</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Workers</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           The Torrens field team — compliance at a glance.
         </p>
       </div>
 
-      <StatChips
+      <StatStrip
         loading={workers.isPending}
-        chips={[
-          { label: 'Workers', value: stats.total },
-          { label: 'Compliant', value: stats.valid, tone: 'success' },
-          { label: 'Expiring', value: stats.expiring, tone: stats.expiring > 0 ? 'warning' : 'default' },
-          { label: 'Expired', value: stats.expired, tone: stats.expired > 0 ? 'danger' : 'default' },
-          { label: 'Rostered this week', value: stats.onSite },
+        segments={[
+          { label: 'Workers', value: stats.total, icon: UsersThree },
+          { label: 'Compliant', value: stats.valid, icon: CheckCircle, tone: 'success' },
+          { label: 'Expiring', value: stats.expiring, icon: Warning, tone: stats.expiring > 0 ? 'warning' : 'default' },
+          { label: 'Expired', value: stats.expired, icon: XCircle, tone: stats.expired > 0 ? 'danger' : 'default' },
+          { label: 'Rostered this week', value: stats.onSite, icon: CalendarCheck },
         ]}
       />
 
@@ -166,7 +168,7 @@ export function WorkersPage() {
         columnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
         rowKey={(row) => row.id}
-        onRowClick={(row) => setDrawerWorkerId(row.id)}
+        onRowClick={(row) => openWorker(row.id)}
         emptyState={
           <EmptyState
             icon={UsersThree}
@@ -214,7 +216,7 @@ export function WorkersPage() {
       <WorkerDrawer
         workerId={drawerWorkerId}
         onOpenChange={(open) => {
-          if (!open) setDrawerWorkerId(null);
+          if (!open) closeWorker();
         }}
       />
     </div>

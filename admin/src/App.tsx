@@ -4,9 +4,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import { AppShell } from '@/components/app-shell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EntryPage } from '@/pages/entry-page';
-import { SiteDetailPage } from '@/pages/site-detail-page';
 import { SitesPage } from '@/pages/sites-page';
-import { WorkerDetailPage } from '@/pages/worker-detail-page';
 import { WorkersPage } from '@/pages/workers-page';
 
 // Heavy routes (leaflet, dnd-kit) load on demand.
@@ -49,10 +47,7 @@ const router = createBrowserRouter([
       { path: 'roster', element: <LazyRoute><RosterPage /></LazyRoute> },
       { path: 'timesheets', element: <LazyRoute><TimesheetsPage /></LazyRoute> },
       { path: 'workers', element: <WorkersPage /> },
-      { path: 'workers/:workerId', element: <WorkerDetailPage /> },
       { path: 'sites', element: <SitesPage /> },
-      { path: 'sites/new', element: <SiteDetailPage /> },
-      { path: 'sites/:siteId', element: <SiteDetailPage /> },
     ],
   },
   { path: '/worker', element: <LazyRoute><WorkerFramePage /></LazyRoute> },

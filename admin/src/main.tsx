@@ -6,6 +6,7 @@ import './index.css';
 import '@/lib/leaflet';
 import App from './App.tsx';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
+import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from '@/lib/query';
 
 createRoot(document.getElementById('root')!).render(
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         <App />
+        <Toaster position="bottom-right" />
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,
