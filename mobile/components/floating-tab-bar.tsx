@@ -60,15 +60,19 @@ export function FloatingTabBar({ state, navigation }: TabBarProps) {
               accessibilityState={{ selected: focused }}
               accessibilityLabel={meta.label}
               onPress={onPress}
-              className={cn(
-                'flex-1 items-center justify-center gap-0.5 rounded-lg py-1.5',
-                focused && 'bg-primary/10'
-              )}>
-              <TabIcon size={21} weight="duotone" color={focused ? '#0F766E' : '#78716C'} />
+              className="flex-1 items-center justify-center gap-0.5 rounded-lg py-1.5">
+              {/* 3px teal top-indicator pill on the active tab. */}
+              <View
+                className={cn(
+                  'absolute top-0 h-[3px] w-7 rounded-full',
+                  focused ? 'bg-primary' : 'bg-transparent'
+                )}
+              />
+              <TabIcon size={21} weight="duotone" color={focused ? '#0F766E' : '#A8A29E'} />
               <Text
                 className={cn(
-                  'text-[11px] font-medium',
-                  focused ? 'text-primary' : 'text-muted-foreground'
+                  'font-medium text-[11px]',
+                  focused ? 'text-primary' : 'text-[#A8A29E]'
                 )}>
                 {meta.label}
               </Text>
