@@ -2,6 +2,17 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-12 — UI polish pass (production-grade interface)
+
+- **New primitives, no external ports** — installed shadcn `alert`, `tabs`, `sonner` and `@dnd-kit/sortable` via CLI; every pattern (drawer, tabs, stat strip, command entity-search) built fresh from these in-repo primitives, nothing copied from WhiteFleet or elsewhere. *Why:* the pass forbids external component sourcing; sonner is the shadcn-official toast and dnd-kit was already in the repo for the roster.
+- **map-markers is the single map vocabulary** — one module exports the teal site pin, pulsing worker dot, clock-in dot, draggable pin, geofence path style, and FitBounds/label-visibility helpers; every `<Marker>` in the app passes an explicit icon (zero default Leaflet markers). It legitimately co-locates divIcon factories with two tiny map components, so it's added to the eslint fast-refresh override rather than split. *Why:* the broken default-marker bug was global; a shared vocabulary fixes it once.
+- **Detail pages retired for drawers** — the site-detail and worker-detail full pages were deleted; both entities now open the shared `EntityDrawer` (~50vw, tabs, sticky header/footer, dirty-close guard) addressable by URL (`?site=` / `?open=`). *Why:* decision #2 designated Sites + Workers as drawer entities; keeping dead full pages would be two sources of truth.
+- **Site draft seeded at render, not in an effect** — the drawer seeds its editable draft from loaded data via React's documented render-time state-adjustment pattern (guarded `setState` during render keyed by target id), and the task list reorders through an optimistic query-cache write. *Why:* the React Compiler lint bans setState-in-effect; both are the compiler-clean equivalents.
+- **Autosave split honored** — Site drawer Details/Compliance use an explicit Save footer with dirty tracking; the Tasks checklist autosaves per action with a quiet sonner "Saved" toast (decision #5).
+- **Timesheets day-grouping via injected header rows** — one TanStack table (sorting + expansion) with full-width day-divider rows injected on date change, rather than TanStack's aggregation grouping. *Why:* the demo needs visual day sections + row-detail expansion, which the injected-header approach delivers in a single table instance.
+- **StatChips retired for StatStrip** — the earlier horizontal chip row is replaced everywhere (Dashboard, Timesheets counts, Job Sites, Workers) by the one low-height `StatStrip` segment component. *Why:* decision to "build it once, reuse"; two near-identical stat components was drift.
+- **Dark mode still skipped** — unchanged from Phase 3; light mode canonical.
+
 ## 2026-07-11 — Phase 3 (Offers, Dashboard, Landing, Ship)
 
 - **Offer resolution in a trigger** — a security-definer trigger on accepted `offer_responses` marks the offer filled, assigns the shift, and writes winner + admin notifications. *Why:* workers can't (and shouldn't) update unassigned shifts through RLS, and doing it client-side would leave a half-resolved offer if the winner disconnected mid-sequence; the partial unique index remains the sole race arbiter, so the trigger only ever runs in the winning transaction.
