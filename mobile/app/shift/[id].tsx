@@ -9,7 +9,8 @@ import { Text } from '@/components/ui/text';
 import { useShift, useSiteTemplates } from '@/features/schedule/hooks';
 import { useSite } from '@/features/today/hooks';
 import { useCertTypes, useMyCerts } from '@/features/wallet/hooks';
-import { formatACST } from '@/lib/format';
+import { useColors } from '@/lib/colors';
+import { formatACST, formatShiftRange } from '@/lib/format';
 
 export default function ShiftDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,6 +19,7 @@ export default function ShiftDetailScreen() {
   const templates = useSiteTemplates(shift.data?.site_id);
   const certTypes = useCertTypes();
   const myCerts = useMyCerts();
+  const c = useColors();
 
   const isPending = shift.isPending || site.isPending;
 
@@ -45,10 +47,12 @@ export default function ShiftDetailScreen() {
                   <StatusPill tone="success" label="Completed" showIcon={false} />
                 )}
               </View>
-              <View className="rounded-lg bg-muted/60 px-3 py-2">
-                <Text className="text-sm font-medium tabular-nums">
-                  {formatACST(shift.data.starts_at, 'EEEE d MMMM · h:mma').toLowerCase()}–
-                  {formatACST(shift.data.ends_at, 'h:mma').toLowerCase()}
+              <View className="gap-0.5 rounded-[12px] bg-muted px-3 py-2.5">
+                <Text className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  {formatACST(shift.data.starts_at, 'EEEE, d MMMM')}
+                </Text>
+                <Text className="text-base font-bold tabular-nums">
+                  {formatShiftRange(shift.data.starts_at, shift.data.ends_at)}
                 </Text>
                 {shift.data.role_required && (
                   <Text className="text-xs text-muted-foreground">{shift.data.role_required}</Text>
@@ -74,11 +78,11 @@ export default function ShiftDetailScreen() {
                   return (
                     <View key={certTypeId} className="flex-row items-center gap-1.5">
                       {met ? (
-                        <CheckCircleIcon size={15} weight="duotone" color="#16A34A" />
+                        <CheckCircleIcon size={16} weight="fill" color={c.success} />
                       ) : (
-                        <XCircleIcon size={15} weight="duotone" color="#DC2626" />
+                        <XCircleIcon size={16} weight="fill" color={c.danger} />
                       )}
-                      <Text className={`text-sm ${met ? 'text-ink' : 'text-danger'}`}>
+                      <Text className="text-sm" style={{ color: met ? c.foreground : c.danger }}>
                         {certType?.name ?? 'Certificate'}
                       </Text>
                     </View>
@@ -96,12 +100,12 @@ export default function ShiftDetailScreen() {
                 </Text>
                 {templates.data?.map((template) => (
                   <View key={template.id} className="flex-row items-center gap-2">
-                    <CheckSquareIcon size={15} weight="duotone" color="#78716C" />
+                    <CheckSquareIcon size={15} weight="duotone" color={c.mutedForeground} />
                     <Text className="flex-1 text-sm" numberOfLines={1}>
                       {template.title}
                     </Text>
                     {template.requires_photo && (
-                      <CameraIcon size={14} weight="duotone" color="#0F766E" />
+                      <CameraIcon size={14} weight="duotone" color={c.primary} />
                     )}
                   </View>
                 ))}

@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
 import { BellIcon, CheckCircleIcon, MegaphoneIcon, TrayIcon } from 'phosphor-react-native';
-import { useEffect } from 'react';
-import { FlatList, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { FlatList, RefreshControl, View } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useMarkAllNotificationsRead, useMyNotifications } from '@/features/offers/hooks';
+import { useColors } from '@/lib/colors';
 import { cn } from '@/lib/utils';
 
 function kindIcon(kind: string) {
@@ -18,6 +19,8 @@ function kindIcon(kind: string) {
 export default function NotificationsScreen() {
   const notifications = useMyNotifications();
   const markAllRead = useMarkAllNotificationsRead();
+  const c = useColors();
+  const [refreshing, setRefreshing] = useState(false);
 
   const hasUnread = (notifications.data ?? []).some((row) => !row.read);
   useEffect(() => {
@@ -40,10 +43,21 @@ export default function NotificationsScreen() {
           data={notifications.data ?? []}
           keyExtractor={(row) => row.id}
           contentContainerClassName="gap-2 p-4 pb-10"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={async () => {
+                setRefreshing(true);
+                await notifications.refetch();
+                setRefreshing(false);
+              }}
+              tintColor={c.mutedForeground}
+            />
+          }
           ListEmptyComponent={
-            <View className="items-center gap-3 rounded-lg border border-dashed border-border px-6 py-14">
-              <View className="rounded-lg bg-muted p-3">
-                <TrayIcon size={26} weight="duotone" color="#78716C" />
+            <View className="items-center gap-3 rounded-[16px] border border-dashed border-border px-6 py-14">
+              <View className="rounded-full bg-muted p-4">
+                <TrayIcon size={26} weight="duotone" color={c.mutedForeground} />
               </View>
               <Text className="text-sm font-medium">Nothing yet</Text>
               <Text className="text-center text-sm text-muted-foreground">
@@ -56,10 +70,10 @@ export default function NotificationsScreen() {
             return (
               <View
                 className={cn(
-                  'flex-row gap-3 rounded-lg border border-border bg-card p-3',
+                  'flex-row gap-3 rounded-[14px] border border-border bg-card p-3.5',
                   !row.read && 'border-primary/30 bg-primary/5'
                 )}>
-                <KindIcon size={18} weight="duotone" color="#0F766E" />
+                <KindIcon size={18} weight="duotone" color={c.primary} />
                 <View className="min-w-0 flex-1 gap-0.5">
                   <Text className="text-sm font-medium">{row.title}</Text>
                   {row.body && <Text className="text-xs text-muted-foreground">{row.body}</Text>}

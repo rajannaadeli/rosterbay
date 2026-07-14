@@ -6,13 +6,15 @@ import { Image, Modal, Pressable, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Textarea } from '@/components/ui/textarea';
+import { useColors } from '@/lib/colors';
 
 /** Bottom-sheet-style modal shell (thumb-zone actions). */
 function SheetShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <Modal transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" accessibilityLabel="Dismiss" onPress={onClose} />
-      <View className="gap-4 rounded-t-lg border-t border-border bg-background p-5 pb-9">
+    <Modal transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <Pressable className="flex-1 bg-black/50" accessibilityLabel="Dismiss" onPress={onClose} />
+      <View className="gap-4 rounded-t-[20px] border-t border-border bg-card px-5 pb-9 pt-3">
+        <View className="h-1 w-10 self-center rounded-full bg-border" />
         {children}
       </View>
     </Modal>
@@ -73,6 +75,7 @@ interface ReportIssueSheetProps {
 export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: ReportIssueSheetProps) {
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<{ base64: string; mimeType: string } | null>(null);
+  const c = useColors();
 
   const attachPhoto = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -113,7 +116,7 @@ export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: Repo
             accessibilityIgnoresInvertColors
           />
         ) : (
-          <ImageSquareIcon size={16} weight="duotone" color="#0F766E" />
+          <ImageSquareIcon size={16} weight="duotone" color={c.primary} />
         )}
         <Text className="text-sm">{photo ? 'Change photo' : 'Attach photo (optional)'}</Text>
       </Pressable>

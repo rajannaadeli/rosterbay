@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
 import { useSignIn } from '@/features/auth/hooks';
+import { useColors } from '@/lib/colors';
 import { DEMO_PASSWORD, DEMO_WORKER_EMAIL } from '@/lib/demo';
 
 const credentialsSchema = z.object({
@@ -20,6 +21,7 @@ const credentialsSchema = z.object({
 
 export default function SignInScreen() {
   const signIn = useSignIn();
+  const c = useColors();
   const [email, setEmail] = useState(DEMO_WORKER_EMAIL);
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -108,7 +110,7 @@ export default function SignInScreen() {
                 setPassword(DEMO_PASSWORD);
                 submit({ email: DEMO_WORKER_EMAIL, password: DEMO_PASSWORD });
               }}>
-              <LightningIcon size={18} weight="duotone" color="#0F766E" />
+              <LightningIcon size={18} weight="duotone" color={c.primary} />
               <Text>Use demo worker (Liam)</Text>
             </Button>
           </View>

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
 import { useAddCert, useCertTypes, useMyProfile } from '@/features/wallet/hooks';
+import { useColors } from '@/lib/colors';
 import { cn } from '@/lib/utils';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -32,6 +33,7 @@ export default function AddDocumentScreen() {
   const profile = useMyProfile();
   const certTypes = useCertTypes();
   const addCert = useAddCert();
+  const c = useColors();
 
   const [certTypeId, setCertTypeId] = useState('');
   const [issuedOn, setIssuedOn] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -129,7 +131,7 @@ export default function AddDocumentScreen() {
                     <Text className="text-sm font-medium">{certType.name}</Text>
                     <Text className="text-xs text-muted-foreground">{certType.code}</Text>
                   </View>
-                  {selected && <CheckCircleIcon size={18} weight="duotone" color="#0F766E" />}
+                  {selected && <CheckCircleIcon size={18} weight="duotone" color={c.primary} />}
                 </Pressable>
               );
             })}

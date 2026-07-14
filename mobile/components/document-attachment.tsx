@@ -4,6 +4,7 @@ import { Animated, Image, Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { useColors } from '@/lib/colors';
 
 export interface AttachedImage {
   base64: string;
@@ -65,6 +66,7 @@ export function DocumentAttachment({
   onRemove,
   onRetry,
 }: DocumentAttachmentProps) {
+  const c = useColors();
   if (!image) {
     return (
       <View className="gap-2">
@@ -74,11 +76,11 @@ export function DocumentAttachment({
           </Text>
           <View className="w-full flex-row gap-3">
             <Button variant="outline" className="flex-1" onPress={onPickCamera}>
-              <CameraIcon size={18} color="#0F766E" />
+              <CameraIcon size={18} color={c.primary} />
               <Text>Camera</Text>
             </Button>
             <Button variant="outline" className="flex-1" onPress={onPickLibrary}>
-              <ImageSquareIcon size={18} color="#0F766E" />
+              <ImageSquareIcon size={18} color={c.primary} />
               <Text>Library</Text>
             </Button>
           </View>
@@ -121,7 +123,7 @@ export function DocumentAttachment({
             hitSlop={8}
             onPress={onRetry}
             className="size-9 items-center justify-center rounded-lg bg-primary/10">
-            <ArrowClockwiseIcon size={18} color="#0F766E" />
+            <ArrowClockwiseIcon size={18} color={c.primary} />
           </Pressable>
         )}
         {!uploading && (
@@ -131,7 +133,7 @@ export function DocumentAttachment({
             hitSlop={8}
             onPress={onRemove}
             className="size-9 items-center justify-center rounded-lg active:bg-muted">
-            <XIcon size={18} color="#78716C" />
+            <XIcon size={18} color={c.mutedForeground} />
           </Pressable>
         )}
       </View>
