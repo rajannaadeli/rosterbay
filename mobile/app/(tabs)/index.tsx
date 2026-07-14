@@ -1,9 +1,9 @@
-import { CalendarBlankIcon } from 'phosphor-react-native';
+import * as Haptics from 'expo-haptics';
+import { SignInIcon, SignOutIcon } from 'phosphor-react-native';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Platform, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { ScreenPlaceholder } from '@/components/screen-placeholder';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useSession } from '@/features/auth/hooks';
@@ -21,6 +21,22 @@ import {
   useSite,
 } from '@/features/today/hooks';
 import { useCertTypes, useMyCerts } from '@/features/wallet/hooks';
+import { useColors } from '@/lib/colors';
+import { formatACST } from '@/lib/format';
+
+function greeting(): string {
+  const hour = Number(formatACST(new Date(), 'H'));
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function tap() {
+  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+}
+function confirmHaptic() {
+  if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+}
 
 export default function TodayScreen() {
   const session = useSession();
@@ -33,27 +49,36 @@ export default function TodayScreen() {
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const reportIssue = useReportIssue();
+  const c = useColors();
 
   const [confirmDistance, setConfirmDistance] = useState<number | null | 'pending'>('pending');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [flowError, setFlowError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const isPending = shift.isPending || (shift.data !== null && (site.isPending || entry.isPending));
+  const firstName =
+    ((session.data?.user.user_metadata?.full_name as string | undefined) ?? 'there').split(' ')[0];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([shift.refetch(), site.refetch(), entry.refetch(), myCerts.refetch()]);
+    setRefreshing(false);
+  };
 
   const startClockIn = async () => {
     if (!shift.data || !site.data) return;
     setFlowError(null);
-    // Fresh reading at the moment of truth.
+    tap();
     const coords = await location.read();
     const distanceM = distanceToSite(coords, site.data);
     if (distanceM !== null && distanceM <= site.data.geofence_radius_m) {
       clockIn.mutate(
         { shift: shift.data, site: site.data, coords, distanceM },
-        { onError: (e) => setFlowError(e.message) }
+        { onSuccess: confirmHaptic, onError: (e) => setFlowError(e.message) }
       );
     } else {
-      // Outside the fence (or no location): never hard-block — confirm + flag.
       setConfirmDistance(distanceM);
       setConfirmOpen(true);
     }
@@ -69,7 +94,10 @@ export default function TodayScreen() {
         distanceM: confirmDistance === 'pending' ? null : confirmDistance,
       },
       {
-        onSuccess: () => setConfirmOpen(false),
+        onSuccess: () => {
+          confirmHaptic();
+          setConfirmOpen(false);
+        },
         onError: (e) => {
           setConfirmOpen(false);
           setFlowError(e.message);
@@ -81,18 +109,23 @@ export default function TodayScreen() {
   const doClockOut = async () => {
     if (!entry.data || !shift.data) return;
     setFlowError(null);
+    tap();
     const coords = await location.read();
     clockOut.mutate(
       { entryId: entry.data.id, shiftId: shift.data.id, coords },
-      { onError: (e) => setFlowError(e.message) }
+      { onSuccess: confirmHaptic, onError: (e) => setFlowError(e.message) }
     );
   };
 
   if (isPending) {
     return (
-      <View className="flex-1 gap-3 bg-background p-4">
-        <Skeleton className="h-56 rounded-lg" />
-        <Skeleton className="h-14 rounded-lg" />
+      <View className="flex-1 gap-4 bg-background p-4">
+        <View className="gap-1.5 pt-1">
+          <Skeleton className="h-4 w-32 rounded-md" />
+          <Skeleton className="h-7 w-52 rounded-md" />
+        </View>
+        <Skeleton className="h-60 rounded-[20px]" />
+        <Skeleton className="h-16 rounded-[16px]" />
       </View>
     );
   }
@@ -109,7 +142,20 @@ export default function TodayScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-4 p-4 pb-32">
+      <ScrollView
+        contentContainerClassName="gap-4 p-4 pb-32"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.mutedForeground} />
+        }>
+        <View className="gap-0.5 pt-1">
+          <Text className="text-sm text-muted-foreground">
+            {formatACST(new Date(), 'EEEE, d MMMM')}
+          </Text>
+          <Text className="text-2xl font-bold tracking-tight">
+            {greeting()}, {firstName}
+          </Text>
+        </View>
+
         {inShift && entry.data ? (
           <InShiftCard
             shift={shift.data}
@@ -134,39 +180,29 @@ export default function TodayScreen() {
           />
         )}
 
-        {flowError && <Text className="text-sm text-danger">{flowError}</Text>}
-
-        <View className="flex-row items-center gap-2 opacity-60">
-          <CalendarBlankIcon size={14} color="#78716C" />
-          <Text className="text-xs text-muted-foreground">
-            Your full roster lives in the Schedule tab.
-          </Text>
-        </View>
+        {flowError && (
+          <Text className="text-sm font-medium text-danger">{flowError}</Text>
+        )}
       </ScrollView>
 
       {/* The dominant action, pinned to the thumb zone. */}
-      <View className="absolute inset-x-0 bottom-0 border-t border-border bg-background p-4">
+      <View className="absolute inset-x-0 bottom-0 border-t border-border bg-card px-4 pb-8 pt-3">
         {inShift ? (
-          <Button
-            size="lg"
-            variant="destructive"
-            className="h-14"
+          <PrimaryAction
+            label={clockOut.isPending ? 'Clocking out…' : 'Clock Out'}
+            icon={<SignOutIcon size={20} weight="bold" color="#FFFFFF" />}
+            tone="danger"
             disabled={clockOut.isPending}
-            onPress={() => void doClockOut()}>
-            <Text className="text-base font-semibold">
-              {clockOut.isPending ? 'Clocking out…' : 'Clock Out'}
-            </Text>
-          </Button>
+            onPress={() => void doClockOut()}
+          />
         ) : (
-          <Button
-            size="lg"
-            className="h-14"
+          <PrimaryAction
+            label={clockIn.isPending ? 'Clocking in…' : 'Clock In'}
+            icon={<SignInIcon size={20} weight="bold" color="#FFFFFF" />}
+            tone="primary"
             disabled={clockIn.isPending}
-            onPress={() => void startClockIn()}>
-            <Text className="text-base font-semibold">
-              {clockIn.isPending ? 'Clocking in…' : 'Clock In'}
-            </Text>
-          </Button>
+            onPress={() => void startClockIn()}
+          />
         )}
       </View>
 
@@ -201,5 +237,33 @@ export default function TodayScreen() {
         />
       )}
     </View>
+  );
+}
+
+function PrimaryAction({
+  label,
+  icon,
+  tone,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  tone: 'primary' | 'danger';
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      disabled={disabled}
+      onPress={onPress}
+      className={`h-16 flex-row items-center justify-center gap-2.5 rounded-[18px] shadow-sm active:opacity-90 ${
+        tone === 'danger' ? 'bg-danger' : 'bg-primary'
+      } ${disabled ? 'opacity-60' : ''}`}>
+      {icon}
+      <Text className="text-lg font-bold text-white">{label}</Text>
+    </Pressable>
   );
 }

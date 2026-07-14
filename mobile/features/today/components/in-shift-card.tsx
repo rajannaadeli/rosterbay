@@ -7,6 +7,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
+import { useColors } from '@/lib/colors';
 import type { Tables } from '@/lib/database.types';
 import { cn } from '@/lib/utils';
 import { uploadTaskProof } from '../api';
@@ -26,13 +27,14 @@ function ElapsedTimer({ since }: { since: string }) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <Text className="text-3xl font-semibold tabular-nums text-ink">
+    <Text className="text-3xl font-bold tabular-nums text-foreground">
       {pad(h)}:{pad(m)}:{pad(s)}
     </Text>
   );
 }
 
 function ProgressRing({ done, total }: { done: number; total: number }) {
+  const c = useColors();
   const size = 56;
   const stroke = 5;
   const radius = (size - stroke) / 2;
@@ -46,7 +48,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E7E5E4"
+          stroke={c.border}
           strokeWidth={stroke}
           fill="none"
         />
@@ -54,7 +56,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#0F766E"
+          stroke={c.primary}
           strokeWidth={stroke}
           fill="none"
           strokeLinecap="round"
@@ -79,6 +81,7 @@ interface TaskRowProps {
 }
 
 function TaskRow({ task, busy, onToggle }: TaskRowProps) {
+  const c = useColors();
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -105,7 +108,7 @@ function TaskRow({ task, busy, onToggle }: TaskRowProps) {
           accessibilityIgnoresInvertColors
         />
       ) : task.requires_photo ? (
-        <CameraIcon size={18} weight="duotone" color="#0F766E" />
+        <CameraIcon size={18} weight="duotone" color={c.primary} />
       ) : null}
     </Pressable>
   );
@@ -119,6 +122,7 @@ interface InShiftCardProps {
 }
 
 export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardProps) {
+  const c = useColors();
   const tasks = useShiftTasks(shift.id, true);
   const setDone = useSetTaskDone(shift.id);
   const [uploadingTaskId, setUploadingTaskId] = useState<string | null>(null);
@@ -182,7 +186,7 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
 
         {entry.flags.length > 0 && (
           <View className="flex-row items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2">
-            <WarningIcon size={14} weight="duotone" color="#D97706" />
+            <WarningIcon size={14} weight="duotone" color={c.warning} />
             <Text className="flex-1 text-xs text-warning">
               This entry is flagged for review ({entry.flags.join(', ').replace(/_/g, ' ')}).
             </Text>
@@ -212,7 +216,7 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
           accessibilityRole="button"
           onPress={onReportIssue}
           className="items-center rounded-lg border border-border py-2.5 active:bg-muted">
-          <Text className="text-sm font-medium text-ink">Report issue</Text>
+          <Text className="text-sm font-medium text-foreground">Report issue</Text>
         </Pressable>
       </CardContent>
     </Card>

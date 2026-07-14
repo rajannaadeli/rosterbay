@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { CalendarBlankIcon, CaretDownIcon, CaretRightIcon } from 'phosphor-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, SectionList, View } from 'react-native';
+import { Pressable, RefreshControl, SectionList, View } from 'react-native';
 
 import { StatusPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useMyShifts, useSites } from '@/features/schedule/hooks';
+import { useColors } from '@/lib/colors';
 import type { Tables } from '@/lib/database.types';
 import { formatACST, formatShiftRange } from '@/lib/format';
 
@@ -31,24 +32,29 @@ function mondayYmd(offsetWeeks: number): string {
 }
 
 function ShiftRow({ shift, siteName, muted }: { shift: Shift; siteName: string; muted?: boolean }) {
+  const c = useColors();
+  const isToday = formatACST(shift.starts_at, 'yyyy-MM-dd') === formatACST(new Date(), 'yyyy-MM-dd');
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push({ pathname: '/shift/[id]', params: { id: shift.id } })}
-      className={`mb-2 flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 active:bg-muted/50 ${muted ? 'opacity-60' : ''}`}>
-      <View className="w-16 items-center rounded-lg bg-muted/60 py-1.5">
-        <Text className="text-[11px] font-medium text-muted-foreground">
+      className={`mb-2.5 flex-row items-center gap-3 rounded-[16px] border border-border bg-card p-3 shadow-sm active:bg-muted/50 ${muted ? 'opacity-60' : ''}`}>
+      <View
+        className={`w-14 items-center justify-center rounded-[12px] py-2 ${isToday ? 'bg-primary/10' : 'bg-muted'}`}>
+        <Text
+          className={`text-[10px] font-semibold uppercase ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
           {formatACST(shift.starts_at, 'EEE')}
         </Text>
-        <Text className="text-sm font-semibold tabular-nums">
-          {formatACST(shift.starts_at, 'd MMM')}
+        <Text
+          className={`text-lg font-bold tabular-nums ${isToday ? 'text-primary' : 'text-foreground'}`}>
+          {formatACST(shift.starts_at, 'd')}
         </Text>
       </View>
-      <View className="min-w-0 flex-1">
-        <Text className="text-sm font-medium" numberOfLines={1}>
+      <View className="min-w-0 flex-1 gap-0.5">
+        <Text className="text-[15px] font-semibold" numberOfLines={1}>
           {siteName}
         </Text>
-        <Text className="text-xs tabular-nums text-muted-foreground">
+        <Text className="text-[13px] tabular-nums text-muted-foreground">
           {formatShiftRange(shift.starts_at, shift.ends_at)}
           {shift.role_required ? ` · ${shift.role_required}` : ''}
         </Text>
@@ -56,7 +62,7 @@ function ShiftRow({ shift, siteName, muted }: { shift: Shift; siteName: string; 
       {shift.status === 'in_progress' ? (
         <StatusPill tone="success" label="On site" />
       ) : (
-        <CaretRightIcon size={14} color="#78716C" />
+        <CaretRightIcon size={16} color={c.faint} />
       )}
     </Pressable>
   );
@@ -65,7 +71,9 @@ function ShiftRow({ shift, siteName, muted }: { shift: Shift; siteName: string; 
 export default function ScheduleScreen() {
   const shifts = useMyShifts();
   const sites = useSites();
+  const c = useColors();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const siteNames = useMemo(
     () => new Map((sites.data ?? []).map((s) => [s.id, s.name])),
@@ -96,11 +104,17 @@ export default function ScheduleScreen() {
     return result;
   }, [shifts.data, showCompleted]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([shifts.refetch(), sites.refetch()]);
+    setRefreshing(false);
+  };
+
   if (shifts.isPending || sites.isPending) {
     return (
-      <View className="flex-1 gap-2 bg-background p-4">
+      <View className="flex-1 gap-2.5 bg-background p-4">
         {Array.from({ length: 6 }, (_, i) => (
-          <Skeleton key={i} className="h-16 rounded-lg" />
+          <Skeleton key={i} className="h-[68px] rounded-[16px]" />
         ))}
       </View>
     );
@@ -109,10 +123,10 @@ export default function ScheduleScreen() {
   if ((shifts.data?.length ?? 0) === 0) {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-background px-8">
-        <View className="rounded-lg bg-muted p-4">
-          <CalendarBlankIcon size={30} weight="duotone" color="#78716C" />
+        <View className="rounded-full bg-muted p-5">
+          <CalendarBlankIcon size={32} weight="duotone" color={c.mutedForeground} />
         </View>
-        <Text className="text-lg font-semibold">No shifts yet</Text>
+        <Text className="text-lg font-bold">No shifts yet</Text>
         <Text className="text-center text-sm text-muted-foreground">
           When Torrens rosters you on, your shifts appear here.
         </Text>
@@ -127,22 +141,29 @@ export default function ScheduleScreen() {
         keyExtractor={(shift) => shift.id}
         contentContainerClassName="p-4 pb-10"
         stickySectionHeadersEnabled={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.mutedForeground} />
+        }
         renderSectionHeader={({ section }) =>
           section.title === 'Completed' ? (
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ expanded: showCompleted }}
               onPress={() => setShowCompleted((v) => !v)}
-              className="mb-2 mt-2 flex-row items-center gap-1.5">
+              className="mb-2.5 mt-3 flex-row items-center gap-1.5">
               {showCompleted ? (
-                <CaretDownIcon size={14} color="#78716C" />
+                <CaretDownIcon size={15} color={c.mutedForeground} />
               ) : (
-                <CaretRightIcon size={14} color="#78716C" />
+                <CaretRightIcon size={15} color={c.mutedForeground} />
               )}
-              <Text className="text-sm font-semibold text-muted-foreground">Completed</Text>
+              <Text className="text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
+                Completed
+              </Text>
             </Pressable>
           ) : (
-            <Text className="mb-2 mt-2 text-sm font-semibold">{section.title}</Text>
+            <Text className="mb-2.5 mt-3 text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
+              {section.title}
+            </Text>
           )
         }
         renderItem={({ item, section }) => (

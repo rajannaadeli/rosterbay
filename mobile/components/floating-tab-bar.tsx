@@ -11,6 +11,7 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { useColors } from '@/lib/colors';
 import { cn } from '@/lib/utils';
 
 /** Tab-bar renderer props, derived from expo-router's public Tabs API. */
@@ -24,18 +25,19 @@ const TAB_META: Record<string, { label: string; icon: Icon }> = {
 };
 
 /**
- * WhiteFleet-style floating pill tab bar: in-flow (screens keep their own
- * height, no content hidden underneath), lifted off the screen edge with a
- * card surface and whisper-quiet shadow.
+ * Floating pill tab bar (reference: bottom_navigatio.png). In-flow so no
+ * content hides beneath it; the active tab is a soft teal pill with a filled
+ * icon, inactive tabs recede to a faint tint. Theme-aware.
  */
 export function FloatingTabBar({ state, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
+  const c = useColors();
 
   return (
     <View
-      style={{ paddingBottom: Math.max(insets.bottom - 6, 8) }}
-      className="bg-background px-3 pt-2">
-      <View className="flex-row items-stretch rounded-lg border border-border bg-card p-1 shadow-sm">
+      style={{ paddingBottom: Math.max(insets.bottom - 4, 10) }}
+      className="bg-background px-4 pt-2">
+      <View className="flex-row items-stretch rounded-[18px] border border-border bg-card p-1.5 shadow-sm">
         {state.routes.map((route, index) => {
           const meta = TAB_META[route.name];
           if (!meta) return null;
@@ -60,20 +62,21 @@ export function FloatingTabBar({ state, navigation }: TabBarProps) {
               accessibilityState={{ selected: focused }}
               accessibilityLabel={meta.label}
               onPress={onPress}
-              className="flex-1 items-center justify-center gap-0.5 rounded-lg py-1.5">
-              {/* 3px teal top-indicator pill on the active tab. */}
-              <View
-                className={cn(
-                  'absolute top-0 h-[3px] w-7 rounded-full',
-                  focused ? 'bg-primary' : 'bg-transparent'
-                )}
+              className={cn(
+                'flex-1 items-center justify-center gap-1 rounded-[13px] py-2',
+                focused ? 'bg-primary/10' : ''
+              )}>
+              <TabIcon
+                size={22}
+                weight={focused ? 'fill' : 'regular'}
+                color={focused ? c.primary : c.faint}
               />
-              <TabIcon size={21} weight="duotone" color={focused ? '#0F766E' : '#A8A29E'} />
               <Text
                 className={cn(
-                  'font-medium text-[11px]',
-                  focused ? 'text-primary' : 'text-[#A8A29E]'
-                )}>
+                  'text-[11px]',
+                  focused ? 'font-semibold text-primary' : 'font-medium'
+                )}
+                style={focused ? undefined : { color: c.faint }}>
                 {meta.label}
               </Text>
             </Pressable>
