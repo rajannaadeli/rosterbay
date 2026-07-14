@@ -45,13 +45,14 @@
   }
 
   .dark:root {
-    --background: 24 11% 7%;
-    /* warm near-black — Stone 950 pushed a touch darker */
+    --background: 24 12% 6%;
+    /* warm near-black — deepened so lifted cards read without a border */
     --foreground: 40 12% 92%;
     /* soft warm white */
-    --card: 24 8% 11%;
+    --card: 28 8% 13%;
+    /* clearly lifted above the canvas (fill contrast replaces the border) */
     --card-foreground: 40 12% 92%;
-    --popover: 24 8% 11%;
+    --popover: 30 8% 15%;
     --popover-foreground: 40 12% 92%;
     --primary: 173 58% 45%;
     /* teal lifted for contrast on dark surfaces */

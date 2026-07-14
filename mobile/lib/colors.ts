@@ -40,12 +40,12 @@ export const LIGHT: Palette = {
 };
 
 export const DARK: Palette = {
-  background: '#141110',
-  card: '#1F1B18',
+  background: '#120F0D',
+  card: '#231F1B',
   foreground: '#EAE7E2',
   mutedForeground: '#A29A92',
   border: '#38322C',
-  muted: '#2A2521',
+  muted: '#2E2925',
   primary: '#2DC2B2',
   onPrimary: '#0C1413',
   success: '#34D399',

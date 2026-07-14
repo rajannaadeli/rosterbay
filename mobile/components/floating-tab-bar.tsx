@@ -37,7 +37,7 @@ export function FloatingTabBar({ state, navigation }: TabBarProps) {
     <View
       style={{ paddingBottom: Math.max(insets.bottom - 4, 10) }}
       className="bg-background px-4 pt-2">
-      <View className="flex-row items-stretch rounded-[18px] border border-border bg-card p-1.5 shadow-sm">
+      <View className="flex-row items-stretch rounded-[18px] bg-card p-1.5 shadow-md">
         {state.routes.map((route, index) => {
           const meta = TAB_META[route.name];
           if (!meta) return null;

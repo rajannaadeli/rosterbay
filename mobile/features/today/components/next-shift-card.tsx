@@ -59,7 +59,7 @@ export function NextShiftCard({
   });
 
   return (
-    <View className="gap-4 rounded-[20px] border border-border bg-card p-5 shadow-sm">
+    <View className="gap-4 rounded-[20px] bg-card p-5 shadow-sm">
       <View className="gap-1">
         <Text className="text-xs font-semibold uppercase tracking-widest text-primary">
           Next shift
@@ -121,7 +121,7 @@ export function NextShiftCard({
       )}
 
       {shift.notes && !shift.notes.startsWith('OVERRIDE:') && (
-        <Text className="rounded-[12px] border border-border bg-muted/60 px-3 py-2.5 text-xs text-muted-foreground">
+        <Text className="rounded-[12px] bg-muted px-3 py-2.5 text-xs text-muted-foreground">
           {shift.notes}
         </Text>
       )}

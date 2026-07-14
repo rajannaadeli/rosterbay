@@ -1,9 +1,9 @@
 import * as Haptics from 'expo-haptics';
-import { SignInIcon, SignOutIcon } from 'phosphor-react-native';
+import { CalendarBlankIcon, SignInIcon, SignOutIcon } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
-import { ScreenPlaceholder } from '@/components/screen-placeholder';
+import { EmptyState } from '@/components/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useSession } from '@/features/auth/hooks';
@@ -133,7 +133,19 @@ export default function TodayScreen() {
   if (!shift.data || !site.data) {
     return (
       <View className="flex-1 bg-background">
-        <ScreenPlaceholder title="No upcoming shifts" />
+        <View className="gap-0.5 p-4 pt-3">
+          <Text className="text-sm text-muted-foreground">
+            {formatACST(new Date(), 'EEEE, d MMMM')}
+          </Text>
+          <Text className="text-2xl font-bold tracking-tight">
+            {greeting()}, {firstName}
+          </Text>
+        </View>
+        <EmptyState
+          icon={CalendarBlankIcon}
+          title="No shifts scheduled"
+          body="When Torrens rosters you on, your next shift shows up here. Your full roster lives in the Schedule tab."
+        />
       </View>
     );
   }

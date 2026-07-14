@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useColors } from '@/lib/colors';
@@ -88,11 +87,11 @@ function TaskRow({ task, busy, onToggle }: TaskRowProps) {
       accessibilityState={{ checked: task.done }}
       disabled={busy}
       onPress={() => onToggle(task)}
-      className="flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 active:bg-muted/50">
+      className="flex-row items-center gap-3 rounded-[12px] bg-muted/50 px-3 py-2.5 active:bg-muted">
       <View
         className={cn(
-          'size-6 items-center justify-center rounded-lg border',
-          task.done ? 'border-success bg-success' : 'border-border bg-background'
+          'size-6 items-center justify-center rounded-[8px] border',
+          task.done ? 'border-success bg-success' : 'border-border bg-card'
         )}>
         {task.done && <CheckIcon size={14} color="#FFFFFF" weight="bold" />}
       </View>
@@ -168,9 +167,8 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
   };
 
   return (
-    <Card>
-      <CardContent className="gap-4 p-4">
-        <View className="flex-row items-center justify-between">
+    <View className="gap-4 rounded-[20px] bg-card p-5 shadow-sm">
+      <View className="flex-row items-center justify-between">
           <View className="gap-0.5">
             <View className="flex-row items-center gap-1.5">
               <View className="size-2 rounded-full bg-success" />
@@ -185,7 +183,7 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
         </View>
 
         {entry.flags.length > 0 && (
-          <View className="flex-row items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2">
+          <View className="flex-row items-center gap-1.5 rounded-[12px] bg-warning/10 px-3 py-2.5">
             <WarningIcon size={14} weight="duotone" color={c.warning} />
             <Text className="flex-1 text-xs text-warning">
               This entry is flagged for review ({entry.flags.join(', ').replace(/_/g, ' ')}).
@@ -215,10 +213,9 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
         <Pressable
           accessibilityRole="button"
           onPress={onReportIssue}
-          className="items-center rounded-lg border border-border py-2.5 active:bg-muted">
-          <Text className="text-sm font-medium text-foreground">Report issue</Text>
+          className="items-center rounded-[12px] bg-muted py-3 active:opacity-80">
+          <Text className="text-sm font-semibold text-foreground">Report issue</Text>
         </Pressable>
-      </CardContent>
-    </Card>
+      </View>
   );
 }

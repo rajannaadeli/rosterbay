@@ -42,7 +42,7 @@ export function AppHeader() {
     'Torrens Facility Services';
 
   return (
-    <SafeAreaView edges={['top']} className="border-b border-border bg-card">
+    <SafeAreaView edges={['top']} className="bg-card shadow-sm">
       <View className="h-14 flex-row items-center gap-2.5 px-4">
         <View className="size-8 items-center justify-center rounded-[10px] bg-primary">
           <CalendarCheckIcon size={17} weight="fill" color={c.onPrimary} />
