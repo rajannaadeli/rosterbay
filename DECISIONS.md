@@ -2,6 +2,14 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-15 — Mobile reference-conformance pass (borderless soft-depth)
+
+- **Borderless soft-depth in both modes** — dropped the spec §6 "1px borders separate" rule for **card surfaces** on mobile: cards now group by fill contrast + shadow (light: white card on deepened `#FAFAF9`; dark: lifted `#231F1B` card on deepened `#120F0D` canvas). Deliberate override of a CLAUDE.md "law," **authorised by the user** to match the reference apps in `ui_references/` (all borderless/soft-depth). *Kept* as borders: single-side **dividers** (footer/section/pinned-bar separators — §3.4 allows hairline dividers), form **inputs**, **button** outlines, and the **Badge/StatusPill** pill outline. Web admin is untouched — this is a mobile-only divergence.
+- **Un-nested the in-shift card** — task rows and Report-issue were bordered `bg-card` boxes inside a padded `Card` (the exact double-padding anti-pattern in `issue_with_card_nesting…`). Now one card depth: borderless tonal rows. The shared `Card` primitive is consequently unused by any screen (left in place, not deleted).
+- **Empty states are onboarding** — one shared `EmptyState` (large tinted glyph + bold headline + teaching copy + optional down-arrow action cue, per §3.8) replaces the thin dashed-box empties across Today/Schedule/Offers/Wallet/notifications. Wallet's points at the pinned Add button. Fixed a real bug: Today's no-shift state was rendering `ScreenPlaceholder`, whose copy says "Coming in this demo… ships in a later phase" — wrong for an empty Today.
+- **Floating on-canvas headers** — shift-detail, notifications, and add-document drop the stock react-navigation header for a `ScreenHeader` with a circular back button on the background (reference: `single_screen_single_action_example`).
+- **Not done (by decision):** gesture/motion craft (long-press context menus, drag-to-dismiss with background scale) — deferred to a later pass; needs `react-native-gesture-handler`.
+
 ## 2026-07-14 — Mobile UI pass (dark mode + instant clock + Today/Schedule)
 
 - **Instant clock in/out** — `useClockIn`/`useClockOut` are now optimistic: `onMutate` flips the shift to `in_progress`/writes a synthetic entry (server-identical flags via `computeClockInFlags`) into the cache on tap, so the screen becomes the in-shift view immediately; rollback on error, `onSettled` invalidate reconciles. *Why:* the multi-step clock-in write (orphan cleanup → insert → shift update → template copy) took 5–10s; the worker must never wait on the server to feel clocked in.
