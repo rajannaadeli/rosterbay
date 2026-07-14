@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { EntityDrawer } from '@/components/entity-drawer';
 import { CompliancePill } from '@/components/status-pill';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/user-avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
@@ -15,7 +15,7 @@ import { DocumentWallet } from '@/features/workers/components/document-wallet';
 import { ShiftHistory } from '@/features/workers/components/shift-history';
 import { useWorker, useWorkerCerts, useWorkerShifts } from '@/features/workers/hooks';
 import type { CertStatus } from '@/lib/database.types';
-import { formatACST, initials } from '@/lib/format';
+import { formatACST } from '@/lib/format';
 
 interface WorkerDrawerProps {
   workerId: string | null;
@@ -56,10 +56,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
         header={
           w ? (
             <div className="flex items-center gap-3">
-              <Avatar className="size-11">
-                {w.avatar_url && <AvatarImage src={w.avatar_url} alt="" />}
-                <AvatarFallback>{initials(w.full_name)}</AvatarFallback>
-              </Avatar>
+              <UserAvatar name={w.full_name} size="md" />
               <div className="flex min-w-0 flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-base font-semibold">{w.full_name}</p>

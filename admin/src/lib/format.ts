@@ -20,3 +20,26 @@ export function initials(fullName: string): string {
     .join('')
     .toUpperCase();
 }
+
+/**
+ * Compact shift-range for chips and dense cells — never truncates or wraps.
+ * Drops `:00` minutes; collapses a shared meridiem:
+ *   6am–2pm · 2–10pm · 10pm–6am · 1–9am · 6:30am–2:15pm
+ * Full times (formatACST) stay for popovers/drawers/expanded panels.
+ */
+export function formatShiftRange(startsAt: string | Date, endsAt: string | Date): string {
+  const start = partsACST(startsAt);
+  const end = partsACST(endsAt);
+  const shareMeridiem = start.meridiem === end.meridiem;
+  const startStr = `${start.time}${shareMeridiem ? '' : start.meridiem}`;
+  const endStr = `${end.time}${end.meridiem}`;
+  return `${startStr}–${endStr}`;
+}
+
+function partsACST(date: string | Date): { time: string; meridiem: 'am' | 'pm' } {
+  const h24 = Number(formatACST(date, 'H'));
+  const min = formatACST(date, 'mm');
+  const hour12 = formatACST(date, 'h');
+  const time = min === '00' ? hour12 : `${hour12}:${min}`;
+  return { time, meridiem: h24 < 12 ? 'am' : 'pm' };
+}

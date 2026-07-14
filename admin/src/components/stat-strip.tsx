@@ -11,6 +11,10 @@ export interface StatSegment {
   icon: Icon;
   /** Optional destination — segment becomes a link with hover tint. */
   to?: string;
+  /** Optional click handler — segment becomes a filter button. */
+  onClick?: () => void;
+  /** Pressed state when this segment's filter is active. */
+  active?: boolean;
   tone?: 'default' | 'success' | 'warning' | 'danger';
   /** Count-up animation (dashboard KPIs). Off for static counts. */
   animate?: boolean;
@@ -59,15 +63,28 @@ export function StatStrip({ segments, loading }: { segments: StatSegment[]; load
             </div>
           </>
         );
+        const interactive = Boolean(seg.to || seg.onClick);
         const className = cn(
-          'flex flex-1 items-center gap-2.5 px-4 py-2.5 transition-colors',
-          seg.to && 'hover:bg-muted/50',
+          'relative flex flex-1 items-center gap-2.5 px-4 py-2.5 text-left transition-colors',
+          interactive && 'hover:bg-muted/50',
+          seg.active &&
+            'bg-primary/5 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary',
         );
-        return seg.to ? (
-          <Link key={seg.label} to={seg.to} className={className}>
-            {inner}
-          </Link>
-        ) : (
+        if (seg.to) {
+          return (
+            <Link key={seg.label} to={seg.to} className={className}>
+              {inner}
+            </Link>
+          );
+        }
+        if (seg.onClick) {
+          return (
+            <button key={seg.label} type="button" onClick={seg.onClick} className={className}>
+              {inner}
+            </button>
+          );
+        }
+        return (
           <div key={seg.label} className={className}>
             {inner}
           </div>

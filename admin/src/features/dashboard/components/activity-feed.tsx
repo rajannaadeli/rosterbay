@@ -1,9 +1,9 @@
 import { CheckCircle, Megaphone, SignIn, SignOut } from '@phosphor-icons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/user-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatACST, initials } from '@/lib/format';
+import { formatACST } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 export type FeedKind = 'clock_in' | 'clock_out' | 'offer' | 'approval';
@@ -70,11 +70,13 @@ export function ActivityFeed({
               )}
             >
               <div className="relative shrink-0">
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
-                    {item.actor ? initials(item.actor) : '•'}
-                  </AvatarFallback>
-                </Avatar>
+                {item.actor ? (
+                  <UserAvatar name={item.actor} size="sm" />
+                ) : (
+                  <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-[10px] text-muted-foreground ring-1 ring-inset ring-black/5">
+                    •
+                  </span>
+                )}
                 <span
                   className={cn(
                     'absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full bg-card',

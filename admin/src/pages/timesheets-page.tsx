@@ -12,8 +12,9 @@ import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { EmptyState } from '@/components/empty-state';
+import { FilterChip } from '@/components/filter-chip';
 import { StatusPill, type StatusTone } from '@/components/status-pill';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/user-avatar';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -31,13 +32,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -53,7 +47,7 @@ import {
 } from '@/features/timesheets/hooks';
 import { useWorkers } from '@/features/workers/hooks';
 import type { TimeEntryFlag, TimeEntryStatus } from '@/lib/database.types';
-import { formatACST, initials } from '@/lib/format';
+import { formatACST } from '@/lib/format';
 import { acstWeekStart, weekDays } from '@/lib/week';
 import { cn } from '@/lib/utils';
 
@@ -191,11 +185,7 @@ export function TimesheetsPage() {
           ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2.5">
-            <Avatar className="size-7">
-              <AvatarFallback className="text-[10px]">
-                {initials(workerNames[row.original.worker_id] ?? '—')}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar name={workerNames[row.original.worker_id] ?? '—'} size="sm" />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{workerNames[row.original.worker_id] ?? '—'}</p>
               <p className="truncate text-xs text-muted-foreground">
@@ -430,22 +420,24 @@ export function TimesheetsPage() {
 
         {/* Filter bar. */}
         <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card px-3 py-2.5">
-          <FilterSelect label="Worker" value={workerId} onChange={setWorkerId} width="w-44">
-            <SelectItem value="all">All</SelectItem>
-            {(workers.data ?? []).map((w) => (
-              <SelectItem key={w.id} value={w.id}>
-                {w.full_name}
-              </SelectItem>
-            ))}
-          </FilterSelect>
-          <FilterSelect label="Site" value={siteId} onChange={setSiteId} width="w-48">
-            <SelectItem value="all">All</SelectItem>
-            {(sites.data ?? []).map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name}
-              </SelectItem>
-            ))}
-          </FilterSelect>
+          <FilterChip
+            label="Worker"
+            value={workerId}
+            onChange={setWorkerId}
+            options={[
+              { value: 'all', label: 'All' },
+              ...(workers.data ?? []).map((w) => ({ value: w.id, label: w.full_name })),
+            ]}
+          />
+          <FilterChip
+            label="Site"
+            value={siteId}
+            onChange={setSiteId}
+            options={[
+              { value: 'all', label: 'All' },
+              ...(sites.data ?? []).map((s) => ({ value: s.id, label: s.name })),
+            ]}
+          />
 
           <div className="mx-1 h-5 w-px bg-border" />
 
@@ -606,35 +598,5 @@ export function TimesheetsPage() {
         </Dialog>
       </div>
     </TooltipProvider>
-  );
-}
-
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  width,
-  children,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  width: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-1.5 rounded-lg border bg-background pl-2.5">
-      <span className="text-xs text-muted-foreground">{label}:</span>
-      <Select value={value} onValueChange={(v) => onChange(v ?? 'all')}>
-        <SelectTrigger
-          size="sm"
-          aria-label={`Filter by ${label.toLowerCase()}`}
-          className={cn('border-0 bg-transparent shadow-none', width)}
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>{children}</SelectContent>
-      </Select>
-    </div>
   );
 }
