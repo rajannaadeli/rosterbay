@@ -2,6 +2,16 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-14 — UI polish pass 2 (Roster board & Workers)
+
+- **Initials avatars, no image pipeline** — one `UserAvatar` (web + mobile) renders deterministic initials on a name-hashed 8-tone *muted* palette (slate/steel/teal/sand/clay/mauve/denim/taupe), 4 sizes. UI-only: the seed's `avatar_url` dicebear column is simply no longer read (no schema change); every surface uses `UserAvatar`. *Why:* the doodle faces were the loudest "generated demo" tell; the palette avoids semantic green/amber/red so status stays unambiguous.
+- **`userInitials` kept private** — not exported (react-refresh fast-refresh rule), mirroring the earlier map-markers reasoning without a lint override.
+- **`formatShiftRange()` in the shared format util** — compact chip times (`6am–2pm`, `2–10pm`, `10pm–6am`) that never wrap; full `formatACST` times remain in popovers/drawers/expanded panels. Mirrored in both apps.
+- **`FilterChip` is the one labeled filter** — Timesheets' bespoke inline `FilterSelect` was deleted and re-pointed at the shared component; Workers + roster panel use it (roster uses a segmented control instead — two roles, one tap, per §1.1). Labeled *form* selects (create-shift role, cert-type) are left as-is; the rule targets unlabeled *filter* dropdowns.
+- **Roster grid: injected sticky geometry, not a table** — CSS grid with `position: sticky` on the site column (z-10) and day-header row (z-20, corner z-30) inside the scroll container; uniform 116px cells cap at 3 chips + a Popover `+N more`; site badges (`N shifts` / `N unfilled`) are pure display math off the already-loaded week data (no new query).
+- **Live drag eligibility** — `onDragOver` runs the existing pure `checkAssignment()` for the hovered shift only (verdict `block` → red ring, else teal), painted before drop; the drop still shows the full conflict popover unchanged. Warn (38h) paints teal since it's assignable.
+- **Workers filtering moved client-side** — role + compliance are page state (so stat-segment clicks and FilterChips drive one source), replacing TanStack `columnFilters`; the merged Worker column folds job title into its search accessor so global search still matches designation. pageSize 25 keeps all 14 on one page.
+
 ## 2026-07-12 — UI polish pass (production-grade interface)
 
 - **New primitives, no external ports** — installed shadcn `alert`, `tabs`, `sonner` and `@dnd-kit/sortable` via CLI; every pattern (drawer, tabs, stat strip, command entity-search) built fresh from these in-repo primitives, nothing copied from WhiteFleet or elsewhere. *Why:* the pass forbids external component sourcing; sonner is the shadcn-official toast and dnd-kit was already in the repo for the roster.
