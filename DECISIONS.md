@@ -2,6 +2,15 @@
 
 Format: `## YYYY-MM-DD` heading per day; one `- **topic** — decision. *Why:* reason.` bullet per decision. Newest day first.
 
+## 2026-07-14 — Mobile UI pass (dark mode + instant clock + Today/Schedule)
+
+- **Instant clock in/out** — `useClockIn`/`useClockOut` are now optimistic: `onMutate` flips the shift to `in_progress`/writes a synthetic entry (server-identical flags via `computeClockInFlags`) into the cache on tap, so the screen becomes the in-shift view immediately; rollback on error, `onSettled` invalidate reconciles. *Why:* the multi-step clock-in write (orphan cleanup → insert → shift update → template copy) took 5–10s; the worker must never wait on the server to feel clocked in.
+- **Dark mode** — added `.dark:root` warm-Stone token block in `global.css` + `NAV_THEME.dark`; preference persisted via `expo-secure-store` in `lib/theme-mode.tsx` (hydrated before first paint to avoid a theme flash), toggled from the account sheet. NativeWind `darkMode: 'class'` drives className tokens automatically. *Why:* user request; overrides the earlier "dark deliberately unthemed" note.
+- **Semantic hues in dark** — dark palette lifts teal (`#0F766E`→`#2DC2B2`) and the status green/amber/red for legibility on near-black, but each keeps its meaning. `lib/colors.ts` is the hex mirror (`useColors()`) for the places className can't reach — Phosphor `color=` props and SVG strokes. *Why:* spec §6's color *law is about which hue means what*; luminance must adapt for contrast, and icon color props need a JS palette.
+- **Account sheet** — the header avatar opens a bottom sheet (guide §3.6) holding the Light/Dark segmented toggle + sign out, rather than a settings screen. *Why:* keeps the worker anchored; no new nav destination (scope).
+- **Today as hub** — greeting header (time-of-day + first name), hero next-shift card, one prominent Clock In/Out pinned to the thumb zone with success/impact haptics (`expo-haptics`, guarded off web) and pull-to-refresh. *Why:* guide §3.1/§3.5 — one unmissable primary action; hub is the only multi-purpose screen.
+- **Scope of this pass** — Today, Schedule, header, tab bar, and the shared placeholder/demo-banner are fully dark-ready; Offers/Wallet/notifications/shift-detail adapt automatically for className tokens but still carry a few hardcoded icon hexes (next pass). *Why:* user scoped "today and schedule first."
+
 ## 2026-07-14 — UI polish pass 2 (Roster board & Workers)
 
 - **Initials avatars, no image pipeline** — one `UserAvatar` (web + mobile) renders deterministic initials on a name-hashed 8-tone *muted* palette (slate/steel/teal/sand/clay/mauve/denim/taupe), 4 sizes. UI-only: the seed's `avatar_url` dicebear column is simply no longer read (no schema change); every surface uses `UserAvatar`. *Why:* the doodle faces were the loudest "generated demo" tell; the palette avoids semantic green/amber/red so status stays unambiguous.
