@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 /*
- * RosterBay design tokens — spec §6 is law. Same six colors as the web admin
- * console (Stone scale + teal accent + semantic green/amber/red), expressed as
- * HSL triplets for the react-native-reusables variables. Light mode is
- * canonical; dark resolves to the same values on purpose.
+ * RosterBay design tokens — spec §6. Same six colors as the web admin console
+ * (Stone scale + teal accent + semantic green/amber/red), expressed as HSL
+ * triplets for the react-native-reusables variables. Dark mode is a warm-Stone
+ * inversion (kept in the same hue family) with the teal accent lifted for
+ * contrast — the semantic status hues keep their meaning.
  */
 @layer base {
   :root {
@@ -41,5 +42,29 @@
     --chart-3: 32 93% 44%;
     --chart-4: 0 72% 51%;
     --chart-5: 25 5% 45%;
+  }
+
+  .dark:root {
+    --background: 24 11% 7%;
+    /* warm near-black — Stone 950 pushed a touch darker */
+    --foreground: 40 12% 92%;
+    /* soft warm white */
+    --card: 24 8% 11%;
+    --card-foreground: 40 12% 92%;
+    --popover: 24 8% 11%;
+    --popover-foreground: 40 12% 92%;
+    --primary: 173 58% 45%;
+    /* teal lifted for contrast on dark surfaces */
+    --primary-foreground: 24 30% 8%;
+    --secondary: 24 6% 16%;
+    --secondary-foreground: 40 12% 92%;
+    --muted: 24 6% 15%;
+    --muted-foreground: 30 6% 62%;
+    --accent: 24 6% 16%;
+    --accent-foreground: 40 12% 92%;
+    --destructive: 0 72% 58%;
+    --border: 30 5% 20%;
+    --input: 30 5% 22%;
+    --ring: 173 58% 45%;
   }
 }

@@ -8,7 +8,10 @@ import { ThemeProvider } from 'expo-router/react-navigation';
 import { PortalHost } from '@rn-primitives/portal';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
+
+import { ThemeModeProvider } from '@/lib/theme-mode';
 
 import {
   PlusJakartaSans_400Regular,
@@ -46,24 +49,34 @@ export default function RootLayout() {
     return null;
   }
 
-  // Light mode is canonical for RosterBay — the dark nav theme resolves to the
-  // same light tokens on purpose.
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider value={NAV_THEME.light}>
-          <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="sign-in" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="notifications" />
-            <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
-          </Stack>
-          <PortalHost />
-        </ThemeProvider>
+        <ThemeModeProvider>
+          <ThemedShell />
+        </ThemeModeProvider>
       </QueryClientProvider>
     </View>
+  );
+}
+
+/** Nav chrome + status bar that track the live color scheme. */
+function ThemedShell() {
+  const { colorScheme } = useColorScheme();
+  const dark = colorScheme === 'dark';
+
+  return (
+    <ThemeProvider value={dark ? NAV_THEME.dark : NAV_THEME.light}>
+      <StatusBar style={dark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="sign-in" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
+      </Stack>
+      <PortalHost />
+    </ThemeProvider>
   );
 }
 

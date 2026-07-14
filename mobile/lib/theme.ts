@@ -1,9 +1,8 @@
 import { DarkTheme, DefaultTheme, type Theme } from 'expo-router/react-navigation';
 
 /**
- * RosterBay tokens (spec §6) for react-navigation chrome. Light mode is
- * canonical; the dark entry reuses the light values on purpose — dark mode is
- * deliberately not themed in this phase.
+ * RosterBay tokens (spec §6) for react-navigation chrome. The dark entry is a
+ * warm-Stone inversion mirroring global.css `.dark:root`.
  */
 export const THEME = {
   light: {
@@ -32,6 +31,14 @@ export const THEME = {
     chart4: 'hsl(0 72% 51%)',
     chart5: 'hsl(25 5% 45%)',
   },
+  dark: {
+    background: 'hsl(24 11% 7%)',
+    foreground: 'hsl(40 12% 92%)',
+    card: 'hsl(24 8% 11%)',
+    primary: 'hsl(173 58% 45%)',
+    border: 'hsl(30 5% 20%)',
+    destructive: 'hsl(0 72% 58%)',
+  },
 };
 
 export const NAV_THEME: Record<'light' | 'dark', Theme> = {
@@ -49,12 +56,12 @@ export const NAV_THEME: Record<'light' | 'dark', Theme> = {
   dark: {
     ...DarkTheme,
     colors: {
-      background: THEME.light.background,
-      border: THEME.light.border,
-      card: THEME.light.card,
-      notification: THEME.light.destructive,
-      primary: THEME.light.primary,
-      text: THEME.light.foreground,
+      background: THEME.dark.background,
+      border: THEME.dark.border,
+      card: THEME.dark.card,
+      notification: THEME.dark.destructive,
+      primary: THEME.dark.primary,
+      text: THEME.dark.foreground,
     },
   },
 };

@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useSession } from '@/features/auth/hooks';
-import { distanceMeters } from '@/lib/compliance';
+import { computeClockInFlags, distanceMeters } from '@/lib/compliance';
 import type { Tables } from '@/lib/database.types';
 import {
   clockIn,
@@ -112,19 +112,99 @@ function useInvalidateToday() {
   };
 }
 
+type Entry = Tables<'time_entries'>;
+type ShiftRow = Tables<'shifts'>;
+
+/**
+ * Build the entry the worker should see the instant they tap Clock In — same
+ * flags/geofence the server will compute, so nothing shifts under them when the
+ * real row lands. The id is a temp sentinel; onSettled swaps in the real row.
+ */
+function optimisticEntry(input: ClockInInput): Entry {
+  const { flags, withinGeofence, status } = computeClockInFlags({
+    shiftStartsAt: input.shift.starts_at,
+    clockInAt: new Date(),
+    distanceM: input.distanceM,
+    geofenceRadiusM: input.site.geofence_radius_m,
+  });
+  const now = new Date().toISOString();
+  return {
+    id: `optimistic-${input.shift.id}`,
+    company_id: input.shift.company_id,
+    shift_id: input.shift.id,
+    worker_id: input.shift.worker_id!,
+    clock_in_at: now,
+    clock_out_at: null,
+    in_lat: input.coords?.lat ?? null,
+    in_lng: input.coords?.lng ?? null,
+    out_lat: null,
+    out_lng: null,
+    distance_from_site_m: input.distanceM,
+    within_geofence: withinGeofence,
+    flags,
+    status,
+    reviewed_by: null,
+    reviewed_at: null,
+    created_at: now,
+  };
+}
+
+/**
+ * Clock in feels instant: we flip the shift to in_progress and drop an
+ * optimistic entry into the cache on tap, so the screen becomes the in-shift
+ * view immediately even while the multi-step write runs. Rolls back on error.
+ */
 export function useClockIn() {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateToday();
   return useMutation({
     mutationFn: (input: ClockInInput) => clockIn(input),
-    onSuccess: invalidate,
+    onMutate: async (input) => {
+      const shiftKey = ['today', 'shift', input.shift.worker_id ?? ''];
+      const entryKey = ['today', 'entry', input.shift.id];
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: shiftKey }),
+        queryClient.cancelQueries({ queryKey: entryKey }),
+      ]);
+      const prevShift = queryClient.getQueryData<ShiftRow | null>(shiftKey);
+      const prevEntry = queryClient.getQueryData<Entry | null>(entryKey);
+      queryClient.setQueryData(entryKey, optimisticEntry(input));
+      queryClient.setQueryData<ShiftRow | null>(shiftKey, (s) =>
+        s ? { ...s, status: 'in_progress' } : s
+      );
+      return { shiftKey, entryKey, prevShift, prevEntry };
+    },
+    onError: (_err, _input, ctx) => {
+      if (!ctx) return;
+      queryClient.setQueryData(ctx.shiftKey, ctx.prevShift);
+      queryClient.setQueryData(ctx.entryKey, ctx.prevEntry);
+    },
+    onSettled: invalidate,
   });
 }
 
+/**
+ * Clock out is likewise optimistic: end the entry and complete the shift in the
+ * cache on tap so the button never sits on a spinner waiting for the round trip.
+ */
 export function useClockOut() {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateToday();
   return useMutation({
     mutationFn: (input: ClockOutInput) => clockOut(input),
-    onSuccess: invalidate,
+    onMutate: async (input) => {
+      const entryKey = ['today', 'entry', input.shiftId];
+      await queryClient.cancelQueries({ queryKey: entryKey });
+      const prevEntry = queryClient.getQueryData<Entry | null>(entryKey);
+      queryClient.setQueryData<Entry | null>(entryKey, (e) =>
+        e ? { ...e, clock_out_at: new Date().toISOString() } : e
+      );
+      return { entryKey, prevEntry };
+    },
+    onError: (_err, _input, ctx) => {
+      if (ctx) queryClient.setQueryData(ctx.entryKey, ctx.prevEntry);
+    },
+    onSettled: invalidate,
   });
 }
 
