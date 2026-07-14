@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useMyShifts, useSites } from '@/features/schedule/hooks';
 import type { Tables } from '@/lib/database.types';
-import { formatACST } from '@/lib/format';
+import { formatACST, formatShiftRange } from '@/lib/format';
 
 type Shift = Tables<'shifts'>;
 
@@ -49,8 +49,7 @@ function ShiftRow({ shift, siteName, muted }: { shift: Shift; siteName: string; 
           {siteName}
         </Text>
         <Text className="text-xs tabular-nums text-muted-foreground">
-          {formatACST(shift.starts_at, 'h:mma').toLowerCase()}–
-          {formatACST(shift.ends_at, 'h:mma').toLowerCase()}
+          {formatShiftRange(shift.starts_at, shift.ends_at)}
           {shift.role_required ? ` · ${shift.role_required}` : ''}
         </Text>
       </View>
