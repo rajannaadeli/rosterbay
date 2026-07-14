@@ -123,7 +123,7 @@ export default function AddDocumentScreen() {
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
                   className={cn(
-                    'flex-row items-center justify-between rounded border border-border bg-card px-3 py-2.5',
+                    'flex-row items-center justify-between rounded-[14px] border border-border bg-card px-3.5 py-3',
                     selected && 'border-primary bg-primary/5'
                   )}
                   onPress={() => chooseCertType(certType.id)}>
@@ -182,8 +182,14 @@ export default function AddDocumentScreen() {
 
         {formError && <Text className="text-sm text-danger">{formError}</Text>}
 
-        <Button size="lg" disabled={addCert.isPending || profile.isPending} onPress={submit}>
-          <Text>{addCert.isPending ? 'Uploading…' : 'Add to wallet'}</Text>
+        <Button
+          size="lg"
+          className="h-14 rounded-[16px]"
+          disabled={addCert.isPending || profile.isPending}
+          onPress={submit}>
+          <Text className="text-base font-semibold">
+            {addCert.isPending ? 'Uploading…' : 'Add to wallet'}
+          </Text>
         </Button>
       </ScrollView>
     </View>

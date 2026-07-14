@@ -1,11 +1,9 @@
 import { router } from 'expo-router';
-import { LightningIcon } from 'phosphor-react-native';
+import { CalendarCheckIcon, LightningIcon } from 'phosphor-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
-
-import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -56,11 +54,16 @@ export default function SignInScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1">
         <View className="flex-1 justify-center gap-8 px-6">
-          <View className="items-center gap-2">
-            <Wordmark />
-            <Text className="text-center text-sm text-muted-foreground">
-              Roster, verify, and track your field workforce.
-            </Text>
+          <View className="items-center gap-4">
+            <View className="size-16 items-center justify-center rounded-[20px] bg-primary shadow-sm">
+              <CalendarCheckIcon size={32} weight="fill" color={c.onPrimary} />
+            </View>
+            <View className="items-center gap-1.5">
+              <Text className="text-3xl font-bold tracking-tight text-foreground">RosterBay</Text>
+              <Text className="text-center text-sm text-muted-foreground">
+                Roster, verify, and track your field workforce.
+              </Text>
+            </View>
           </View>
 
           <View className="gap-4">
@@ -97,21 +100,25 @@ export default function SignInScreen() {
           <View className="gap-3">
             <Button
               size="lg"
+              className="h-14 rounded-[16px]"
               disabled={signIn.isPending}
               onPress={() => submit({ email, password })}>
-              <Text>{signIn.isPending ? 'Signing in…' : 'Sign in'}</Text>
+              <Text className="text-base font-semibold">
+                {signIn.isPending ? 'Signing in…' : 'Sign in'}
+              </Text>
             </Button>
             <Button
               size="lg"
               variant="outline"
+              className="h-14 rounded-[16px]"
               disabled={signIn.isPending}
               onPress={() => {
                 setEmail(DEMO_WORKER_EMAIL);
                 setPassword(DEMO_PASSWORD);
                 submit({ email: DEMO_WORKER_EMAIL, password: DEMO_PASSWORD });
               }}>
-              <LightningIcon size={18} weight="duotone" color={c.primary} />
-              <Text>Use demo worker (Liam)</Text>
+              <LightningIcon size={18} weight="fill" color={c.primary} />
+              <Text className="font-medium">Use demo worker (Liam)</Text>
             </Button>
           </View>
         </View>
