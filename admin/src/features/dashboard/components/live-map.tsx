@@ -1,5 +1,6 @@
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
+import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
 import type { Tables } from '@/lib/database.types';
 import type { TimesheetRow } from '@/features/timesheets/hooks';
 import { formatACST } from '@/lib/format';
@@ -23,45 +24,48 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
   ];
 
   return (
-    <MapContainer
-      center={[-34.928, 138.59]}
-      zoom={11}
-      className="z-0 h-full w-full"
-      scrollWheelZoom={false}
-    >
-      <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
-      <FitBounds points={points} maxZoom={13} />
-      <SiteLabelVisibility />
-      {sites.map((site) => (
-        <Marker key={site.id} position={[site.lat, site.lng]} icon={siteIcon(site.name)}>
-          <Popup>
-            <span className="text-sm font-medium">{site.name}</span>
-            <br />
-            <span className="text-xs">{site.client_name}</span>
-          </Popup>
-        </Marker>
-      ))}
-      {onSite.map((entry) =>
-        entry.in_lat !== null && entry.in_lng !== null ? (
-          <Marker
-            key={entry.id}
-            position={[entry.in_lat, entry.in_lng]}
-            icon={workerDotIcon}
-            zIndexOffset={1000}
-          >
+    <FullscreenMapWrapper className="h-full w-full">
+      <MapContainer
+        center={[-34.928, 138.59]}
+        zoom={11}
+        className="z-0 h-full w-full"
+        scrollWheelZoom={true}
+      >
+        <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+        <FitBounds points={points} maxZoom={13} />
+        <SiteLabelVisibility />
+        <FullscreenInvalidate />
+        {sites.map((site) => (
+          <Marker key={site.id} position={[site.lat, site.lng]} icon={siteIcon(site.name)}>
             <Popup>
-              <span className="text-sm font-medium">
-                {workerNames[entry.worker_id] ?? 'Worker'}
-              </span>
+              <span className="text-sm font-medium">{site.name}</span>
               <br />
-              <span className="text-xs">
-                {siteNames[entry.site_id] ?? 'Site'} · on site since{' '}
-                {formatACST(entry.clock_in_at, 'h:mm a')}
-              </span>
+              <span className="text-xs">{site.client_name}</span>
             </Popup>
           </Marker>
-        ) : null,
-      )}
-    </MapContainer>
+        ))}
+        {onSite.map((entry) =>
+          entry.in_lat !== null && entry.in_lng !== null ? (
+            <Marker
+              key={entry.id}
+              position={[entry.in_lat, entry.in_lng]}
+              icon={workerDotIcon}
+              zIndexOffset={1000}
+            >
+              <Popup>
+                <span className="text-sm font-medium">
+                  {workerNames[entry.worker_id] ?? 'Worker'}
+                </span>
+                <br />
+                <span className="text-xs">
+                  {siteNames[entry.site_id] ?? 'Site'} · on site since{' '}
+                  {formatACST(entry.clock_in_at, 'h:mm a')}
+                </span>
+              </Popup>
+            </Marker>
+          ) : null,
+        )}
+      </MapContainer>
+    </FullscreenMapWrapper>
   );
 }

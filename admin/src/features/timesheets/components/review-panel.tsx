@@ -1,6 +1,8 @@
 import { Clock, MapPin, Question } from '@phosphor-icons/react';
 import { Circle, MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet';
 
+import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { LATE_THRESHOLD_MIN, MISSING_CLOCK_OUT_GRACE_H } from '@/lib/compliance';
@@ -63,14 +65,15 @@ export function ReviewPanel({ row, site, busy, onReview }: ReviewPanelProps) {
       <div className="relative">
         {hasPoint ? (
           <>
-            <div className="h-[260px] overflow-hidden rounded-lg border">
+            <FullscreenMapWrapper className="h-[260px] overflow-hidden rounded-lg border">
               <MapContainer
                 center={[site.lat, site.lng]}
                 zoom={15}
                 className="z-0 h-full w-full"
-                scrollWheelZoom={false}
+                scrollWheelZoom={true}
               >
                 <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+                <FullscreenInvalidate />
                 <FitBounds
                   points={[
                     [site.lat, site.lng],
@@ -89,15 +92,15 @@ export function ReviewPanel({ row, site, busy, onReview }: ReviewPanelProps) {
                   pathOptions={{ color: '#DC2626', dashArray: '6 6', weight: 2 }}
                 />
               </MapContainer>
-            </div>
-            <span
-              style={{ zIndex: 400 }}
-              className="absolute bottom-2 left-2 rounded-lg border bg-card/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur"
-            >
-              <span className={row.within_geofence === false ? 'text-danger' : 'text-foreground'}>
-                {Math.round(Number(row.distance_from_site_m ?? 0))} m from site
+              <span
+                style={{ zIndex: 999 }}
+                className="absolute bottom-3 left-3 rounded-lg border bg-card/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur"
+              >
+                <span className={row.within_geofence === false ? 'text-danger' : 'text-foreground'}>
+                  {Math.round(Number(row.distance_from_site_m ?? 0))} m from site
+                </span>
               </span>
-            </span>
+            </FullscreenMapWrapper>
           </>
         ) : (
           <div className="flex h-[260px] items-center justify-center rounded-lg border text-sm text-muted-foreground">

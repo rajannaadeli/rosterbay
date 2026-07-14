@@ -1,7 +1,11 @@
+import { Crosshair } from '@phosphor-icons/react';
 import type { Marker as LeafletMarker } from 'leaflet';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Circle, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 
+import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
+
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -32,11 +36,43 @@ function KeepPinInView({ lat, lng }: { lat: number; lng: number }) {
 }
 
 export function GeofenceEditor({ value, onChange, siteName = '', height = 240 }: GeofenceEditorProps) {
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const useMyLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setLocating(true);
+    setLocError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        onChange({
+          ...value,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocating(false);
+      },
+      (error) => {
+        setLocError(
+          error.code === error.PERMISSION_DENIED
+            ? 'Location access denied — enable it in your browser settings.'
+            : 'Could not determine your location. Try again.',
+        );
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  }, [onChange, value]);
+
   return (
     <div className="z-0 flex flex-col gap-3">
-      <div className="overflow-hidden rounded-lg border" style={{ height }}>
+      <FullscreenMapWrapper className="overflow-hidden rounded-lg border" style={{ height }}>
         <MapContainer center={[value.lat, value.lng]} zoom={15} className="z-0 h-full w-full">
           <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+          <FullscreenInvalidate />
           <Marker
             position={[value.lat, value.lng]}
             draggable
@@ -51,7 +87,25 @@ export function GeofenceEditor({ value, onChange, siteName = '', height = 240 }:
           <Circle center={[value.lat, value.lng]} radius={value.radius} pathOptions={GEOFENCE_PATH_OPTIONS} />
           <KeepPinInView lat={value.lat} lng={value.lng} />
         </MapContainer>
-      </div>
+
+        {/* "Use my location" button — top-right, below zoom controls */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={useMyLocation}
+          disabled={locating}
+          style={{ zIndex: 1000 }}
+          className="absolute top-3 right-3 gap-1.5 bg-card shadow-sm"
+        >
+          <Crosshair size={14} weight="bold" className={locating ? 'animate-spin' : ''} />
+          {locating ? 'Locating…' : 'Use my location'}
+        </Button>
+      </FullscreenMapWrapper>
+
+      {locError && (
+        <p className="text-xs text-danger">{locError}</p>
+      )}
 
       <div className="flex items-center gap-3">
         <Label htmlFor="geofence-radius" className="shrink-0 text-xs text-muted-foreground">

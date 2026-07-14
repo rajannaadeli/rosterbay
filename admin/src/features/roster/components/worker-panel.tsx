@@ -26,13 +26,13 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
       {...attributes}
       {...listeners}
       className={cn(
-        'group flex h-14 cursor-grab items-center gap-2 rounded-lg border bg-card px-2 select-none active:cursor-grabbing',
+        'group flex h-14 cursor-grab items-center gap-2 rounded-lg border bg-card pl-1 pr-2 select-none active:cursor-grabbing mx-0.5',
         isDragging && 'opacity-40',
       )}
     >
       <DotsSixVertical
         size={16}
-        className="shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/60"
+        className="shrink-0 text-muted-foreground/60 transition-colors group-hover:text-muted-foreground"
         aria-hidden
       />
       <UserAvatar name={worker.full_name} size="md" />

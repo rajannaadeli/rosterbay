@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type Row,
   type SortingState,
 } from '@tanstack/react-table';
 import { Fragment, useMemo, useState } from 'react';
@@ -82,6 +83,72 @@ function variance(row: TimesheetRow): number | null {
 function weekRange(offset: number) {
   const days = weekDays(acstWeekStart(offset));
   return { from: formatACST(days[0]!, 'yyyy-MM-dd'), to: formatACST(days[6]!, 'yyyy-MM-dd') };
+}
+
+/**
+ * Per-row action buttons — owns its own useReviewEntry so that clicking
+ * Approve on one row doesn't force a columns-memo invalidation (which
+ * would re-mount every cell and flash all hidden approve buttons).
+ */
+function RowActions({ row }: { row: Row<TimesheetRow> }) {
+  const r = row.original;
+  const reviewable = r.effective_status === 'pending' || r.effective_status === 'flagged';
+  const review = useReviewEntry();
+
+  if (!reviewable) return null;
+  return (
+    <div className="flex items-center justify-end gap-1">
+      {r.effective_status === 'flagged' && !row.getIsExpanded() && (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-warning hover:text-warning"
+          onClick={(e) => {
+            e.stopPropagation();
+            row.toggleExpanded(true);
+          }}
+        >
+          Review
+        </Button>
+      )}
+      <Button
+        size="sm"
+        variant="ghost"
+        className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        disabled={review.isPending}
+        onClick={(e) => {
+          e.stopPropagation();
+          review.mutate({ id: r.id, status: 'approved' });
+        }}
+      >
+        <CheckCircle aria-hidden />
+        Approve
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              aria-label="More actions"
+              onClick={(e) => e.stopPropagation()}
+            />
+          }
+        >
+          <DotsThree size={16} aria-hidden />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => review.mutate({ id: r.id, status: 'rejected' })}
+          >
+            Reject entry
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }
 
 export function TimesheetsPage() {
@@ -278,67 +345,10 @@ export function TimesheetsPage() {
         header: '',
         enableSorting: false,
         meta: { className: 'w-28 text-right' },
-        cell: ({ row }) => {
-          const r = row.original;
-          const reviewable = r.effective_status === 'pending' || r.effective_status === 'flagged';
-          if (!reviewable) return null;
-          return (
-            <div className="flex items-center justify-end gap-1">
-              {r.effective_status === 'flagged' && !row.getIsExpanded() && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-warning hover:text-warning"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    row.toggleExpanded(true);
-                  }}
-                >
-                  Review
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant="ghost"
-                className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                disabled={review.isPending}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  review.mutate({ id: r.id, status: 'approved' });
-                }}
-              >
-                <CheckCircle aria-hidden />
-                Approve
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                      aria-label="More actions"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  }
-                >
-                  <DotsThree size={16} aria-hidden />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => review.mutate({ id: r.id, status: 'rejected' })}
-                  >
-                    Reject entry
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
+        cell: ({ row }) => <RowActions row={row} />,
       },
     ],
-    [workerNames, siteNames, review],
+    [workerNames, siteNames],
   );
 
   const table = useReactTable({

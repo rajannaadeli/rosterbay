@@ -255,7 +255,7 @@ export function DashboardPage() {
               <Skeleton className="h-full w-full" />
             )}
             <div
-              style={{ zIndex: 400 }}
+              style={{ zIndex: 40 }}
               className="pointer-events-none absolute top-3 right-3 flex items-center gap-1.5 rounded-lg border bg-card/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur"
             >
               <span className="relative flex size-2">
