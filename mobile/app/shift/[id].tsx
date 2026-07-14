@@ -8,6 +8,7 @@ import {
 } from 'phosphor-react-native';
 import { ScrollView, View } from 'react-native';
 
+import { ScreenHeader } from '@/components/screen-header';
 import { StatusPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -30,7 +31,8 @@ export default function ShiftDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: true, title: 'Shift details' }} />
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScreenHeader title="Shift details" />
       {isPending || !shift.data || !site.data ? (
         <View className="gap-3 p-4">
           <Skeleton className="h-52 rounded-[20px]" />
@@ -38,7 +40,7 @@ export default function ShiftDetailScreen() {
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 p-4 pb-10">
-          <View className="gap-4 rounded-[20px] border border-border bg-card p-5 shadow-sm">
+          <View className="gap-4 rounded-[20px] bg-card p-5 shadow-sm">
             <View className="flex-row items-start justify-between gap-2">
               <View className="min-w-0 flex-1 gap-1">
                 <Text className="text-2xl font-bold tracking-tight" numberOfLines={2}>
@@ -68,14 +70,14 @@ export default function ShiftDetailScreen() {
               )}
             </View>
             {shift.data.notes && !shift.data.notes.startsWith('OVERRIDE:') && (
-              <Text className="rounded-[12px] border border-border bg-muted/60 px-3 py-2.5 text-xs text-muted-foreground">
+              <Text className="rounded-[12px] bg-muted px-3 py-2.5 text-xs text-muted-foreground">
                 {shift.data.notes}
               </Text>
             )}
           </View>
 
           {site.data.required_cert_type_ids.length > 0 && (
-            <View className="gap-2.5 rounded-[18px] border border-border bg-card p-5 shadow-sm">
+            <View className="gap-2.5 rounded-[18px] bg-card p-5 shadow-sm">
               <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Requirements
               </Text>
@@ -101,7 +103,7 @@ export default function ShiftDetailScreen() {
           )}
 
           {(templates.data?.length ?? 0) > 0 && (
-            <View className="gap-3 rounded-[18px] border border-border bg-card p-5 shadow-sm">
+            <View className="gap-3 rounded-[18px] bg-card p-5 shadow-sm">
               <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Tasks on this shift
               </Text>

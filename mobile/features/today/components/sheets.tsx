@@ -13,7 +13,7 @@ function SheetShell({ children, onClose }: { children: React.ReactNode; onClose:
   return (
     <Modal transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable className="flex-1 bg-black/50" accessibilityLabel="Dismiss" onPress={onClose} />
-      <View className="gap-4 rounded-t-[20px] border-t border-border bg-card px-5 pb-9 pt-3">
+      <View className="gap-4 rounded-t-[24px] bg-card px-5 pb-9 pt-3 shadow-lg">
         <View className="h-1 w-10 self-center rounded-full bg-border" />
         {children}
       </View>
@@ -108,7 +108,7 @@ export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: Repo
       <Pressable
         accessibilityRole="button"
         onPress={() => void attachPhoto()}
-        className="flex-row items-center gap-2 self-start rounded-lg border border-border px-3 py-2 active:bg-muted">
+        className="flex-row items-center gap-2 self-start rounded-[12px] bg-muted px-3 py-2.5 active:opacity-80">
         {photo ? (
           <Image
             source={{ uri: `data:${photo.mimeType};base64,${photo.base64}` }}

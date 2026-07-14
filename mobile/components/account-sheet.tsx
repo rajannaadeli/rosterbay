@@ -27,7 +27,7 @@ export function AccountSheet({ name, subtitle, onClose }: AccountSheetProps) {
   return (
     <Modal transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable className="flex-1 bg-black/50" accessibilityLabel="Dismiss" onPress={onClose} />
-      <View className="gap-5 rounded-t-[20px] border-t border-border bg-card px-5 pb-10 pt-3">
+      <View className="gap-5 rounded-t-[24px] bg-card px-5 pb-10 pt-3 shadow-lg">
         <View className="h-1 w-10 self-center rounded-full bg-border" />
 
         <View className="flex-row items-center gap-3">
@@ -70,7 +70,7 @@ export function AccountSheet({ name, subtitle, onClose }: AccountSheetProps) {
             onClose();
             signOut.mutate(undefined, { onSuccess: () => router.replace('/sign-in') });
           }}
-          className="flex-row items-center gap-3 rounded-[14px] border border-border px-4 py-3.5 active:bg-muted">
+          className="flex-row items-center gap-3 rounded-[14px] bg-muted px-4 py-3.5 active:opacity-80">
           <SignOutIcon size={18} color={c.mutedForeground} />
           <Text className="text-sm font-medium">Sign out of the demo</Text>
         </Pressable>

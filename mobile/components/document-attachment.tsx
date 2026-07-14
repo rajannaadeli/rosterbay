@@ -92,7 +92,7 @@ export function DocumentAttachment({
 
   return (
     <View className="gap-2">
-      <View className="flex-row items-center gap-3 rounded-lg border border-border bg-card p-3">
+      <View className="flex-row items-center gap-3 rounded-[14px] bg-card p-3 shadow-sm">
         <Image
           source={{ uri: `data:${image.mimeType};base64,${image.base64}` }}
           className="size-14 rounded-lg bg-muted"

@@ -5,6 +5,7 @@ import { FlatList, RefreshControl, View } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 
 import { EmptyState } from '@/components/empty-state';
+import { ScreenHeader } from '@/components/screen-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useMarkAllNotificationsRead, useMyNotifications } from '@/features/offers/hooks';
@@ -32,7 +33,8 @@ export default function NotificationsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: true, title: 'Notifications' }} />
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScreenHeader title="Notifications" />
       {notifications.isPending ? (
         <View className="gap-2 p-4">
           {Array.from({ length: 5 }, (_, i) => (

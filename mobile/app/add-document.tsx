@@ -7,6 +7,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { z } from 'zod';
 
 import { DocumentAttachment } from '@/components/document-attachment';
+import { ScreenHeader } from '@/components/screen-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -110,7 +111,8 @@ export default function AddDocumentScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Stack.Screen options={{ headerShown: true, title: 'Add document' }} />
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScreenHeader title="Add document" />
       <ScrollView contentContainerClassName="gap-5 p-4 pb-10">
         <View className="gap-2">
           <Label nativeID="cert-type-label">Certificate type</Label>
@@ -123,8 +125,8 @@ export default function AddDocumentScreen() {
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
                   className={cn(
-                    'flex-row items-center justify-between rounded-[14px] border border-border bg-card px-3.5 py-3',
-                    selected && 'border-primary bg-primary/5'
+                    'flex-row items-center justify-between rounded-[14px] bg-muted px-3.5 py-3',
+                    selected && 'bg-primary/10'
                   )}
                   onPress={() => chooseCertType(certType.id)}>
                   <View>
