@@ -1,10 +1,17 @@
-import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
-import { CaretLeft, CaretRight, Plus } from '@phosphor-icons/react';
+import {
+  DndContext,
+  DragOverlay,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
+import { CaretLeft, CaretRight, MegaphoneSimple } from '@phosphor-icons/react';
 import { addDays } from 'date-fns';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useCertTypes } from '@/features/certs/hooks';
 import { BroadcastDialog } from '@/features/offers/components/broadcast-dialog';
 import { eligibleWorkers } from '@/features/offers/eligibility';
@@ -12,7 +19,7 @@ import { useBroadcastOffer, useOffersRealtime, useOpenOffers } from '@/features/
 import { useCompany } from '@/features/company/hooks';
 import { useShiftsRealtime } from '@/features/realtime/hooks';
 import { checkAssignment } from '@/features/roster/conflict-engine';
-import { ShiftChip } from '@/features/roster/components/shift-chip';
+import { RosterCell } from '@/features/roster/components/roster-cell';
 import {
   ConflictDialog,
   CreateShiftDialog,
@@ -70,6 +77,8 @@ export function RosterPage() {
   const [createCell, setCreateCell] = useState<{ siteId: string; dateYmd: string } | null>(null);
   const [detailShiftId, setDetailShiftId] = useState<string | null>(null);
   const [broadcastShiftId, setBroadcastShiftId] = useState<string | null>(null);
+  const [unfilledOnly, setUnfilledOnly] = useState(false);
+  const [dragOver, setDragOver] = useState<{ shiftId: string; state: 'ok' | 'block' } | null>(null);
 
   const workerById = useMemo(
     () => new Map((workers.data ?? []).map((w) => [w.id, w])),
@@ -118,21 +127,23 @@ export function RosterPage() {
     return map;
   }, [visibleShifts]);
 
-  const runAssignment = (worker: WorkerRow, shift: Shift) => {
+  const evaluate = (worker: WorkerRow, shift: Shift) => {
     const site = (sites.data ?? []).find((s) => s.id === shift.site_id);
-    if (!site) return;
-
-    const check = checkAssignment({
+    if (!site) return null;
+    return checkAssignment({
       worker: { id: worker.id, full_name: worker.full_name },
       targetShift: shift,
       site: { name: site.name, required_cert_type_ids: site.required_cert_type_ids },
       certTypeNames,
       workerCerts: certsByWorker.get(worker.id) ?? [],
-      workerWeekShifts: visibleShifts.filter(
-        (s) => s.worker_id === worker.id && s.id !== shift.id,
-      ),
+      workerWeekShifts: visibleShifts.filter((s) => s.worker_id === worker.id && s.id !== shift.id),
       siteNamesById,
     });
+  };
+
+  const runAssignment = (worker: WorkerRow, shift: Shift) => {
+    const check = evaluate(worker, shift);
+    if (!check) return;
 
     if (check.verdict === 'ok') {
       assign.mutate({ shiftId: shift.id, workerId: worker.id });
@@ -151,8 +162,21 @@ export function RosterPage() {
     setActiveWorker(worker ?? null);
   };
 
+  // Hovered-cell-only eligibility, painted before drop (§1.4).
+  const onDragOver = (event: DragOverEvent) => {
+    const worker = event.active.data.current?.worker as WorkerRow | undefined;
+    const shift = event.over?.data.current?.shift as Shift | undefined;
+    if (!worker || !shift || (shift.status !== 'open' && shift.status !== 'assigned')) {
+      setDragOver(null);
+      return;
+    }
+    const check = evaluate(worker, shift);
+    setDragOver({ shiftId: shift.id, state: check?.verdict === 'block' ? 'block' : 'ok' });
+  };
+
   const onDragEnd = (event: DragEndEvent) => {
     setActiveWorker(null);
+    setDragOver(null);
     const worker = event.active.data.current?.worker as WorkerRow | undefined;
     const shift = event.over?.data.current?.shift as Shift | undefined;
     if (!worker || !shift) return;
@@ -192,139 +216,170 @@ export function RosterPage() {
   const isPending = shifts.isPending || sites.isPending || workers.isPending;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Roster</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Drag workers onto shifts — compliance is checked before anything saves.
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label="Previous week"
-            onClick={() => setWeekOffset((w) => w - 1)}
-          >
-            <CaretLeft aria-hidden />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)}>
-            Today
-          </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label="Next week"
-            onClick={() => setWeekOffset((w) => w + 1)}
-          >
-            <CaretRight aria-hidden />
-          </Button>
-          <span className="ml-2 text-sm font-medium tabular-nums">
-            {formatACST(days[0]!, 'd MMM')} – {formatACST(days[6]!, 'd MMM yyyy')}
-          </span>
-        </div>
-      </div>
-
-      <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div className="flex items-start gap-4">
-          <WorkerPanel
-            workers={workers.data}
-            isPending={workers.isPending}
-            collapsed={panelCollapsed}
-            onToggleCollapsed={() => setPanelCollapsed((c) => !c)}
-          />
-
-          <div className="min-w-0 flex-1 overflow-x-auto rounded-lg border bg-card">
-            {isPending ? (
-              <div className="flex flex-col gap-2 p-4">
-                {Array.from({ length: 6 }, (_, i) => (
-                  <Skeleton key={i} className="h-16 rounded-lg" />
-                ))}
-              </div>
-            ) : (
-              <div
-                className="grid min-w-[1080px]"
-                style={{ gridTemplateColumns: '150px repeat(7, minmax(130px, 1fr))' }}
-              >
-                <div className="border-b bg-muted/20 px-3 py-2" />
-                {days.map((day) => {
-                  const ymd = formatACST(day, 'yyyy-MM-dd');
-                  const isToday = ymd === todayYmd;
-                  return (
-                    <div
-                      key={ymd}
-                      className={cn(
-                        'border-b border-l bg-muted/20 px-2 py-2 text-center',
-                        isToday && 'bg-primary/5',
-                      )}
-                    >
-                      <p className={cn('text-xs font-semibold', isToday && 'text-primary')}>
-                        {formatACST(day, 'EEE')}
-                      </p>
-                      <p className={cn('text-[11px] text-muted-foreground', isToday && 'text-primary/80')}>
-                        {formatACST(day, 'd MMM')}
-                      </p>
-                    </div>
-                  );
-                })}
-
-                {(sites.data ?? []).map((site) => (
-                  <div key={site.id} className="contents">
-                    <div className="border-b px-3 py-2">
-                      <p className="text-xs font-semibold leading-tight">{site.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{site.client_name}</p>
-                    </div>
-                    {days.map((day) => {
-                      const ymd = formatACST(day, 'yyyy-MM-dd');
-                      const cellShifts = (grid.get(site.id)?.get(ymd) ?? []).sort((a, b) =>
-                        a.starts_at.localeCompare(b.starts_at),
-                      );
-                      const isToday = ymd === todayYmd;
-                      return (
-                        <div
-                          key={ymd}
-                          className={cn(
-                            'group flex min-h-[64px] flex-col gap-1 border-b border-l p-1',
-                            isToday && 'bg-primary/[0.03]',
-                          )}
-                        >
-                          {cellShifts.map((shift) => (
-                            <ShiftChip
-                              key={shift.id}
-                              shift={shift}
-                              worker={shift.worker_id ? workerById.get(shift.worker_id) : undefined}
-                              hasOpenOffer={offerShiftIds.has(shift.id)}
-                              onClick={() => setDetailShiftId(shift.id)}
-                              onBroadcast={() => setBroadcastShiftId(shift.id)}
-                            />
-                          ))}
-                          <button
-                            type="button"
-                            aria-label={`Add shift at ${site.name} on ${formatACST(day, 'EEE d MMM')}`}
-                            onClick={() => setCreateCell({ siteId: site.id, dateYmd: ymd })}
-                            className="flex items-center justify-center rounded-lg py-0.5 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground hover:bg-muted focus-visible:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                          >
-                            <Plus size={13} aria-hidden />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            )}
+    <TooltipProvider delay={200}>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Drag workers onto shifts — compliance is checked before anything saves.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              aria-pressed={unfilledOnly}
+              onClick={() => setUnfilledOnly((v) => !v)}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
+                unfilledOnly ? 'border-danger/40 bg-danger/5 text-danger' : 'hover:bg-muted/50',
+              )}
+            >
+              <MegaphoneSimple size={13} weight="duotone" aria-hidden />
+              Unfilled only
+            </button>
+            <div className="mx-1 h-5 w-px bg-border" />
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label="Previous week"
+              onClick={() => setWeekOffset((w) => w - 1)}
+            >
+              <CaretLeft aria-hidden />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)}>
+              Today
+            </Button>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label="Next week"
+              onClick={() => setWeekOffset((w) => w + 1)}
+            >
+              <CaretRight aria-hidden />
+            </Button>
+            <span className="ml-2 text-sm font-medium tabular-nums">
+              {formatACST(days[0]!, 'd MMM')} – {formatACST(days[6]!, 'd MMM yyyy')}
+            </span>
           </div>
         </div>
 
-        <DragOverlay dropAnimation={null}>
-          {activeWorker && (
-            <div className="w-56 rotate-2 opacity-95 shadow-md">
-              <WorkerDragCard worker={activeWorker} />
+        <DndContext onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
+          <div className="flex items-start gap-4">
+            <WorkerPanel
+              workers={workers.data}
+              isPending={workers.isPending}
+              collapsed={panelCollapsed}
+              onToggleCollapsed={() => setPanelCollapsed((c) => !c)}
+            />
+
+            <div className="max-h-[calc(100vh-11rem)] min-w-0 flex-1 overflow-auto rounded-lg border bg-card scrollbar-thin">
+              {isPending ? (
+                <div className="flex flex-col gap-2 p-4">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div
+                  className="grid min-w-[1080px]"
+                  style={{ gridTemplateColumns: '160px repeat(7, minmax(132px, 1fr))' }}
+                >
+                  {/* Corner + day headers (sticky top). */}
+                  <div className="sticky top-0 left-0 z-30 border-r border-b bg-card" />
+                  {days.map((day) => {
+                    const ymd = formatACST(day, 'yyyy-MM-dd');
+                    const isToday = ymd === todayYmd;
+                    const dow = day.getDay();
+                    const isWeekend = dow === 0 || dow === 6;
+                    return (
+                      <div
+                        key={ymd}
+                        className={cn(
+                          'sticky top-0 z-20 border-b border-l bg-card px-2 py-2 text-center',
+                          isToday && 'bg-primary/5',
+                          !isToday && isWeekend && 'bg-warning/4',
+                        )}
+                      >
+                        <p className={cn('text-xs font-semibold', isToday && 'text-primary')}>
+                          {formatACST(day, 'EEE')}
+                        </p>
+                        <p
+                          className={cn(
+                            'text-[11px] text-muted-foreground',
+                            isToday && 'text-primary/80',
+                          )}
+                        >
+                          {formatACST(day, 'd MMM')}
+                        </p>
+                      </div>
+                    );
+                  })}
+
+                  {(sites.data ?? []).map((site) => {
+                    const siteShifts = [...(grid.get(site.id)?.values() ?? [])].flat();
+                    const unfilledCount = siteShifts.filter((s) => s.worker_id === null).length;
+                    return (
+                      <div key={site.id} className="contents">
+                        <div className="sticky left-0 z-10 flex flex-col gap-1 border-b bg-card px-3 py-2">
+                          <div>
+                            <p className="text-xs font-semibold leading-tight">{site.name}</p>
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {site.client_name}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums">
+                              {siteShifts.length} shifts
+                            </span>
+                            {unfilledCount > 0 && (
+                              <span className="rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-medium text-danger tabular-nums">
+                                {unfilledCount} unfilled
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {days.map((day) => {
+                          const ymd = formatACST(day, 'yyyy-MM-dd');
+                          const cellShifts = (grid.get(site.id)?.get(ymd) ?? [])
+                            .slice()
+                            .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+                          const dow = day.getDay();
+                          return (
+                            <RosterCell
+                              key={ymd}
+                              site={site}
+                              day={day}
+                              shifts={cellShifts}
+                              isToday={ymd === todayYmd}
+                              isWeekend={dow === 0 || dow === 6}
+                              workerById={workerById}
+                              offerShiftIds={offerShiftIds}
+                              dimFilled={unfilledOnly}
+                              hoveredShiftId={dragOver?.shiftId ?? null}
+                              hoverState={dragOver?.state ?? null}
+                              onChipClick={setDetailShiftId}
+                              onBroadcast={setBroadcastShiftId}
+                              onAdd={() => setCreateCell({ siteId: site.id, dateYmd: ymd })}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+          </div>
+
+          <DragOverlay dropAnimation={null}>
+            {activeWorker && (
+              <div className="w-56 rotate-2 scale-[1.02] opacity-95 shadow-lg">
+                <WorkerDragCard worker={activeWorker} />
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
 
       {createCell && (
         <CreateShiftDialog
@@ -418,6 +473,7 @@ export function RosterPage() {
           );
         }}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

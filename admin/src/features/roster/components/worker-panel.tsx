@@ -1,23 +1,15 @@
 import { useDraggable } from '@dnd-kit/core';
-import { MagnifyingGlass, SidebarSimple } from '@phosphor-icons/react';
+import { DotsSixVertical, MagnifyingGlass, SidebarSimple } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
 import { CompliancePill } from '@/components/status-pill';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/user-avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
 import type { Views } from '@/lib/database.types';
-import { initials } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 type WorkerRow = Views<'worker_overview'>;
@@ -34,22 +26,30 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
       {...attributes}
       {...listeners}
       className={cn(
-        'flex cursor-grab items-center gap-2 rounded-lg border bg-card px-2.5 py-2 select-none active:cursor-grabbing',
+        'group flex h-14 cursor-grab items-center gap-2 rounded-lg border bg-card px-2 select-none active:cursor-grabbing',
         isDragging && 'opacity-40',
       )}
     >
-      <Avatar className="size-7">
-        {worker.avatar_url && <AvatarImage src={worker.avatar_url} alt="" />}
-        <AvatarFallback className="text-[10px]">{initials(worker.full_name)}</AvatarFallback>
-      </Avatar>
+      <DotsSixVertical
+        size={16}
+        className="shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/60"
+        aria-hidden
+      />
+      <UserAvatar name={worker.full_name} size="md" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium">{worker.full_name}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{worker.job_title}</p>
+        <p className="truncate text-sm font-medium">{worker.full_name}</p>
+        <p className="truncate text-xs text-muted-foreground">{worker.job_title}</p>
       </div>
       <CompliancePill status={worker.compliance_status} showIcon={false} className="px-1.5 text-[10px]" />
     </div>
   );
 }
+
+const ROLE_SEGMENTS: { id: string; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'Cleaner', label: 'Cleaners' },
+  { id: 'Security Guard', label: 'Security' },
+];
 
 interface WorkerPanelProps {
   workers: WorkerRow[] | undefined;
@@ -62,11 +62,6 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('all');
   const query = useDebounce(search, 300);
-
-  const roles = useMemo(() => {
-    const unique = new Set((workers ?? []).map((w) => w.job_title).filter((t) => t !== null));
-    return [...unique].sort();
-  }, [workers]);
 
   const filtered = useMemo(
     () =>
@@ -94,7 +89,7 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
   }
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col gap-2 self-start rounded-lg border bg-card p-3">
+    <aside className="flex max-h-[calc(100vh-11rem)] w-60 shrink-0 flex-col gap-2.5 self-start rounded-lg border bg-card p-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Workers</h2>
         <Button
@@ -106,7 +101,6 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
           <SidebarSimple aria-hidden />
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">Drag a worker onto a shift to assign.</p>
 
       <div className="relative">
         <MagnifyingGlass
@@ -125,27 +119,38 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
           onChange={(event) => setSearch(event.target.value)}
         />
       </div>
-      <Select value={role} onValueChange={(value) => setRole(value ?? 'all')}>
-        <SelectTrigger size="sm" aria-label="Filter by role" className="w-full">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All roles</SelectItem>
-          {roles.map((jobTitle) => (
-            <SelectItem key={jobTitle} value={jobTitle}>
-              {jobTitle}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
 
-      <div className="flex max-h-[60vh] flex-col gap-1.5 overflow-y-auto pr-0.5">
-        {isPending
-          ? Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-11 rounded-lg" />)
-          : filtered.map((worker) => <WorkerDragCard key={worker.id} worker={worker} />)}
-        {!isPending && filtered.length === 0 && (
-          <p className="py-6 text-center text-xs text-muted-foreground">No workers match.</p>
-        )}
+      {/* Segmented role control — two roles, one tap. */}
+      <div className="flex rounded-lg bg-muted p-0.5" role="group" aria-label="Filter by role">
+        {ROLE_SEGMENTS.map((seg) => (
+          <button
+            key={seg.id}
+            type="button"
+            aria-pressed={role === seg.id}
+            onClick={() => setRole(seg.id)}
+            className={cn(
+              'flex-1 rounded-lg py-1 text-xs font-medium transition-colors',
+              role === seg.id
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {seg.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">Drag a worker onto a shift to assign.</p>
+
+      <div className="scrollbar-thin -mr-1 min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="scroll-fade-y flex flex-col gap-1.5 pb-3">
+          {isPending
+            ? Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)
+            : filtered.map((worker) => <WorkerDragCard key={worker.id} worker={worker} />)}
+          {!isPending && filtered.length === 0 && (
+            <p className="py-6 text-center text-xs text-muted-foreground">No workers match.</p>
+          )}
+        </div>
       </div>
     </aside>
   );

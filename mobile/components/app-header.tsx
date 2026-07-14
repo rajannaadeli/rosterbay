@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DemoBanner } from '@/components/demo-banner';
+import { UserAvatar } from '@/components/user-avatar';
 import { Text } from '@/components/ui/text';
 import { useSession } from '@/features/auth/hooks';
 import { useMyNotifications, useNotificationsRealtime } from '@/features/offers/hooks';
@@ -25,7 +26,10 @@ export function AppHeader() {
   const notifications = useMyNotifications();
   useNotificationsRealtime();
   const unread = (notifications.data ?? []).filter((row) => !row.read).length;
-  const initial = (session.data?.user.email?.[0] ?? 'L').toUpperCase();
+  const workerName =
+    (session.data?.user.user_metadata?.full_name as string | undefined) ??
+    session.data?.user.email ??
+    'Worker';
 
   return (
     <SafeAreaView edges={['top']} className="border-b border-border bg-card">
@@ -49,9 +53,7 @@ export function AppHeader() {
             </View>
           )}
         </Pressable>
-        <View className="size-8 items-center justify-center rounded-full bg-primary/10">
-          <Text className="text-xs font-semibold text-primary">{initial}</Text>
-        </View>
+        <UserAvatar name={workerName} size="sm" />
       </View>
       <DemoBanner />
     </SafeAreaView>
