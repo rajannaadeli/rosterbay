@@ -2,6 +2,7 @@ import { CheckCircleIcon, EyeIcon, MegaphoneIcon } from 'phosphor-react-native';
 import { useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 
+import { EmptyState } from '@/components/empty-state';
 import { StatusPill } from '@/components/status-pill';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -71,16 +72,12 @@ export default function OffersScreen() {
           ) : null
         }
         ListEmptyComponent={
-          <View className="items-center gap-3 rounded-[18px] border border-dashed border-border px-6 py-14">
-            <View className="rounded-full bg-muted p-4">
-              <MegaphoneIcon size={26} weight="duotone" color={c.mutedForeground} />
-            </View>
-            <Text className="text-base font-semibold">No open offers</Text>
-            <Text className="text-center text-sm text-muted-foreground">
-              When Torrens broadcasts a shift you're eligible for, it lands here instantly — first
-              to accept gets it.
-            </Text>
-          </View>
+          <EmptyState
+            className="py-24"
+            icon={MegaphoneIcon}
+            title="No open offers"
+            body="When Torrens broadcasts a shift you're eligible for, it lands here instantly — first to accept gets it."
+          />
         }
         renderItem={({ item: offer }) => (
           <OfferCard
@@ -119,9 +116,7 @@ function OfferCard({ offer, siteName, won, busy, onAccept }: OfferCardProps) {
 
   return (
     <View
-      className={`gap-3 rounded-[18px] border border-border bg-card p-4 shadow-sm ${
-        filled && !won ? 'opacity-70' : ''
-      }`}>
+      className={`gap-3 rounded-[18px] bg-card p-4 shadow-sm ${filled && !won ? 'opacity-70' : ''}`}>
       <View className="flex-row items-start justify-between gap-2">
         <View className="min-w-0 flex-1 gap-1">
           <Text className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -138,7 +133,7 @@ function OfferCard({ offer, siteName, won, busy, onAccept }: OfferCardProps) {
       </View>
 
       {won ? (
-        <View className="flex-row items-center gap-2 rounded-[12px] border border-success/30 bg-success/10 px-3 py-2.5">
+        <View className="flex-row items-center gap-2 rounded-[12px] bg-success/10 px-3 py-2.5">
           <CheckCircleIcon size={18} weight="fill" color={c.success} />
           <Text className="flex-1 text-sm font-medium text-success">
             You got it — the shift is in your Schedule.

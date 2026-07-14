@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 
+import { EmptyState } from '@/components/empty-state';
 import { CertPill } from '@/components/status-pill';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,7 +60,7 @@ function ComplianceSummary({ certs }: { certs: Cert[] }) {
   const iconColor = { success: c.success, warning: c.warning, danger: c.danger }[tone];
 
   return (
-    <View className="mb-1 flex-row items-center gap-3 rounded-[18px] border border-border bg-card p-4 shadow-sm">
+    <View className="mb-1 flex-row items-center gap-3 rounded-[18px] bg-card p-4 shadow-sm">
       <View className={`size-11 items-center justify-center rounded-full ${tint}`}>
         {tone === 'success' ? (
           <CheckCircleIcon size={24} weight="fill" color={iconColor} />
@@ -118,21 +119,19 @@ export default function WalletScreen() {
           }
           ListHeaderComponent={data.length > 0 ? <ComplianceSummary certs={data} /> : null}
           ListEmptyComponent={
-            <View className="items-center gap-3 rounded-[18px] border border-dashed border-border px-6 py-16">
-              <View className="rounded-full bg-muted p-5">
-                <CertificateIcon size={28} weight="duotone" color={c.mutedForeground} />
-              </View>
-              <Text className="text-base font-bold">No documents yet</Text>
-              <Text className="text-center text-sm text-muted-foreground">
-                Add your first certificate — a photo from your camera roll is all it takes.
-              </Text>
-            </View>
+            <EmptyState
+              className="py-20"
+              icon={CertificateIcon}
+              title="No documents yet"
+              body="Add your first certificate — a photo from your camera roll is all it takes."
+              hint="Add document"
+            />
           }
           renderItem={({ item: cert }) => {
             const certType = typeById.get(cert.cert_type_id);
             return (
               <View
-                className={`gap-3 rounded-[18px] border border-border bg-card p-4 shadow-sm ${
+                className={`gap-3 rounded-[18px] bg-card p-4 shadow-sm ${
                   cert.status === 'expired' ? 'border-l-[3px] border-l-danger' : ''
                 }`}>
                 <View className="flex-row items-start gap-3">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 
+import { EmptyState } from '@/components/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useMarkAllNotificationsRead, useMyNotifications } from '@/features/offers/hooks';
@@ -55,23 +56,20 @@ export default function NotificationsScreen() {
             />
           }
           ListEmptyComponent={
-            <View className="items-center gap-3 rounded-[16px] border border-dashed border-border px-6 py-14">
-              <View className="rounded-full bg-muted p-4">
-                <TrayIcon size={26} weight="duotone" color={c.mutedForeground} />
-              </View>
-              <Text className="text-sm font-medium">Nothing yet</Text>
-              <Text className="text-center text-sm text-muted-foreground">
-                Shift offers and confirmations land here the moment they happen.
-              </Text>
-            </View>
+            <EmptyState
+              className="py-24"
+              icon={TrayIcon}
+              title="Nothing yet"
+              body="Shift offers and confirmations land here the moment they happen."
+            />
           }
           renderItem={({ item: row }) => {
             const KindIcon = kindIcon(row.kind);
             return (
               <View
                 className={cn(
-                  'flex-row gap-3 rounded-[14px] border border-border bg-card p-3.5',
-                  !row.read && 'border-primary/30 bg-primary/5'
+                  'flex-row gap-3 rounded-[14px] bg-card p-3.5 shadow-sm',
+                  !row.read && 'border-l-[3px] border-l-primary bg-primary/5'
                 )}>
                 <KindIcon size={18} weight="duotone" color={c.primary} />
                 <View className="min-w-0 flex-1 gap-0.5">

@@ -3,6 +3,7 @@ import { CalendarBlankIcon, CaretDownIcon, CaretRightIcon } from 'phosphor-react
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, SectionList, View } from 'react-native';
 
+import { EmptyState } from '@/components/empty-state';
 import { StatusPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
@@ -34,11 +35,13 @@ function mondayYmd(offsetWeeks: number): string {
 function ShiftRow({ shift, siteName, muted }: { shift: Shift; siteName: string; muted?: boolean }) {
   const c = useColors();
   const isToday = formatACST(shift.starts_at, 'yyyy-MM-dd') === formatACST(new Date(), 'yyyy-MM-dd');
+  const live = shift.status === 'in_progress';
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push({ pathname: '/shift/[id]', params: { id: shift.id } })}
-      className={`mb-2.5 flex-row items-center gap-3 rounded-[16px] border border-border bg-card p-3 shadow-sm active:bg-muted/50 ${muted ? 'opacity-60' : ''}`}>
+      className={`mb-2.5 flex-row items-center gap-3 overflow-hidden rounded-[16px] bg-card p-3 shadow-sm active:opacity-80 ${muted ? 'opacity-60' : ''}`}>
+      {live && <View className="-my-3 -ml-3 mr-0 h-auto w-1 self-stretch bg-success" />}
       <View
         className={`w-14 items-center justify-center rounded-[12px] py-2 ${isToday ? 'bg-primary/10' : 'bg-muted'}`}>
         <Text
@@ -122,14 +125,12 @@ export default function ScheduleScreen() {
 
   if ((shifts.data?.length ?? 0) === 0) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background px-8">
-        <View className="rounded-full bg-muted p-5">
-          <CalendarBlankIcon size={32} weight="duotone" color={c.mutedForeground} />
-        </View>
-        <Text className="text-lg font-bold">No shifts yet</Text>
-        <Text className="text-center text-sm text-muted-foreground">
-          When Torrens rosters you on, your shifts appear here.
-        </Text>
+      <View className="flex-1 bg-background">
+        <EmptyState
+          icon={CalendarBlankIcon}
+          title="No shifts yet"
+          body="When Torrens rosters you on, your upcoming shifts appear here — grouped by week."
+        />
       </View>
     );
   }
@@ -150,20 +151,23 @@ export default function ScheduleScreen() {
               accessibilityRole="button"
               accessibilityState={{ expanded: showCompleted }}
               onPress={() => setShowCompleted((v) => !v)}
-              className="mb-2.5 mt-3 flex-row items-center gap-1.5">
-              {showCompleted ? (
-                <CaretDownIcon size={15} color={c.mutedForeground} />
-              ) : (
-                <CaretRightIcon size={15} color={c.mutedForeground} />
-              )}
-              <Text className="text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
+              className="mb-2.5 mt-4 flex-row items-center gap-1.5">
+              <Text className="text-lg font-bold tracking-tight text-muted-foreground">
                 Completed
               </Text>
+              {showCompleted ? (
+                <CaretDownIcon size={16} weight="bold" color={c.mutedForeground} />
+              ) : (
+                <CaretRightIcon size={16} weight="bold" color={c.mutedForeground} />
+              )}
             </Pressable>
           ) : (
-            <Text className="mb-2.5 mt-3 text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
-              {section.title}
-            </Text>
+            <View className="mb-2.5 mt-4 flex-row items-baseline gap-2">
+              <Text className="text-lg font-bold tracking-tight">{section.title}</Text>
+              <Text className="text-sm font-medium text-muted-foreground">
+                {section.data.length}
+              </Text>
+            </View>
           )
         }
         renderItem={({ item, section }) => (
