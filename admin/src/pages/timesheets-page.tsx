@@ -34,7 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSites } from '@/features/sites/hooks';
 import { ReviewPanel } from '@/features/timesheets/components/review-panel';
@@ -505,9 +505,9 @@ export function TimesheetsPage() {
           />
         ) : (
           <div className="overflow-hidden rounded-lg border bg-card">
-            <div className="max-h-[calc(100vh-19rem)] overflow-y-auto scrollbar-thin">
-              <Table>
-                <TableHeader className="sticky top-0 z-10 bg-card">
+            <div className="max-h-[calc(100vh-19rem)] overflow-auto scrollbar-thin">
+              <table className="relative w-full caption-bottom text-sm">
+                <TableHeader className="sticky top-0 z-10 bg-card shadow-[0_1px_0_var(--border)]">
                   {table.getHeaderGroups().map((hg) => (
                     <TableRow key={hg.id}>
                       {hg.headers.map((header) => {
@@ -579,7 +579,7 @@ export function TimesheetsPage() {
                     );
                   })}
                 </TableBody>
-              </Table>
+              </table>
             </div>
           </div>
         )}

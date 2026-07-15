@@ -296,9 +296,9 @@ export function RosterPage() {
                       <div
                         key={ymd}
                         className={cn(
-                          'sticky top-0 z-20 border-b border-l bg-card px-2 py-2 text-center',
-                          isToday && 'bg-primary/5',
-                          !isToday && isWeekend && 'bg-warning/4',
+                          'sticky top-0 z-20 border-b border-l bg-white px-2 py-2 text-center',
+                          isToday && 'bg-[#F4F8F7]',
+                          !isToday && isWeekend && 'bg-[#FDFAF6]',
                         )}
                       >
                         <p className={cn('text-xs font-semibold', isToday && 'text-primary')}>

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { MoonIcon, SignOutIcon, SunIcon } from 'phosphor-react-native';
-import { Modal, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
+import { BottomSheet } from '@/components/bottom-sheet';
 import { UserAvatar } from '@/components/user-avatar';
 import { Text } from '@/components/ui/text';
 import { useSignOut } from '@/features/auth/hooks';
@@ -25,8 +26,7 @@ export function AccountSheet({ name, subtitle, onClose }: AccountSheetProps) {
   const c = useColors();
 
   return (
-    <Modal transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable className="flex-1 bg-black/50" accessibilityLabel="Dismiss" onPress={onClose} />
+    <BottomSheet onClose={onClose}>
       <View className="gap-5 rounded-t-[24px] bg-card px-5 pb-10 pt-3 shadow-lg">
         <View className="h-1 w-10 self-center rounded-full bg-border" />
 
@@ -75,7 +75,7 @@ export function AccountSheet({ name, subtitle, onClose }: AccountSheetProps) {
           <Text className="text-sm font-medium">Sign out of the demo</Text>
         </Pressable>
       </View>
-    </Modal>
+    </BottomSheet>
   );
 }
 

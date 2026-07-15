@@ -1,23 +1,23 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImageSquareIcon } from 'phosphor-react-native';
 import { useState } from 'react';
-import { Image, Modal, Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Textarea } from '@/components/ui/textarea';
 import { useColors } from '@/lib/colors';
 
-/** Bottom-sheet-style modal shell (thumb-zone actions). */
+/** Bottom-sheet shell (thumb-zone actions). */
 function SheetShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <Modal transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable className="flex-1 bg-black/50" accessibilityLabel="Dismiss" onPress={onClose} />
+    <BottomSheet onClose={onClose}>
       <View className="gap-4 rounded-t-[24px] bg-card px-5 pb-9 pt-3 shadow-lg">
         <View className="h-1 w-10 self-center rounded-full bg-border" />
         {children}
       </View>
-    </Modal>
+    </BottomSheet>
   );
 }
 

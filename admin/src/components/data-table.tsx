@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -52,8 +51,11 @@ interface DataTableProps<T> {
 }
 
 /**
- * The standard list table (WhiteFleet visual pattern, TanStack Table engine):
+ * The standard list table (RosterBay visual pattern, TanStack Table engine):
  * toolbar with debounced search + filter slot, sortable headers, pagination.
+ *
+ * The table body scrolls inside a bounded container while the search bar,
+ * column headers, and pagination footer stay fixed.
  */
 export function DataTable<T>({
   columns,
@@ -129,77 +131,80 @@ export function DataTable<T>({
         </div>
       )}
 
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const canSort = header.column.getCanSort();
-                const sorted = header.column.getIsSorted();
-                return (
-                  <TableHead key={header.id} className={header.column.columnDef.meta?.className}>
-                    {header.isPlaceholder ? null : canSort ? (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {sorted === 'asc' ? (
-                          <CaretUp size={12} aria-hidden />
-                        ) : sorted === 'desc' ? (
-                          <CaretDown size={12} aria-hidden />
-                        ) : (
-                          <CaretUpDown size={12} className="text-muted-foreground/60" aria-hidden />
-                        )}
-                      </button>
-                    ) : (
-                      flexRender(header.column.columnDef.header, header.getContext())
-                    )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            Array.from({ length: 5 }, (_, i) => (
-              <TableRow key={i}>
-                {columns.map((_, colIndex) => (
-                  <TableCell key={colIndex}>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                ))}
+      {/* Scrollable table area — header sticks, body scrolls */}
+      <div className="max-h-[calc(100vh-22rem)] overflow-auto scrollbar-thin">
+        <table className="relative w-full caption-bottom text-sm">
+          <TableHeader className="sticky top-0 z-10 bg-card shadow-[0_1px_0_var(--border)]">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
+                  return (
+                    <TableHead key={header.id} className={header.column.columnDef.meta?.className}>
+                      {header.isPlaceholder ? null : canSort ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {sorted === 'asc' ? (
+                            <CaretUp size={12} aria-hidden />
+                          ) : sorted === 'desc' ? (
+                            <CaretDown size={12} aria-hidden />
+                          ) : (
+                            <CaretUpDown size={12} className="text-muted-foreground/60" aria-hidden />
+                          )}
+                        </button>
+                      ) : (
+                        flexRender(header.column.columnDef.header, header.getContext())
+                      )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="py-16 text-center">
-                {emptyState ?? <p className="text-sm text-muted-foreground">No records found.</p>}
-              </TableCell>
-            </TableRow>
-          ) : (
-            rows.map((row) => (
-              <TableRow
-                key={row.id}
-                tabIndex={onRowClick ? 0 : undefined}
-                className={cn('hover:bg-muted/50', onRowClick && 'cursor-pointer')}
-                onClick={() => onRowClick?.(row.original)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') onRowClick?.(row.original);
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cell.column.columnDef.meta?.className}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }, (_, i) => (
+                <TableRow key={i}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={colIndex}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="py-16 text-center">
+                  {emptyState ?? <p className="text-sm text-muted-foreground">No records found.</p>}
+                </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  className={cn('hover:bg-muted/50', onRowClick && 'cursor-pointer')}
+                  onClick={() => onRowClick?.(row.original)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') onRowClick?.(row.original);
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={cell.column.columnDef.meta?.className}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </table>
+      </div>
 
       {!loading && (filteredCount > 0 || pageCount > 1) && (
         <div className="flex items-center justify-between border-t px-4 py-2 text-sm text-muted-foreground">

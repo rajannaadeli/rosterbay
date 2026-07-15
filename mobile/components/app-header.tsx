@@ -1,10 +1,8 @@
 import { router, usePathname } from 'expo-router';
 import { BellIcon, CalendarCheckIcon } from 'phosphor-react-native';
-import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AccountSheet } from '@/components/account-sheet';
 import { DemoBanner } from '@/components/demo-banner';
 import { UserAvatar } from '@/components/user-avatar';
 import { Text } from '@/components/ui/text';
@@ -24,12 +22,11 @@ const TITLES: Record<string, string> = {
  * navigator, so switching tabs never remounts or flickers the chrome. The
  * avatar opens the account sheet (appearance + sign out).
  */
-export function AppHeader() {
+export function AppHeader({ onOpenAccount }: { onOpenAccount: () => void }) {
   const pathname = usePathname();
   const session = useSession();
   const notifications = useMyNotifications();
   const c = useColors();
-  const [accountOpen, setAccountOpen] = useState(false);
   useNotificationsRealtime();
 
   const unread = (notifications.data ?? []).filter((row) => !row.read).length;
@@ -37,9 +34,6 @@ export function AppHeader() {
     (session.data?.user.user_metadata?.full_name as string | undefined) ??
     session.data?.user.email ??
     'Worker';
-  const role =
-    (session.data?.user.user_metadata?.role as string | undefined) ??
-    'Torrens Facility Services';
 
   return (
     <SafeAreaView edges={['top']} className="bg-card shadow-sm">
@@ -67,16 +61,12 @@ export function AppHeader() {
           accessibilityRole="button"
           accessibilityLabel="Account"
           hitSlop={6}
-          onPress={() => setAccountOpen(true)}
+          onPress={onOpenAccount}
           className="rounded-full active:opacity-80">
           <UserAvatar name={workerName} size="sm" />
         </Pressable>
       </View>
       <DemoBanner />
-
-      {accountOpen && (
-        <AccountSheet name={workerName} subtitle={role} onClose={() => setAccountOpen(false)} />
-      )}
     </SafeAreaView>
   );
 }
