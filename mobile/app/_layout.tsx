@@ -12,6 +12,7 @@ import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
+import { ToastHost } from '@/components/toast-host';
 import { useHydrateThemeMode } from '@/lib/theme-mode';
 
 // NativeWind's css-interop writes to a shared value during render when
@@ -71,6 +72,7 @@ export default function RootLayout() {
             <Stack.Screen name="notifications" />
             <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
           </Stack>
+          <ToastHost />
           <PortalHost />
         </NavThemeWrapper>
       </QueryClientProvider>

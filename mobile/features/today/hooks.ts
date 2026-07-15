@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from '@/features/auth/hooks';
 import { computeClockInFlags, distanceMeters } from '@/lib/compliance';
 import type { Tables } from '@/lib/database.types';
+import { toast } from '@/lib/toast';
 import {
   clockIn,
   clockOut,
@@ -216,8 +217,11 @@ export function useClockOut() {
   });
 }
 
+type ShiftTask = Tables<'shift_tasks'>;
+
 export function useSetTaskDone(shiftId: string) {
   const queryClient = useQueryClient();
+  const key = ['today', 'tasks', shiftId];
   return useMutation({
     mutationFn: ({
       taskId,
@@ -228,7 +232,29 @@ export function useSetTaskDone(shiftId: string) {
       done: boolean;
       photoUrl?: string;
     }) => setTaskDone(taskId, done, photoUrl),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['today', 'tasks', shiftId] }),
+    // Flip the checkbox instantly; the write runs in the background.
+    onMutate: async ({ taskId, done, photoUrl }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const prev = queryClient.getQueryData<ShiftTask[]>(key);
+      queryClient.setQueryData<ShiftTask[]>(key, (rows) =>
+        (rows ?? []).map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                done,
+                done_at: done ? new Date().toISOString() : null,
+                ...(photoUrl !== undefined ? { photo_url: photoUrl } : {}),
+              }
+            : t
+        )
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(key, ctx.prev);
+      toast.error("Couldn't update the task — try again.");
+    },
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: key }),
   });
 }
 

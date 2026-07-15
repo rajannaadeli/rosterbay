@@ -150,12 +150,15 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
             {workers.data?.map((worker) => (
               <CommandItem
                 key={worker.id}
+                // className=''
                 value={`worker ${worker.full_name} ${worker.job_title ?? ''}`}
                 onSelect={() => runItem(`/app/workers?open=${worker.id}`, worker.full_name)}
               >
-                <User weight="duotone" className="text-muted-foreground" aria-hidden />
-                <span>{worker.full_name}</span>
-                <span className="ml-auto text-xs text-muted-foreground">{worker.job_title}</span>
+                <div className="flex items-center gap-2">
+                  <User weight="duotone" className="text-muted-foreground" aria-hidden />
+                  <span>{worker.full_name}</span>
+                </div>
+                <span className="text-right text-xs absolute right-3 text-muted-foreground">{worker.job_title}</span>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -171,7 +174,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
               >
                 <MapPin weight="duotone" className="text-muted-foreground" aria-hidden />
                 <span>{site.name}</span>
-                <span className="ml-auto text-xs text-muted-foreground">{site.client_name}</span>
+                <span className="text-xs absolute right-3 text-muted-foreground">{site.client_name}</span>
               </CommandItem>
             ))}
           </CommandGroup>
