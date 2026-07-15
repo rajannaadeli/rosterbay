@@ -66,7 +66,7 @@ export function AppHeader({ onOpenAccount }: { onOpenAccount: () => void }) {
           <UserAvatar name={workerName} size="sm" />
         </Pressable>
       </View>
-      <DemoBanner />
+      {/* <DemoBanner /> */}
     </SafeAreaView>
   );
 }

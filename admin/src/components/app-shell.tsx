@@ -32,7 +32,7 @@ export function AppShell() {
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <AppHeader />
-          <DemoBanner />
+          {/* <DemoBanner /> */}
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-[1440px] p-6">
               <Outlet />

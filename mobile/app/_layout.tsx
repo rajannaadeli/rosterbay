@@ -1,6 +1,6 @@
 import '@/global.css';
 
-import { useCallback } from 'react';
+import { useCallback, type ReactNode } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -55,17 +55,32 @@ export default function RootLayout() {
     return null;
   }
 
+  // The <Stack> is created HERE, in a component that does NOT subscribe to the
+  // color scheme, so it's a stable element reference. NavThemeWrapper re-renders
+  // on a theme toggle but receives the same `children`, so React never
+  // re-renders the navigator — which is what was detaching screens from their
+  // navigation container and crashing.
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <QueryClientProvider client={queryClient}>
-        <RootNavigation />
+        <NavThemeWrapper>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="sign-in" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="notifications" />
+            <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
+          </Stack>
+          <PortalHost />
+        </NavThemeWrapper>
       </QueryClientProvider>
     </View>
   );
 }
 
-/** The single color-scheme subscriber: nav chrome + status bar + the navigator. */
-function RootNavigation() {
+/** Subscribes to the color scheme and swaps only nav-theme + status bar — never
+ *  the navigator subtree passed as `children`. */
+function NavThemeWrapper({ children }: { children: ReactNode }) {
   useHydrateThemeMode();
   const { colorScheme } = useColorScheme();
   const dark = colorScheme === 'dark';
@@ -73,14 +88,7 @@ function RootNavigation() {
   return (
     <ThemeProvider value={dark ? NAV_THEME.dark : NAV_THEME.light}>
       <StatusBar style={dark ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="sign-in" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="notifications" />
-        <Stack.Screen name="add-document" options={{ presentation: 'modal' }} />
-      </Stack>
-      <PortalHost />
+      {children}
     </ThemeProvider>
   );
 }
