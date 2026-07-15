@@ -132,9 +132,9 @@ export function DataTable<T>({
       )}
 
       {/* Scrollable table area — header sticks, body scrolls */}
-      <div className="max-h-[calc(100vh-20rem)] overflow-auto scrollbar-thin">
+      <div className="max-h-[calc(100vh-22rem)] overflow-auto scrollbar-thin">
         <table className="relative w-full caption-bottom text-sm">
-          <TableHeader className="sticky top-0 z-10 bg-card shadow-[0_1px_0_var(--border)]">
+          <TableHeader className="sticky top-0 z-10 bg-[#FBFBFB]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

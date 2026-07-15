@@ -32,8 +32,6 @@ export default function TabsLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          // Pause background tabs so off-screen timers/queries don't re-render.
-          freezeOnBlur: true,
         }}>
         <Tabs.Screen name="index" options={{ title: 'Today' }} />
         <Tabs.Screen name="schedule" options={{ title: 'Schedule' }} />

@@ -12,7 +12,7 @@ import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
-import { ThemeModeProvider } from '@/lib/theme-mode';
+import { useHydrateThemeMode } from '@/lib/theme-mode';
 
 // NativeWind's css-interop writes to a shared value during render when
 // className-driven styles change (e.g. a theme switch). That's internal to
@@ -58,16 +58,15 @@ export default function RootLayout() {
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <QueryClientProvider client={queryClient}>
-        <ThemeModeProvider>
-          <ThemedShell />
-        </ThemeModeProvider>
+        <RootNavigation />
       </QueryClientProvider>
     </View>
   );
 }
 
-/** Nav chrome + status bar that track the live color scheme. */
-function ThemedShell() {
+/** The single color-scheme subscriber: nav chrome + status bar + the navigator. */
+function RootNavigation() {
+  useHydrateThemeMode();
   const { colorScheme } = useColorScheme();
   const dark = colorScheme === 'dark';
 
