@@ -10,8 +10,14 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
 import { ThemeModeProvider } from '@/lib/theme-mode';
+
+// NativeWind's css-interop writes to a shared value during render when
+// className-driven styles change (e.g. a theme switch). That's internal to
+// nativewind and harmless, so quiet Reanimated's strict render-time warning.
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import {
   PlusJakartaSans_400Regular,
