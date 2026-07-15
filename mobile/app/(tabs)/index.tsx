@@ -201,11 +201,11 @@ export default function TodayScreen() {
       </ScrollView>
 
       {/* The dominant action, pinned to the thumb zone. */}
-      <View className="absolute inset-x-0 bottom-0 border-t border-border bg-card px-4 pb-8 pt-3">
+      <View className="absolute inset-x-0 bottom-0 bg-background px-4 pb-2 pt-3">
         {inShift ? (
           <PrimaryAction
             label={clockOut.isPending ? 'Clocking out…' : 'Clock Out'}
-            icon={<SignOutIcon size={20} weight="bold" color="#FFFFFF" />}
+            icon={<SignOutIcon size={16} weight="bold" color="#FFFFFF" />}
             tone="danger"
             disabled={clockOut.isPending}
             onPress={doClockOut}
@@ -213,7 +213,7 @@ export default function TodayScreen() {
         ) : (
           <PrimaryAction
             label={clockIn.isPending ? 'Clocking in…' : 'Clock In'}
-            icon={<SignInIcon size={20} weight="bold" color="#FFFFFF" />}
+            icon={<SignInIcon size={16} weight="bold" color="#FFFFFF" />}
             tone="primary"
             disabled={clockIn.isPending}
             onPress={startClockIn}
@@ -274,11 +274,11 @@ function PrimaryAction({
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      className={`h-16 flex-row items-center justify-center gap-2.5 rounded-[18px] shadow-sm active:opacity-90 ${
+      className={`h-11 flex-row items-center justify-center gap-2.5 rounded-full shadow-sm active:opacity-90 ${
         tone === 'danger' ? 'bg-danger' : 'bg-primary'
       } ${disabled ? 'opacity-60' : ''}`}>
       {icon}
-      <Text className="text-lg font-bold text-white">{label}</Text>
+      <Text className="text-base font-bold text-white">{label}</Text>
     </Pressable>
   );
 }

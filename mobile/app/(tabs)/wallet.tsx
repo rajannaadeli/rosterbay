@@ -165,13 +165,13 @@ export default function WalletScreen() {
       )}
 
       {/* Primary action pinned to the thumb zone. */}
-      <View className="absolute inset-x-0 bottom-0 border-t border-border bg-card px-4 pb-8 pt-3">
+      <View className="absolute inset-x-0 bottom-0 bg-background px-4 pb-2 pt-3">
         <Button
           size="lg"
-          className="h-14 rounded-[16px]"
+          className="h-11 rounded-full"
           onPress={() => router.push('/add-document')}>
-          <PlusIcon size={18} weight="bold" color="#FFFFFF" />
-          <Text className="text-base font-semibold">Add document</Text>
+          <PlusIcon size={16} weight="bold" color="#FFFFFF" />
+          <Text className="text-base text-white font-semibold">Add document</Text>
         </Button>
       </View>
     </View>

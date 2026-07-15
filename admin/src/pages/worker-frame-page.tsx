@@ -32,7 +32,7 @@ export function WorkerFramePage() {
     const observer = new ResizeObserver(() => {
       const { width, height } = el.getBoundingClientRect();
       // Never upscale past 1:1 — keep the app crisp; shrink to fit otherwise.
-      setScale(Math.min(1, width / DEVICE_W, height / DEVICE_H));
+      setScale(Math.min(0.8, width / DEVICE_W, height / DEVICE_H));
     });
     observer.observe(el);
     return () => observer.disconnect();

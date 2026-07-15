@@ -37,7 +37,7 @@ export function FloatingTabBar({ state, navigation }: TabBarProps) {
     <View
       style={{ paddingBottom: Math.max(insets.bottom - 4, 10) }}
       className="bg-background px-4 pt-2">
-      <View className="flex-row items-stretch rounded-[18px] bg-card p-1.5 shadow-md">
+      <View className="flex-row items-stretch rounded-full bg-card p-1.5 shadow-md">
         {state.routes.map((route, index) => {
           const meta = TAB_META[route.name];
           if (!meta) return null;
@@ -63,7 +63,7 @@ export function FloatingTabBar({ state, navigation }: TabBarProps) {
               accessibilityLabel={meta.label}
               onPress={onPress}
               className={cn(
-                'flex-1 items-center justify-center gap-1 rounded-[13px] py-2',
+                'flex-1 items-center justify-center gap-1 rounded-full py-2',
                 focused ? 'bg-primary/10' : ''
               )}>
               <TabIcon
