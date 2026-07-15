@@ -2,7 +2,6 @@ import { Navigate, Outlet } from 'react-router';
 
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
-import { DemoBanner } from '@/components/demo-banner';
 import { SidebarProvider } from '@/components/sidebar-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from '@/features/auth/hooks';
