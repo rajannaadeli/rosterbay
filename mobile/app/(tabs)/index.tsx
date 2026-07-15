@@ -67,11 +67,14 @@ export default function TodayScreen() {
     setRefreshing(false);
   };
 
-  const startClockIn = async () => {
+  const startClockIn = () => {
     if (!shift.data || !site.data) return;
     setFlowError(null);
     tap();
-    const coords = await location.read();
+    // Use the already-warm location (read on mount) — never block the tap on a
+    // fresh GPS fix. Within the fence we clock in optimistically and the screen
+    // flips to the in-shift view instantly; otherwise confirm (never block).
+    const coords = location.coords;
     const distanceM = distanceToSite(coords, site.data);
     if (distanceM !== null && distanceM <= site.data.geofence_radius_m) {
       clockIn.mutate(
@@ -106,13 +109,13 @@ export default function TodayScreen() {
     );
   };
 
-  const doClockOut = async () => {
+  const doClockOut = () => {
     if (!entry.data || !shift.data) return;
     setFlowError(null);
     tap();
-    const coords = await location.read();
+    // Optimistic + warm coords — the screen leaves the in-shift view instantly.
     clockOut.mutate(
-      { entryId: entry.data.id, shiftId: shift.data.id, coords },
+      { entryId: entry.data.id, shiftId: shift.data.id, coords: location.coords },
       { onSuccess: confirmHaptic, onError: (e) => setFlowError(e.message) }
     );
   };
@@ -205,7 +208,7 @@ export default function TodayScreen() {
             icon={<SignOutIcon size={20} weight="bold" color="#FFFFFF" />}
             tone="danger"
             disabled={clockOut.isPending}
-            onPress={() => void doClockOut()}
+            onPress={doClockOut}
           />
         ) : (
           <PrimaryAction
@@ -213,7 +216,7 @@ export default function TodayScreen() {
             icon={<SignInIcon size={20} weight="bold" color="#FFFFFF" />}
             tone="primary"
             disabled={clockIn.isPending}
-            onPress={() => void startClockIn()}
+            onPress={startClockIn}
           />
         )}
       </View>

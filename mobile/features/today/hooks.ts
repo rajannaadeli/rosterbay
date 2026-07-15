@@ -79,6 +79,14 @@ export function useLocation(): LocationReading {
         setStatus('denied');
         return null;
       }
+      // Fast path: the OS's last-known fix returns almost instantly, so `coords`
+      // is warm well before the worker taps Clock In. We then refine it with a
+      // fresh reading in the background (never blocking the tap).
+      const last = await Location.getLastKnownPositionAsync();
+      if (last) {
+        setCoords({ lat: last.coords.latitude, lng: last.coords.longitude });
+        setStatus('ready');
+      }
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
