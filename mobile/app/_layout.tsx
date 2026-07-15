@@ -78,17 +78,18 @@ export default function RootLayout() {
   );
 }
 
-/** Subscribes to the color scheme and swaps only nav-theme + status bar — never
- *  the navigator subtree passed as `children`. */
+/** Subscribes to the color scheme and swaps only nav-theme + status bar. Holds
+ *  the navigator (children) out until the persisted scheme is applied, so the
+ *  scheme is never flipped under a mounted navigator. */
 function NavThemeWrapper({ children }: { children: ReactNode }) {
-  useHydrateThemeMode();
+  const ready = useHydrateThemeMode();
   const { colorScheme } = useColorScheme();
   const dark = colorScheme === 'dark';
 
   return (
     <ThemeProvider value={dark ? NAV_THEME.dark : NAV_THEME.light}>
       <StatusBar style={dark ? 'light' : 'dark'} />
-      {children}
+      {ready ? children : <View style={{ flex: 1 }} />}
     </ThemeProvider>
   );
 }
