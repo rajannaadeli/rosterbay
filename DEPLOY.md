@@ -5,12 +5,16 @@ Items marked **[you]** need your accounts/credentials; nothing else proceeds unt
 
 ## 0. Database (5 min) — prerequisite for everything
 
-1. **[you]** Supabase SQL editor → paste and run `supabase/migrations/0007_offers.sql`, then `0008_pg_cron.sql`.
-   (Live DB is currently on 0001–0006. Fresh projects can run `supabase/setup.sql` instead.)
-2. **[you]** Dashboard → Database → Extensions → enable **pg_cron** → re-run `0008_pg_cron.sql`.
+1. **[you]** Supabase SQL editor → paste and run `supabase/migrations/0007_offers.sql`, then `0008_pg_cron.sql`,
+   then `0009_proof_of_work.sql`. (Live DB is currently on 0001–0006. Fresh projects can run
+   `supabase/setup.sql` instead — it's the 0001–0009 concatenation.)
+2. **[you]** Reseed so the proof-of-work photos exist in storage: from the repo root, `npm run seed:auth`.
+   It uploads `scripts/seed-photos/*.jpg` to the `task-proof` bucket, then calls `reset_demo()`.
+   Running `reset_demo()` alone is fine afterwards — the objects persist across resets.
+3. **[you]** Dashboard → Database → Extensions → enable **pg_cron** → re-run `0008_pg_cron.sql`.
    Expect the notice `rosterbay-nightly-reset scheduled`. Verify: `select jobname, schedule from cron.job;`
-3. **[you]** Dashboard → Database → Replication (or Publications) → confirm `supabase_realtime`
-   includes: `time_entries`, `shifts`, `shift_offers`, `notifications`.
+4. **[you]** Dashboard → Database → Replication (or Publications) → confirm `supabase_realtime`
+   includes: `time_entries`, `shifts`, `shift_offers`, `notifications`, `shift_tasks`, `issues`.
 
 ## 1. Vercel — admin console → rosterbay.com (15 min)
 
