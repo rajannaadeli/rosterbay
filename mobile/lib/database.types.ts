@@ -12,7 +12,14 @@ export type CertStatus = 'valid' | 'expiring_soon' | 'expired';
 export type ShiftStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
 export type OfferStatus = 'open' | 'filled' | 'expired';
 export type TimeEntryStatus = 'pending' | 'approved' | 'flagged' | 'rejected';
-export type TimeEntryFlag = 'late' | 'out_of_zone' | 'missing_clock_out';
+export type TimeEntryFlag =
+  | 'late'
+  | 'out_of_zone'
+  | 'missing_clock_out'
+  | 'incomplete_tasks';
+/** 'template' = snapshotted from the site checklist at shift creation. */
+export type ShiftTaskSource = 'template' | 'adhoc';
+export type IssueStatus = 'open' | 'acknowledged';
 
 export interface Database {
   public: {
@@ -322,6 +329,9 @@ export interface Database {
           done: boolean;
           done_at: string | null;
           photo_url: string | null;
+          source: ShiftTaskSource;
+          added_by: string | null;
+          sort_order: number;
           created_at: string;
         };
         Insert: {
@@ -334,6 +344,9 @@ export interface Database {
           done?: boolean;
           done_at?: string | null;
           photo_url?: string | null;
+          source?: ShiftTaskSource;
+          added_by?: string | null;
+          sort_order?: number;
           created_at?: string;
         };
         Update: {
@@ -346,6 +359,9 @@ export interface Database {
           done?: boolean;
           done_at?: string | null;
           photo_url?: string | null;
+          source?: ShiftTaskSource;
+          added_by?: string | null;
+          sort_order?: number;
           created_at?: string;
         };
         Relationships: [];
@@ -418,6 +434,9 @@ export interface Database {
           worker_id: string;
           note: string;
           photo_url: string | null;
+          status: IssueStatus;
+          acknowledged_by: string | null;
+          acknowledged_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -427,6 +446,9 @@ export interface Database {
           worker_id: string;
           note: string;
           photo_url?: string | null;
+          status?: IssueStatus;
+          acknowledged_by?: string | null;
+          acknowledged_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -436,6 +458,9 @@ export interface Database {
           worker_id?: string;
           note?: string;
           photo_url?: string | null;
+          status?: IssueStatus;
+          acknowledged_by?: string | null;
+          acknowledged_at?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -535,6 +560,25 @@ export interface Database {
           missing_clock_out: boolean;
           effective_flags: TimeEntryFlag[];
           effective_status: TimeEntryStatus;
+          tasks_total: number;
+          tasks_done: number;
+          incomplete_tasks: boolean;
+        };
+        Relationships: [];
+      };
+      shift_proof_summary: {
+        Row: {
+          shift_id: string;
+          company_id: string;
+          site_id: string;
+          worker_id: string | null;
+          shift_status: ShiftStatus;
+          starts_at: string;
+          ends_at: string;
+          tasks_total: number;
+          tasks_done: number;
+          photos_count: number;
+          open_issues_count: number;
         };
         Relationships: [];
       };

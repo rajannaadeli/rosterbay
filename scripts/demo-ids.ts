@@ -10,6 +10,21 @@ export const DEMO_COMPANY_ID = 'c0000000-0000-4000-8000-000000000001';
 /** One shared password for every demo account (documented in the phase report). */
 export const DEMO_PASSWORD = 'RosterBayDemo1!';
 
+/**
+ * Proof-of-work photos in the `task-proof` bucket. seed_proof_of_work() (0009)
+ * writes these exact paths onto shift_tasks.photo_url / issues.photo_url —
+ * change them in both places or not at all. Sources: scripts/seed-photos/,
+ * regenerate with `node scripts/make-seed-photos.mjs`.
+ */
+export const SEED_PHOTOS = [
+  'seed/kingsford-lobby.jpg',
+  'seed/marion-food-court.jpg',
+  'seed/hospital-ward.jpg',
+  'seed/wingfield-dock.jpg',
+  'seed/riverbank-gates.jpg',
+  'seed/roller-door.jpg',
+] as const;
+
 export type DemoRole = 'admin' | 'supervisor' | 'worker';
 
 export interface DemoUser {

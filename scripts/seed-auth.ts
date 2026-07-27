@@ -6,13 +6,17 @@
  *   2. npm install && npm run seed:auth
  *
  * Creates each auth user with its fixed UUID (profiles rows in reset_demo()
- * reference these exact ids), then calls reset_demo() to seed tenant data.
- * Safe to run repeatedly: existing users with the right id are left alone; a
- * user whose email exists under a different id is deleted and recreated.
+ * reference these exact ids), uploads the proof-of-work photos the seed points
+ * at, then calls reset_demo() to seed tenant data. Safe to run repeatedly:
+ * existing users with the right id are left alone; a user whose email exists
+ * under a different id is deleted and recreated.
  */
 import 'dotenv/config';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
-import { DEMO_PASSWORD, DEMO_USERS } from './demo-ids';
+import { DEMO_PASSWORD, DEMO_USERS, SEED_PHOTOS } from './demo-ids';
 
 const url = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,6 +44,23 @@ async function listAllUsersByEmail(): Promise<Map<string, string>> {
     if (data.users.length < 100) break;
   }
   return byEmail;
+}
+
+/**
+ * The seed stores storage *paths* (`seed/…jpg`) rather than absolute URLs, so a
+ * nightly reset_demo() never needs the project URL. These objects must exist
+ * before the seed runs, or the demo would render broken thumbnails.
+ */
+async function uploadSeedPhotos(): Promise<void> {
+  const photoDir = join(dirname(fileURLToPath(import.meta.url)), 'seed-photos');
+  for (const path of SEED_PHOTOS) {
+    const file = readFileSync(join(photoDir, path.replace('seed/', '')));
+    const { error } = await admin.storage
+      .from('task-proof')
+      .upload(path, file, { contentType: 'image/jpeg', upsert: true });
+    if (error) throw new Error(`upload ${path}: ${error.message}`);
+  }
+  console.log(`Proof photos: ${SEED_PHOTOS.length} uploaded to task-proof/seed.`);
 }
 
 async function main(): Promise<void> {
@@ -80,6 +101,8 @@ async function main(): Promise<void> {
   }
 
   console.log(`\nAuth users: ${created} created, ${skipped} already correct.`);
+
+  await uploadSeedPhotos();
 
   console.log('Calling reset_demo() to seed tenant data…');
   const { error: rpcError } = await admin.rpc('reset_demo');
