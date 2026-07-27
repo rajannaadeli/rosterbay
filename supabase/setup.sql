@@ -1395,9 +1395,10 @@ declare
   v_at timestamptz;
 begin
   -- This function owns the whole task/issue layer; the base seed's partial
-  -- in-progress checklist is replaced wholesale.
-  delete from public.shift_tasks;
-  delete from public.issues;
+  -- in-progress checklist is replaced wholesale. truncate, not delete: Supabase
+  -- loads pg_safeupdate for API roles, which rejects an unqualified DELETE when
+  -- reset_demo() is invoked over RPC.
+  truncate table public.shift_tasks, public.issues;
 
   -- Every live shift carries a snapshot of its site's checklist, taken at
   -- creation. Editing a template later never reaches back into these rows.
