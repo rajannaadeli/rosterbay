@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { ImageSquareIcon } from 'phosphor-react-native';
+import { CheckCircleIcon, ImageSquareIcon } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 
@@ -80,11 +80,19 @@ export function GeofenceConfirmSheet({
 interface ReportIssueSheetProps {
   busy: boolean;
   errorMessage: string | null;
+  /** True once the report has landed — the sheet switches to its sent state. */
+  sent: boolean;
   onClose: () => void;
   onSubmit: (note: string, photo: { base64: string; mimeType: string } | null) => void;
 }
 
-export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: ReportIssueSheetProps) {
+export function ReportIssueSheet({
+  busy,
+  errorMessage,
+  sent,
+  onClose,
+  onSubmit,
+}: ReportIssueSheetProps) {
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<{ base64: string; mimeType: string } | null>(null);
   const c = useColors();
@@ -103,7 +111,22 @@ export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: Repo
 
   return (
     <SheetShell onClose={onClose}>
-      {(close) => (
+      {(close) =>
+        sent ? (
+          <>
+            <View className="items-center gap-2 py-2">
+              <CheckCircleIcon size={40} weight="fill" color={c.success} />
+              <Text className="text-lg font-semibold">Report sent</Text>
+              <Text className="text-center text-sm text-muted-foreground">
+                The ops team can see it now. You&apos;ll see it marked acknowledged on this
+                shift once someone picks it up.
+              </Text>
+            </View>
+            <Button size="lg" onPress={close}>
+              <Text>Done</Text>
+            </Button>
+          </>
+        ) : (
         <>
           <View className="gap-1">
             <Text className="text-lg font-semibold">Report an issue</Text>
@@ -149,7 +172,8 @@ export function ReportIssueSheet({ busy, errorMessage, onClose, onSubmit }: Repo
             </Button>
           </View>
         </>
-      )}
+        )
+      }
     </SheetShell>
   );
 }

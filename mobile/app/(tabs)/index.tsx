@@ -235,19 +235,20 @@ export default function TodayScreen() {
         <ReportIssueSheet
           busy={reportIssue.isPending}
           errorMessage={reportIssue.isError ? reportIssue.error.message : null}
-          onClose={() => setIssueOpen(false)}
+          sent={reportIssue.isSuccess}
+          onClose={() => {
+            setIssueOpen(false);
+            reportIssue.reset();
+          }}
           onSubmit={(note, photo) => {
             if (!session.data) return;
-            reportIssue.mutate(
-              {
-                companyId: shift.data!.company_id,
-                shiftId: shift.data!.id,
-                workerId: session.data.user.id,
-                note,
-                ...(photo ? { photoBase64: photo.base64, mimeType: photo.mimeType } : {}),
-              },
-              { onSuccess: () => setIssueOpen(false) }
-            );
+            reportIssue.mutate({
+              companyId: shift.data!.company_id,
+              shiftId: shift.data!.id,
+              workerId: session.data.user.id,
+              note,
+              ...(photo ? { photoBase64: photo.base64, mimeType: photo.mimeType } : {}),
+            });
           }}
         />
       )}

@@ -22,13 +22,3 @@ export async function fetchSites() {
   if (error) throw error;
   return data;
 }
-
-export async function fetchSiteTemplates(siteId: string) {
-  const { data, error } = await supabase
-    .from('task_templates')
-    .select('*')
-    .eq('site_id', siteId)
-    .order('sort_order');
-  if (error) throw error;
-  return data;
-}

@@ -153,6 +153,17 @@ export async function fetchShiftTasks(shiftId: string) {
   return data;
 }
 
+/** What this worker reported on the shift — acknowledged state included. */
+export async function fetchShiftIssues(shiftId: string) {
+  const { data, error } = await supabase
+    .from('issues')
+    .select('*')
+    .eq('shift_id', shiftId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 function base64ToBytes(base64: string): Uint8Array {
   const binary = globalThis.atob(base64);
   const bytes = new Uint8Array(binary.length);

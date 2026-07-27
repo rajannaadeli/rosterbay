@@ -4,28 +4,38 @@ import {
   CheckCircleIcon,
   CheckSquareIcon,
   MapPinIcon,
+  WarningIcon,
   XCircleIcon,
 } from 'phosphor-react-native';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/screen-header';
 import { StatusPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
-import { useShift, useSiteTemplates } from '@/features/schedule/hooks';
-import { useSite } from '@/features/today/hooks';
+import { useShift } from '@/features/schedule/hooks';
+import { useShiftIssues, useShiftTasks, useSite } from '@/features/today/hooks';
 import { useCertTypes, useMyCerts } from '@/features/wallet/hooks';
 import { useColors } from '@/lib/colors';
 import { formatACST, formatShiftRange } from '@/lib/format';
+import { proofPhotoUrl } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 export default function ShiftDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const shift = useShift(id ?? '');
   const site = useSite(shift.data?.site_id);
-  const templates = useSiteTemplates(shift.data?.site_id);
+  // The shift's own checklist — a snapshot taken when it was created, not the
+  // site's current templates.
+  const tasks = useShiftTasks(shift.data?.id, true);
+  const issues = useShiftIssues(shift.data?.id);
   const certTypes = useCertTypes();
   const myCerts = useMyCerts();
   const c = useColors();
+
+  const taskList = tasks.data ?? [];
+  const doneCount = taskList.filter((task) => task.done).length;
+  const finished = shift.data?.status === 'completed';
 
   const isPending = shift.isPending || site.isPending;
 
@@ -102,22 +112,104 @@ export default function ShiftDetailScreen() {
             </View>
           )}
 
-          {(templates.data?.length ?? 0) > 0 && (
+          {taskList.length > 0 && (
+            <View className="gap-3 rounded-[18px] bg-card p-5 shadow-sm">
+              <View className="flex-row items-center justify-between gap-2">
+                <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Tasks on this shift
+                </Text>
+                {finished && (
+                  <Text
+                    className={cn(
+                      'text-xs font-semibold tabular-nums',
+                      doneCount === taskList.length ? 'text-success' : 'text-warning'
+                    )}>
+                    {doneCount}/{taskList.length} completed
+                  </Text>
+                )}
+              </View>
+
+              {taskList.map((task) => {
+                const photo = proofPhotoUrl(task.photo_url);
+                return (
+                  <View key={task.id} className="flex-row items-center gap-2.5">
+                    {task.done ? (
+                      <CheckCircleIcon size={16} weight="fill" color={c.success} />
+                    ) : (
+                      <CheckSquareIcon size={16} weight="duotone" color={c.mutedForeground} />
+                    )}
+                    <View className="flex-1 gap-1">
+                      <Text
+                        className={cn('text-sm', task.done && 'text-muted-foreground')}
+                        numberOfLines={2}>
+                        {task.title}
+                      </Text>
+                      {task.source === 'adhoc' && (
+                        <View className="self-start rounded-full bg-primary/10 px-2 py-0.5">
+                          <Text className="text-[10px] font-medium text-primary">
+                            Added by supervisor
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    {photo ? (
+                      <Image
+                        source={{ uri: photo }}
+                        className="size-9 rounded-lg bg-muted"
+                        accessibilityIgnoresInvertColors
+                      />
+                    ) : task.requires_photo ? (
+                      <CameraIcon size={15} weight="duotone" color={c.primary} />
+                    ) : null}
+                  </View>
+                );
+              })}
+
+              {finished && (
+                <Text className="text-xs text-muted-foreground">
+                  This shift is finished — the checklist is a record now.
+                </Text>
+              )}
+            </View>
+          )}
+
+          {(issues.data?.length ?? 0) > 0 && (
             <View className="gap-3 rounded-[18px] bg-card p-5 shadow-sm">
               <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Tasks on this shift
+                Issues you reported
               </Text>
-              {templates.data?.map((template) => (
-                <View key={template.id} className="flex-row items-center gap-2.5">
-                  <CheckSquareIcon size={16} weight="duotone" color={c.mutedForeground} />
-                  <Text className="flex-1 text-sm" numberOfLines={1}>
-                    {template.title}
-                  </Text>
-                  {template.requires_photo && (
-                    <CameraIcon size={15} weight="duotone" color={c.primary} />
-                  )}
-                </View>
-              ))}
+              {issues.data?.map((issue) => {
+                const photo = proofPhotoUrl(issue.photo_url);
+                return (
+                  <View key={issue.id} className="gap-2 rounded-[12px] bg-muted/50 p-3">
+                    <View className="flex-row items-start gap-2.5">
+                      <WarningIcon
+                        size={16}
+                        weight="duotone"
+                        color={issue.status === 'open' ? c.danger : c.mutedForeground}
+                      />
+                      <Text className="flex-1 text-sm">{issue.note}</Text>
+                      {photo && (
+                        <Image
+                          source={{ uri: photo }}
+                          className="size-9 rounded-lg bg-muted"
+                          accessibilityIgnoresInvertColors
+                        />
+                      )}
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      {issue.status === 'acknowledged' ? (
+                        <StatusPill tone="success" label="Acknowledged" />
+                      ) : (
+                        <StatusPill tone="warning" label="Awaiting review" />
+                      )}
+                      <Text className="text-[11px] text-muted-foreground">
+                        {formatACST(issue.created_at, 'd MMM, h:mm a')}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           )}
         </ScrollView>

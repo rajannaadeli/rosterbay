@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { useSession } from '@/features/auth/hooks';
-import { fetchMyShifts, fetchShift, fetchSites, fetchSiteTemplates } from './api';
+import { fetchMyShifts, fetchShift, fetchSites } from './api';
 
 export function useMyShifts() {
   const session = useSession();
@@ -23,12 +23,4 @@ export function useShift(shiftId: string) {
 
 export function useSites() {
   return useQuery({ queryKey: ['sites'], queryFn: fetchSites, staleTime: Infinity });
-}
-
-export function useSiteTemplates(siteId: string | undefined) {
-  return useQuery({
-    queryKey: ['site-templates', siteId],
-    queryFn: () => fetchSiteTemplates(siteId!),
-    enabled: siteId !== undefined,
-  });
 }

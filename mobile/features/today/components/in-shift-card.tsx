@@ -8,9 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { useColors } from '@/lib/colors';
 import type { Tables } from '@/lib/database.types';
+import { proofPhotoUrl } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { uploadTaskProof } from '../api';
-import { useSetTaskDone, useShiftTasks } from '../hooks';
+import { useSetTaskDone, useShiftTasks, useShiftTasksRealtime } from '../hooks';
 
 function ElapsedTimer({ since }: { since: string }) {
   const [, tick] = useState(0);
@@ -81,6 +82,7 @@ interface TaskRowProps {
 
 function TaskRow({ task, busy, onToggle }: TaskRowProps) {
   const c = useColors();
+  const photo = proofPhotoUrl(task.photo_url);
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -95,14 +97,21 @@ function TaskRow({ task, busy, onToggle }: TaskRowProps) {
         )}>
         {task.done && <CheckIcon size={14} color="#FFFFFF" weight="bold" />}
       </View>
-      <Text
-        className={cn('flex-1 text-sm', task.done && 'text-muted-foreground line-through')}
-        numberOfLines={2}>
-        {task.title}
-      </Text>
-      {task.photo_url ? (
+      <View className="flex-1 gap-1">
+        <Text
+          className={cn('text-sm', task.done && 'text-muted-foreground line-through')}
+          numberOfLines={2}>
+          {task.title}
+        </Text>
+        {task.source === 'adhoc' && (
+          <View className="self-start rounded-full bg-primary/10 px-2 py-0.5">
+            <Text className="text-[10px] font-medium text-primary">Added by supervisor</Text>
+          </View>
+        )}
+      </View>
+      {photo ? (
         <Image
-          source={{ uri: task.photo_url }}
+          source={{ uri: photo }}
           className="size-9 rounded-lg bg-muted"
           accessibilityIgnoresInvertColors
         />
@@ -123,6 +132,7 @@ interface InShiftCardProps {
 export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardProps) {
   const c = useColors();
   const tasks = useShiftTasks(shift.id, true);
+  useShiftTasksRealtime(shift.id);
   const setDone = useSetTaskDone(shift.id);
   const [uploadingTaskId, setUploadingTaskId] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
@@ -196,7 +206,7 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
           {tasks.isPending ? (
             Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)
           ) : taskList.length === 0 ? (
-            <Text className="text-sm text-muted-foreground">No checklist for this site.</Text>
+            <Text className="text-sm text-muted-foreground">No checklist on this shift.</Text>
           ) : (
             taskList.map((task) => (
               <TaskRow

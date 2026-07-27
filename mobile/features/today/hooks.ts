@@ -6,11 +6,13 @@ import { useSession } from '@/features/auth/hooks';
 import { computeClockInFlags, distanceMeters } from '@/lib/compliance';
 import type { Tables } from '@/lib/database.types';
 import { toast } from '@/lib/toast';
+import { supabase } from '@/lib/supabase';
 import {
   clockIn,
   clockOut,
   fetchActiveEntry,
   fetchMyCurrentOrNextShift,
+  fetchShiftIssues,
   fetchShiftTasks,
   fetchSite,
   reportIssue,
@@ -54,6 +56,38 @@ export function useShiftTasks(shiftId: string | undefined, enabled: boolean) {
     queryFn: () => fetchShiftTasks(shiftId!),
     enabled: shiftId !== undefined && enabled,
   });
+}
+
+export function useShiftIssues(shiftId: string | undefined) {
+  return useQuery({
+    queryKey: ['today', 'issues', shiftId],
+    queryFn: () => fetchShiftIssues(shiftId!),
+    enabled: shiftId !== undefined,
+  });
+}
+
+/**
+ * A task the supervisor adds mid-shift should appear on the worker's checklist
+ * without a pull-to-refresh — the same realtime path the offer cards use.
+ */
+export function useShiftTasksRealtime(shiftId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!shiftId) return;
+    const channel = supabase
+      .channel(`shift-tasks-${shiftId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shift_tasks', filter: `shift_id=eq.${shiftId}` },
+        () => void queryClient.invalidateQueries({ queryKey: ['today', 'tasks', shiftId] })
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [shiftId, queryClient]);
 }
 
 export type LocationStatus = 'loading' | 'ready' | 'denied' | 'unavailable';
@@ -259,5 +293,12 @@ export function useSetTaskDone(shiftId: string) {
 }
 
 export function useReportIssue() {
-  return useMutation({ mutationFn: (input: ReportIssueInput) => reportIssue(input) });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ReportIssueInput) => reportIssue(input),
+    // The report shows up straight away in the worker's own issue list, and
+    // comes back marked once the ops team acknowledges it.
+    onSuccess: (_data, input) =>
+      void queryClient.invalidateQueries({ queryKey: ['today', 'issues', input.shiftId] }),
+  });
 }
