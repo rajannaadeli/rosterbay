@@ -1,4 +1,12 @@
-import { CheckCircle, Megaphone, SignIn, SignOut } from '@phosphor-icons/react';
+import {
+  Camera,
+  CheckCircle,
+  ListChecks,
+  Megaphone,
+  SignIn,
+  SignOut,
+  Warning,
+} from '@phosphor-icons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
 
 import { UserAvatar } from '@/components/user-avatar';
@@ -6,7 +14,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { formatACST } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export type FeedKind = 'clock_in' | 'clock_out' | 'offer' | 'approval';
+export type FeedKind =
+  | 'clock_in'
+  | 'clock_out'
+  | 'offer'
+  | 'approval'
+  | 'task_photo'
+  | 'tasks_complete'
+  | 'issue';
 
 export interface ActivityItem {
   id: string;
@@ -24,6 +39,9 @@ const KIND_META: Record<FeedKind, { icon: typeof SignIn; className: string }> = 
   clock_out: { icon: SignOut, className: 'text-muted-foreground' },
   offer: { icon: Megaphone, className: 'text-primary' },
   approval: { icon: CheckCircle, className: 'text-success' },
+  task_photo: { icon: Camera, className: 'text-primary' },
+  tasks_complete: { icon: ListChecks, className: 'text-success' },
+  issue: { icon: Warning, className: 'text-danger' },
 };
 
 function dayLabel(iso: string): string {

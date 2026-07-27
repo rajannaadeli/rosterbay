@@ -1,4 +1,4 @@
-import { CaretDown, CaretRight, CaretUpDown, CheckCircle, Clock, DotsThree, DownloadSimple, MapPin, Question } from '@phosphor-icons/react';
+import { CaretDown, CaretRight, CaretUpDown, CheckCircle, Clock, DotsThree, DownloadSimple, ListChecks, MapPin, Question } from '@phosphor-icons/react';
 import {
   flexRender,
   getCoreRowModel,
@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type ExpandedState,
   type Row,
   type SortingState,
 } from '@tanstack/react-table';
@@ -67,10 +68,12 @@ const STATUS_LABEL: Record<TimeEntryStatus, string> = {
   flagged: 'Flagged',
   rejected: 'Rejected',
 };
-const FLAG_META: Record<TimeEntryFlag, { icon: typeof Clock; label: string }> = {
-  late: { icon: Clock, label: 'Late clock-in' },
-  out_of_zone: { icon: MapPin, label: 'Clocked in outside the geofence' },
-  missing_clock_out: { icon: Question, label: 'Missing clock-out' },
+const FLAG_META: Record<TimeEntryFlag, { icon: typeof Clock; label: string; tone: string }> = {
+  late: { icon: Clock, label: 'Late clock-in', tone: 'text-danger' },
+  out_of_zone: { icon: MapPin, label: 'Clocked in outside the geofence', tone: 'text-danger' },
+  missing_clock_out: { icon: Question, label: 'Missing clock-out', tone: 'text-danger' },
+  // A review signal, not a failure — amber, and it never blocks approval.
+  incomplete_tasks: { icon: ListChecks, label: 'Tasks not completed', tone: 'text-warning' },
 };
 
 function variance(row: TimesheetRow): number | null {
@@ -170,6 +173,11 @@ export function TimesheetsPage() {
   const [custom, setCustom] = useState(() => weekRange(0));
   const [sorting, setSorting] = useState<SortingState>([]);
   const [bulkOpen, setBulkOpen] = useState(false);
+  // ?entry=<id> lands on one row expanded (dashboard attention rows link here).
+  const [expanded, setExpanded] = useState<ExpandedState>(() => {
+    const entryId = searchParams.get('entry');
+    return entryId ? { [entryId]: true } : {};
+  });
 
   const range = preset === 'this-week' ? weekRange(0) : preset === 'last-week' ? weekRange(-1) : custom;
 
@@ -320,7 +328,7 @@ export function TimesheetsPage() {
               return (
                 <Tooltip key={flag}>
                   <TooltipTrigger render={<span className="inline-flex" aria-label={meta.label} />}>
-                    <meta.icon size={14} weight="duotone" className="text-danger" aria-hidden />
+                    <meta.icon size={14} weight="duotone" className={meta.tone} aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent>{meta.label}</TooltipContent>
                 </Tooltip>
@@ -354,8 +362,9 @@ export function TimesheetsPage() {
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
+    state: { sorting, expanded },
     onSortingChange: setSorting,
+    onExpandedChange: setExpanded,
     getRowId: (row) => row.id,
     getRowCanExpand: () => true,
     getCoreRowModel: getCoreRowModel(),
@@ -569,6 +578,7 @@ export function TimesheetsPage() {
                               <ReviewPanel
                                 row={row.original}
                                 site={siteById.get(row.original.site_id)}
+                                workerNames={workerNames}
                                 busy={review.isPending}
                                 onReview={(next) => review.mutate({ id: row.original.id, status: next })}
                               />

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   instantiateShiftTasks,
   nextSortOrder,
+  tasksEditable,
   type ChecklistTemplate,
 } from '@/features/proof/task-instantiation';
 import { checkAssignment, type CheckAssignmentInput, type ConflictShift } from './conflict-engine';
@@ -279,5 +280,18 @@ describe('nextSortOrder', () => {
 
   it('starts at 1 on an empty checklist', () => {
     expect(nextSortOrder([])).toBe(1);
+  });
+});
+
+describe('tasksEditable', () => {
+  it('allows edits until the shift completes', () => {
+    expect(tasksEditable('open')).toBe(true);
+    expect(tasksEditable('assigned')).toBe(true);
+    expect(tasksEditable('in_progress')).toBe(true);
+  });
+
+  it('locks the checklist once the shift is a record', () => {
+    expect(tasksEditable('completed')).toBe(false);
+    expect(tasksEditable('cancelled')).toBe(false);
   });
 });

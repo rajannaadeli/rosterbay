@@ -6,6 +6,7 @@ import {
   cancelShift,
   createShift,
   fetchAllWorkerCerts,
+  fetchShift,
   fetchShiftsRange,
   unassignShift,
   updateShift,
@@ -18,6 +19,15 @@ export function useShiftsRange(fromIso: string, toIso: string) {
   return useQuery({
     queryKey: shiftsKey(fromIso),
     queryFn: () => fetchShiftsRange(fromIso, toIso),
+  });
+}
+
+/** Fallback for a deep-linked shift that isn't in the week currently loaded. */
+export function useShift(shiftId: string | null) {
+  return useQuery({
+    queryKey: ['shifts', 'one', shiftId],
+    queryFn: () => fetchShift(shiftId!),
+    enabled: shiftId !== null,
   });
 }
 

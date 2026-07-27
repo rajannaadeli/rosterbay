@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { useTemplateUsage } from '@/features/proof/hooks';
 import { useTaskTemplateMutations, useTaskTemplates } from '@/features/sites/hooks';
 import type { Tables } from '@/lib/database.types';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ const saved = () => toast.success('Saved', { duration: 1500 });
 
 export function TaskTemplateEditor({ siteId, companyId }: TaskTemplateEditorProps) {
   const templates = useTaskTemplates(siteId);
+  const usage = useTemplateUsage();
   const { create, update, remove, reorder } = useTaskTemplateMutations(siteId);
   const queryClient = useQueryClient();
   const [newTitle, setNewTitle] = useState('');
@@ -106,8 +108,8 @@ export function TaskTemplateEditor({ siteId, companyId }: TaskTemplateEditorProp
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs text-muted-foreground">
-        The checklist workers complete on every shift here. Drag to reorder; changes save
-        automatically.
+        These templates are copied onto every new shift at this site. Existing shifts
+        aren&apos;t affected. Drag to reorder; changes save automatically.
       </p>
 
       {order.length === 0 ? (
@@ -124,6 +126,7 @@ export function TaskTemplateEditor({ siteId, companyId }: TaskTemplateEditorProp
                 <SortableTaskRow
                   key={task.id}
                   task={task}
+                  usedOnShifts={usage.data?.get(task.id) ?? 0}
                   onRename={(title) => {
                     if (title && title !== task.title) {
                       update.mutate({ id: task.id, patch: { title } }, { onSuccess: saved });
@@ -199,12 +202,20 @@ export function TaskTemplateEditor({ siteId, companyId }: TaskTemplateEditorProp
 
 interface SortableTaskRowProps {
   task: Task;
+  /** Snapshots of this template sitting on shifts that haven't run yet. */
+  usedOnShifts: number;
   onRename: (title: string) => void;
   onTogglePhoto: (requiresPhoto: boolean) => void;
   onDelete: () => void;
 }
 
-function SortableTaskRow({ task, onRename, onTogglePhoto, onDelete }: SortableTaskRowProps) {
+function SortableTaskRow({
+  task,
+  usedOnShifts,
+  onRename,
+  onTogglePhoto,
+  onDelete,
+}: SortableTaskRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
@@ -234,6 +245,12 @@ function SortableTaskRow({ task, onRename, onTogglePhoto, onDelete }: SortableTa
         className="h-8 flex-1 border-transparent bg-transparent shadow-none focus-visible:border-input focus-visible:bg-background"
         onBlur={(event) => onRename(event.target.value.trim())}
       />
+
+      <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
+        {usedOnShifts === 0
+          ? 'not on any upcoming shift yet'
+          : `used on ${usedOnShifts} upcoming shift${usedOnShifts === 1 ? '' : 's'}`}
+      </span>
 
       <label
         className={cn(

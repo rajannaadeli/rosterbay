@@ -1,4 +1,4 @@
-import type { Tables, TablesInsert } from '@/lib/database.types';
+import type { ShiftStatus, Tables, TablesInsert } from '@/lib/database.types';
 
 /** The only template fields a shift snapshot needs. */
 export type ChecklistTemplate = Pick<
@@ -46,4 +46,12 @@ export function instantiateShiftTasks({
 /** Position for a task appended to an existing shift checklist. */
 export function nextSortOrder(tasks: readonly { sort_order: number }[]): number {
   return tasks.reduce((max, task) => Math.max(max, task.sort_order), 0) + 1;
+}
+
+/**
+ * Admins may add, remove and re-scope tasks right up until the shift completes
+ * — after that the checklist is a record of what happened, not a document.
+ */
+export function tasksEditable(status: ShiftStatus): boolean {
+  return status === 'open' || status === 'assigned' || status === 'in_progress';
 }

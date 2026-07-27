@@ -29,9 +29,10 @@ interface EntityDrawerProps {
   header: ReactNode;
   /** Right-aligned header actions (e.g. an overflow ⋯ menu). */
   headerActions?: ReactNode;
-  tabs: DrawerTab[];
-  activeTab: string;
-  onTabChange: (id: string) => void;
+  /** Omit for a single-column drawer (no tab bar) — e.g. the shift sheet. */
+  tabs?: DrawerTab[];
+  activeTab?: string;
+  onTabChange?: (id: string) => void;
   /** Sticky footer — omit to hide (e.g. autosave tabs). */
   footer?: ReactNode;
   children: ReactNode;
@@ -65,6 +66,49 @@ export function EntityDrawer({
     onOpenChange(next);
   };
 
+  const panel = (
+    <>
+      {/* Sticky header */}
+      <div className="flex items-start gap-3 border-b bg-muted/20 px-5 py-4">
+        <div className="min-w-0 flex-1">{header}</div>
+        <div className="flex shrink-0 items-center gap-1">
+          {headerActions}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Close"
+            onClick={() => requestClose(false)}
+          >
+            <X size={16} aria-hidden />
+          </Button>
+        </div>
+      </div>
+
+      {/* Tab bar — only when the entity has tabs */}
+      {tabs && (
+        <div className="border-b px-4 py-2">
+          <TabsList variant="line">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+      )}
+
+      {/* Scrollable body */}
+      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">{children}</div>
+
+      {/* Sticky footer */}
+      {footer && (
+        <div className="flex items-center justify-end gap-2 border-t bg-card px-5 py-3">
+          {footer}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <>
       <Sheet open={open} onOpenChange={requestClose}>
@@ -76,48 +120,17 @@ export function EntityDrawer({
           <SheetTitle className="sr-only">{srTitle}</SheetTitle>
           <SheetDescription className="sr-only">Details drawer</SheetDescription>
 
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => onTabChange(String(v))}
-            className="flex min-h-0 flex-1 flex-col gap-0"
-          >
-            {/* Sticky header */}
-            <div className="flex items-start gap-3 border-b bg-muted/20 px-5 py-4">
-              <div className="min-w-0 flex-1">{header}</div>
-              <div className="flex shrink-0 items-center gap-1">
-                {headerActions}
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Close"
-                  onClick={() => requestClose(false)}
-                >
-                  <X size={16} aria-hidden />
-                </Button>
-              </div>
-            </div>
-
-            {/* Tab bar */}
-            <div className="border-b px-4 py-2">
-              <TabsList variant="line">
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.id} value={tab.id}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-
-            {/* Scrollable body */}
-            <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">{children}</div>
-
-            {/* Sticky footer */}
-            {footer && (
-              <div className="flex items-center justify-end gap-2 border-t bg-card px-5 py-3">
-                {footer}
-              </div>
-            )}
-          </Tabs>
+          {tabs ? (
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => onTabChange?.(String(v))}
+              className="flex min-h-0 flex-1 flex-col gap-0"
+            >
+              {panel}
+            </Tabs>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col">{panel}</div>
+          )}
         </SheetContent>
       </Sheet>
 

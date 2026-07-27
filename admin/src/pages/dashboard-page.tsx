@@ -22,6 +22,12 @@ import { BroadcastDialog } from '@/features/offers/components/broadcast-dialog';
 import { eligibleWorkers } from '@/features/offers/eligibility';
 import { useBroadcastOffer, useOffersRealtime, useOpenOffers } from '@/features/offers/hooks';
 import { useNotifications } from '@/features/notifications/hooks';
+import {
+  useOpenIssues,
+  useProofRealtime,
+  useProofSummaries,
+  useRecentTaskActivity,
+} from '@/features/proof/hooks';
 import { useAllWorkerCerts, useShiftsRange } from '@/features/roster/hooks';
 import { useCertTypes } from '@/features/certs/hooks';
 import { useSites } from '@/features/sites/hooks';
@@ -62,6 +68,18 @@ export function DashboardPage() {
 
   const [broadcastShiftId, setBroadcastShiftId] = useState<string | null>(null);
   const [mountedAt] = useState(() => new Date().toISOString());
+
+  // Proof-of-work window: yesterday and today's shifts, plus tomorrow's.
+  const [proofFrom] = useState(() => new Date(Date.now() - 48 * 3_600_000).toISOString());
+  const [proofTo] = useState(() => new Date(Date.now() + 24 * 3_600_000).toISOString());
+  const proofSummaries = useProofSummaries(proofFrom, proofTo);
+  const openIssues = useOpenIssues();
+  const proofShiftIds = useMemo(
+    () => (proofSummaries.data ?? []).map((row) => row.shift_id),
+    [proofSummaries.data],
+  );
+  const taskActivity = useRecentTaskActivity(proofShiftIds);
+  useProofRealtime();
 
   const workerNames = useMemo(
     () => Object.fromEntries((workers.data ?? []).map((w) => [w.id, w.full_name])),
@@ -108,6 +126,26 @@ export function DashboardPage() {
   );
   const flagged = (timesheets.data ?? []).filter((r) => r.effective_status === 'flagged');
 
+  /** Completed shifts in the last 48h that came back with tasks outstanding. */
+  const incompleteShifts = useMemo(
+    () =>
+      (proofSummaries.data ?? [])
+        .filter(
+          (row) =>
+            row.shift_status === 'completed' &&
+            row.tasks_total > 0 &&
+            row.tasks_done < row.tasks_total,
+        )
+        .sort((a, b) => b.starts_at.localeCompare(a.starts_at)),
+    [proofSummaries.data],
+  );
+
+  /** shift_id → time entry, so a tasks-incomplete row can open its timesheet. */
+  const entryByShift = useMemo(
+    () => new Map((timesheets.data ?? []).map((row) => [row.shift_id, row.id])),
+    [timesheets.data],
+  );
+
   const attention: AttentionRow[] = useMemo(() => {
     const rows: AttentionRow[] = [];
     for (const shift of unfilled) {
@@ -117,6 +155,25 @@ export function DashboardPage() {
         title: `Unfilled — ${siteNames[shift.site_id] ?? 'site'}`,
         subtitle: `${formatACST(shift.starts_at, 'EEE h:mma').toLowerCase()}–${formatACST(shift.ends_at, 'h:mma').toLowerCase()}${shift.role_required ? ` · ${shift.role_required}` : ''}`,
         broadcastShiftId: shift.id,
+      });
+    }
+    for (const issue of openIssues.data ?? []) {
+      rows.push({
+        id: `issue-${issue.id}`,
+        severity: 'danger',
+        title: `Issue reported — ${issue.site_id ? (siteNames[issue.site_id] ?? 'site') : 'site'}`,
+        subtitle: `${workerNames[issue.worker_id] ?? 'worker'} · ${issue.note}`,
+        to: `/app/roster?shift=${issue.shift_id}`,
+      });
+    }
+    for (const summary of incompleteShifts) {
+      const entryId = entryByShift.get(summary.shift_id);
+      rows.push({
+        id: `incomplete-${summary.shift_id}`,
+        severity: 'warning',
+        title: `Tasks incomplete — ${summary.worker_id ? (workerNames[summary.worker_id] ?? 'worker') : 'unassigned'} · ${siteNames[summary.site_id] ?? 'site'}`,
+        subtitle: `${summary.tasks_total - summary.tasks_done} of ${summary.tasks_total} not completed · ${formatACST(summary.starts_at, 'EEE h:mma').toLowerCase()}`,
+        to: entryId ? `/app/timesheets?entry=${entryId}` : '/app/timesheets',
       });
     }
     for (const row of flagged.slice(0, 4)) {
@@ -141,7 +198,18 @@ export function DashboardPage() {
       });
     }
     return rows;
-  }, [unfilled, flagged, expiredCerts, expiringCerts, siteNames, workerNames, certTypeNames]);
+  }, [
+    unfilled,
+    openIssues.data,
+    incompleteShifts,
+    entryByShift,
+    flagged,
+    expiredCerts,
+    expiringCerts,
+    siteNames,
+    workerNames,
+    certTypeNames,
+  ]);
 
   const feed: ActivityItem[] = useMemo(() => {
     const items: ActivityItem[] = [];
@@ -187,8 +255,67 @@ export function DashboardPage() {
         detail: `${siteNames[offer.site_id] ?? 'site'} · ${formatACST(offer.shift_starts_at, 'EEE h:mma').toLowerCase()}`,
       });
     }
+
+    // Proof of work: photos as they land, and a shift closing out at 100%.
+    const summaryByShift = new Map(
+      (proofSummaries.data ?? []).map((summary) => [summary.shift_id, summary]),
+    );
+    for (const task of taskActivity.data ?? []) {
+      const summary = summaryByShift.get(task.shift_id);
+      if (!summary || task.photo_url === null || task.done_at === null) continue;
+      const worker = summary.worker_id ? (workerNames[summary.worker_id] ?? 'Worker') : 'Worker';
+      items.push({
+        id: `${task.id}-photo`,
+        at: task.done_at,
+        kind: 'task_photo',
+        actor: worker,
+        lead: worker,
+        detail: `submitted photo proof — ${task.title}`,
+      });
+    }
+    for (const summary of proofSummaries.data ?? []) {
+      if (summary.tasks_total === 0 || summary.tasks_done < summary.tasks_total) continue;
+      if (summary.shift_status !== 'completed') continue;
+      // The final tick is the event's timestamp; skip shifts finished earlier
+      // than the activity window, which have nothing recent to report.
+      const lastTick = (taskActivity.data ?? [])
+        .filter((task) => task.shift_id === summary.shift_id && task.done_at !== null)
+        .map((task) => task.done_at as string)
+        .sort()
+        .at(-1);
+      if (!lastTick) continue;
+      const worker = summary.worker_id ? (workerNames[summary.worker_id] ?? 'Worker') : 'Worker';
+      items.push({
+        id: `${summary.shift_id}-tasks-complete`,
+        at: lastTick,
+        kind: 'tasks_complete',
+        actor: worker,
+        lead: worker,
+        detail: `completed all ${summary.tasks_total} tasks at ${siteNames[summary.site_id] ?? 'site'}`,
+      });
+    }
+    for (const issue of openIssues.data ?? []) {
+      const worker = workerNames[issue.worker_id] ?? 'Worker';
+      items.push({
+        id: `${issue.id}-issue`,
+        at: issue.created_at,
+        kind: 'issue',
+        actor: worker,
+        lead: worker,
+        detail: `reported an issue at ${issue.site_id ? (siteNames[issue.site_id] ?? 'site') : 'site'}`,
+      });
+    }
+
     return items.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 14);
-  }, [timesheets.data, openOffers.data, workerNames, siteNames]);
+  }, [
+    timesheets.data,
+    openOffers.data,
+    proofSummaries.data,
+    taskActivity.data,
+    openIssues.data,
+    workerNames,
+    siteNames,
+  ]);
   void notifications;
 
   const loading = timesheets.isPending || workers.isPending || sites.isPending;

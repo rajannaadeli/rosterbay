@@ -13,6 +13,13 @@ export async function fetchShiftsRange(fromIso: string, toIso: string) {
   return data;
 }
 
+/** Single shift by id — the sheet may be deep-linked to another week's shift. */
+export async function fetchShift(shiftId: string) {
+  const { data, error } = await supabase.from('shifts').select('*').eq('id', shiftId).single();
+  if (error) throw error;
+  return data;
+}
+
 /** Every worker's certs with server-computed status — conflict-engine input. */
 export async function fetchAllWorkerCerts() {
   const { data, error } = await supabase.from('worker_certs_with_status').select('*');

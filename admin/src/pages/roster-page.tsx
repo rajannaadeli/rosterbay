@@ -8,6 +8,7 @@ import {
 import { CaretLeft, CaretRight, MegaphoneSimple } from '@phosphor-icons/react';
 import { addDays } from 'date-fns';
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,16 +24,18 @@ import { RosterCell } from '@/features/roster/components/roster-cell';
 import {
   ConflictDialog,
   CreateShiftDialog,
-  ShiftDetailDialog,
   type CreateShiftValues,
   type PendingAssignment,
 } from '@/features/roster/components/shift-dialogs';
+import { ShiftSheet } from '@/features/roster/components/shift-sheet';
+import { useProofRealtime, useProofSummaries } from '@/features/proof/hooks';
 import { WorkerDragCard, WorkerPanel } from '@/features/roster/components/worker-panel';
 import {
   useAllWorkerCerts,
   useAssignShift,
   useCancelShift,
   useCreateShift,
+  useShift,
   useShiftsRange,
   useUnassignShift,
   useUpdateShift,
@@ -61,8 +64,10 @@ export function RosterPage() {
   const allCerts = useAllWorkerCerts();
   const openOffers = useOpenOffers();
   const broadcast = useBroadcastOffer();
+  const proof = useProofSummaries(fromIso, toIso);
   useShiftsRealtime(fromIso, toIso);
   useOffersRealtime();
+  useProofRealtime();
 
   const assign = useAssignShift(fromIso);
   const unassign = useUnassignShift(fromIso);
@@ -75,7 +80,16 @@ export function RosterPage() {
   const [activeWorker, setActiveWorker] = useState<WorkerRow | null>(null);
   const [pendingAssignment, setPendingAssignment] = useState<PendingAssignment | null>(null);
   const [createCell, setCreateCell] = useState<{ siteId: string; dateYmd: string } | null>(null);
-  const [detailShiftId, setDetailShiftId] = useState<string | null>(null);
+  // Sheet state lives in the URL (?shift=<id>) so the dashboard can deep-link.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const detailShiftId = searchParams.get('shift');
+  const setDetailShiftId = (shiftId: string | null) =>
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (shiftId === null) next.delete('shift');
+      else next.set('shift', shiftId);
+      return next;
+    });
   const [broadcastShiftId, setBroadcastShiftId] = useState<string | null>(null);
   const [unfilledOnly, setUnfilledOnly] = useState(false);
   const [dragOver, setDragOver] = useState<{ shiftId: string; state: 'ok' | 'block' } | null>(null);
@@ -83,6 +97,14 @@ export function RosterPage() {
   const workerById = useMemo(
     () => new Map((workers.data ?? []).map((w) => [w.id, w])),
     [workers.data],
+  );
+  const workerNames = useMemo(
+    () => Object.fromEntries((workers.data ?? []).map((w) => [w.id, w.full_name])),
+    [workers.data],
+  );
+  const proofByShift = useMemo(
+    () => new Map((proof.data ?? []).map((row) => [row.shift_id, row])),
+    [proof.data],
   );
   const siteNamesById = useMemo(
     () => Object.fromEntries((sites.data ?? []).map((s) => [s.id, s.name])),
@@ -207,7 +229,10 @@ export function RosterPage() {
     );
   };
 
-  const detailShift = visibleShifts.find((s) => s.id === detailShiftId) ?? null;
+  // A dashboard deep-link can point at a shift outside the loaded week.
+  const shiftInWeek = visibleShifts.find((s) => s.id === detailShiftId) ?? null;
+  const linkedShift = useShift(detailShiftId !== null && !shiftInWeek ? detailShiftId : null);
+  const detailShift = shiftInWeek ?? linkedShift.data ?? null;
   const roles = useMemo(() => {
     const unique = new Set((workers.data ?? []).map((w) => w.job_title).filter((t) => t !== null));
     return [...unique].sort();
@@ -355,6 +380,7 @@ export function RosterPage() {
                               isWeekend={dow === 0 || dow === 6}
                               workerById={workerById}
                               offerShiftIds={offerShiftIds}
+                              proofByShift={proofByShift}
                               dimFilled={unfilledOnly}
                               hoveredShiftId={dragOver?.shiftId ?? null}
                               hoverState={dragOver?.state ?? null}
@@ -393,13 +419,12 @@ export function RosterPage() {
         />
       )}
 
-      <ShiftDetailDialog
+      <ShiftSheet
         shift={detailShift}
         siteName={detailShift ? (siteNamesById[detailShift.site_id] ?? 'Site') : ''}
-        workerName={
-          detailShift?.worker_id ? (workerById.get(detailShift.worker_id)?.full_name ?? null) : null
-        }
-        pending={unassign.isPending || update.isPending || cancel.isPending}
+        worker={detailShift?.worker_id ? workerById.get(detailShift.worker_id) : undefined}
+        workerNames={workerNames}
+        busy={unassign.isPending || update.isPending || cancel.isPending}
         onOpenChange={(open) => !open && setDetailShiftId(null)}
         onUnassign={() => {
           if (detailShift) unassign.mutate(detailShift.id, { onSuccess: () => setDetailShiftId(null) });

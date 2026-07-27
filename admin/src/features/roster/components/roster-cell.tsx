@@ -19,6 +19,8 @@ interface RosterCellProps {
   isWeekend: boolean;
   workerById: Map<string, WorkerRow>;
   offerShiftIds: Set<string>;
+  /** Per-shift task counts — drives the completion glyph on finished chips. */
+  proofByShift: Map<string, Views<'shift_proof_summary'>>;
   dimFilled: boolean;
   hoveredShiftId: string | null;
   hoverState: 'ok' | 'block' | null;
@@ -35,6 +37,7 @@ export function RosterCell({
   isWeekend,
   workerById,
   offerShiftIds,
+  proofByShift,
   dimFilled,
   hoveredShiftId,
   hoverState,
@@ -51,6 +54,7 @@ export function RosterCell({
       shift={shift}
       worker={shift.worker_id ? workerById.get(shift.worker_id) : undefined}
       hasOpenOffer={offerShiftIds.has(shift.id)}
+      proof={proofByShift.get(shift.id)}
       dropState={hoveredShiftId === shift.id ? hoverState : null}
       dimmed={dimFilled && shift.worker_id !== null}
       onClick={() => onChipClick(shift.id)}

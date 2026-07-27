@@ -23,12 +23,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Tables } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { AssignmentCheck } from '../conflict-engine';
-
-type Shift = Tables<'shifts'>;
 
 // ── Create shift ──────────────────────────────────────────────────────────────
 
@@ -171,106 +168,6 @@ export function CreateShiftDialog({
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ── Shift detail (edit / unassign / cancel) ───────────────────────────────────
-
-interface ShiftDetailDialogProps {
-  shift: Shift | null;
-  siteName: string;
-  workerName: string | null;
-  pending: boolean;
-  onOpenChange: (open: boolean) => void;
-  onUnassign: () => void;
-  onCancelShift: () => void;
-  onSaveTimes: (startHm: string, endHm: string) => void;
-}
-
-export function ShiftDetailDialog({
-  shift,
-  siteName,
-  workerName,
-  pending,
-  onOpenChange,
-  onUnassign,
-  onCancelShift,
-  onSaveTimes,
-}: ShiftDetailDialogProps) {
-  const [start, setStart] = useState<string | null>(null);
-  const [end, setEnd] = useState<string | null>(null);
-
-  if (!shift) return null;
-
-  const startHm = start ?? formatACST(shift.starts_at, 'HH:mm');
-  const endHm = end ?? formatACST(shift.ends_at, 'HH:mm');
-  const dirty = start !== null || end !== null;
-
-  return (
-    <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {siteName} — {formatACST(shift.starts_at, 'EEE d MMM')}
-          </DialogTitle>
-          <DialogDescription>
-            {workerName ? `Assigned to ${workerName}` : 'Unfilled'} ·{' '}
-            <span className="capitalize">{shift.status.replace('_', ' ')}</span>
-            {shift.role_required && <> · {shift.role_required}</>}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="detail-start">Start</Label>
-            <Input
-              id="detail-start"
-              type="time"
-              value={startHm}
-              onChange={(event) => setStart(event.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="detail-end">End</Label>
-            <Input
-              id="detail-end"
-              type="time"
-              value={endHm}
-              onChange={(event) => setEnd(event.target.value)}
-            />
-          </div>
-        </div>
-
-        {shift.notes && (
-          <p
-            className={cn(
-              'rounded-lg border bg-muted/40 px-3 py-2 text-xs',
-              shift.notes.startsWith('OVERRIDE:') && 'border-warning/40 bg-warning/5 text-warning',
-            )}
-          >
-            {shift.notes}
-          </p>
-        )}
-
-        <DialogFooter className="flex-wrap gap-2">
-          {shift.worker_id && shift.status === 'assigned' && (
-            <Button variant="outline" disabled={pending} onClick={onUnassign}>
-              Unassign
-            </Button>
-          )}
-          {shift.status !== 'completed' && shift.status !== 'cancelled' && (
-            <Button variant="destructive" disabled={pending} onClick={onCancelShift}>
-              Cancel shift
-            </Button>
-          )}
-          {dirty && (
-            <Button disabled={pending} onClick={() => onSaveTimes(startHm, endHm)}>
-              {pending ? 'Saving…' : 'Save times'}
-            </Button>
-          )}
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

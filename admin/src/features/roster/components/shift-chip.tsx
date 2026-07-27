@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
-import { MegaphoneSimple } from '@phosphor-icons/react';
+import { CheckCircle, CircleHalf, MegaphoneSimple } from '@phosphor-icons/react';
 
 import { UserAvatar } from '@/components/user-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,6 +14,8 @@ interface ShiftChipProps {
   worker: Views<'worker_overview'> | undefined;
   /** An open offer exists — chip pulses radar-style until it resolves. */
   hasOpenOffer?: boolean;
+  /** Task counts for this shift — renders the completion glyph when finished. */
+  proof?: Views<'shift_proof_summary'>;
   /** Live drag eligibility when this chip is the hovered drop target. */
   dropState?: 'ok' | 'block' | null;
   /** Dimmed by the "Unfilled only" view toggle. */
@@ -26,6 +28,7 @@ export function ShiftChip({
   shift,
   worker,
   hasOpenOffer,
+  proof,
   dropState,
   dimmed,
   onClick,
@@ -34,6 +37,11 @@ export function ShiftChip({
   const { setNodeRef } = useDroppable({ id: shift.id, data: { shift } });
   const unfilled = shift.worker_id === null;
   const range = formatShiftRange(shift.starts_at, shift.ends_at);
+
+  // Completion glyph: teal ✓ when the checklist came back whole, amber half
+  // when it didn't. Icon only — the chip stays one 32px line.
+  const finished = shift.status === 'completed' && proof && proof.tasks_total > 0;
+  const allDone = finished && proof.tasks_done === proof.tasks_total;
 
   return (
     <button
@@ -104,6 +112,23 @@ export function ShiftChip({
           )}
           <span className="truncate font-medium">{worker?.full_name.split(' ')[0] ?? '—'}</span>
           <span className="shrink-0 text-muted-foreground">· {range}</span>
+          {finished && (
+            <span
+              role="img"
+              aria-label={
+                allDone
+                  ? 'All tasks completed'
+                  : `${proof.tasks_total - proof.tasks_done} tasks not completed`
+              }
+              className={cn('ml-auto shrink-0', allDone ? 'text-primary' : 'text-warning')}
+            >
+              {allDone ? (
+                <CheckCircle size={11} weight="fill" aria-hidden />
+              ) : (
+                <CircleHalf size={11} weight="fill" aria-hidden />
+              )}
+            </span>
+          )}
         </>
       )}
     </button>
