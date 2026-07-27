@@ -51,35 +51,43 @@ const scenes = {
       <rect x="470" y="0" width="26" height="200" fill="#2f353b"/>
     </g>`),
 
-  // Food court seating — warm timber and upholstery, overhead light.
+  // Food court seating — warm timber, wiped table plane running to a wall.
   'marion-food-court': frame(`
-    <defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#d8c3a2"/><stop offset="0.5" stop-color="#a98d6d"/>
-      <stop offset="1" stop-color="#5d4a37"/></linearGradient></defs>
+    <defs><linearGradient id="f" x1="0" y1="0" x2="0.15" y2="1">
+      <stop offset="0" stop-color="#c9b190"/><stop offset="0.34" stop-color="#a98d6d"/>
+      <stop offset="1" stop-color="#4f3f2f"/></linearGradient>
+      <radialGradient id="win" cx="18%" cy="16%" r="52%">
+        <stop offset="0" stop-color="#fbf0dc" stop-opacity="0.7"/>
+        <stop offset="1" stop-color="#fbf0dc" stop-opacity="0"/></radialGradient></defs>
     <rect width="600" height="600" fill="#8f7558"/>
-    <rect width="600" height="600" fill="url(#f)" opacity="0.9"/>
-    <g filter="url(#soft)" opacity="0.75">
-      <rect x="60" y="250" width="230" height="120" rx="18" fill="#c9ad87"/>
-      <rect x="330" y="300" width="240" height="130" rx="18" fill="#b89970"/>
-      <circle cx="140" cy="200" r="46" fill="#6f5a43"/>
-      <circle cx="420" cy="215" r="42" fill="#6f5a43"/>
-      <rect x="0" y="60" width="600" height="34" fill="#f0e2cb" opacity="0.55"/>
+    <rect width="600" height="600" fill="url(#f)"/>
+    <rect width="600" height="600" fill="url(#win)"/>
+    <g filter="url(#soft)" opacity="0.7">
+      <rect x="0" y="196" width="600" height="9" fill="#e6d3b4"/>
+      <rect x="-40" y="238" width="700" height="150" rx="8" fill="#cdb18a"/>
+      <rect x="86" y="120" width="104" height="132" rx="14" fill="#6d5945"/>
+      <rect x="352" y="150" width="126" height="104" rx="14" fill="#7b6650"/>
+      <rect x="-30" y="430" width="700" height="200" fill="#443729"/>
     </g>`),
 
-  // Sanitised ward touchpoints — clinical, cool, high-key.
+  // Sanitised ward touchpoints — clinical, cool, wall-to-floor with a rail.
   'hospital-ward': frame(`
-    <defs><linearGradient id="f" x1="0" y1="0" x2="0.1" y2="1">
-      <stop offset="0" stop-color="#eef4f2"/><stop offset="0.55" stop-color="#cfdcd8"/>
-      <stop offset="1" stop-color="#8fa39e"/></linearGradient></defs>
+    <defs><linearGradient id="f" x1="0" y1="0" x2="0.12" y2="1">
+      <stop offset="0" stop-color="#eef4f2"/><stop offset="0.5" stop-color="#d5e0dc"/>
+      <stop offset="1" stop-color="#7e918c"/></linearGradient>
+      <radialGradient id="lamp" cx="26%" cy="12%" r="48%">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0.75"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs>
     <rect width="600" height="600" fill="url(#f)"/>
-    <g filter="url(#soft)" opacity="0.7">
-      <rect x="0" y="300" width="600" height="120" fill="#b9c9c5"/>
-      <rect x="80" y="150" width="180" height="150" rx="10" fill="#dfe9e6"/>
-      <rect x="360" y="180" width="150" height="120" rx="10" fill="#d3e0dc"/>
-      <rect x="0" y="470" width="600" height="130" fill="#7d918c"/>
-    </g>
-    <g filter="url(#soft)" opacity="0.4">
-      <rect x="270" y="120" width="14" height="300" fill="#9db0ab"/>
+    <rect width="600" height="600" fill="url(#lamp)"/>
+    <g filter="url(#soft)" opacity="0.72">
+      <rect x="-30" y="352" width="700" height="14" fill="#9fb2ad"/>
+      <rect x="-30" y="366" width="700" height="240" fill="#b4c4c0"/>
+      <rect x="-30" y="252" width="700" height="10" fill="#c4d2ce"/>
+      <rect x="392" y="64" width="150" height="292" rx="6" fill="#dceae6"/>
+      <rect x="392" y="64" width="150" height="292" rx="6" fill="none"
+            stroke="#a8bab5" stroke-width="9"/>
+      <rect x="66" y="286" width="196" height="76" rx="10" fill="#e7f0ed"/>
     </g>`),
 
   // Loading dock secured — concrete, roller shutter, safety line.

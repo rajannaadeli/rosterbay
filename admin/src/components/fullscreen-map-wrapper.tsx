@@ -60,7 +60,10 @@ export function FullscreenMapWrapper({ children, className = '', style }: Fullsc
   }, []);
 
   return (
-    <div ref={wrapperRef} className={`relative bg-card ${className}`} style={style}>
+    // `isolate` keeps Leaflet's own z-indexes (and this button's) inside the
+    // map's stacking context — without it they punch through modals opened
+    // over the map, e.g. the photo-proof lightbox.
+    <div ref={wrapperRef} className={`relative isolate bg-card ${className}`} style={style}>
       {children}
       <button
         type="button"

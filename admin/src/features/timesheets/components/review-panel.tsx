@@ -157,6 +157,10 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
           </p>
         )}
 
+        {/* Work evidence sits above the decision, in the space the column
+            already had — the panel stays inside its compact height. */}
+        <ProofOfWorkRow row={row} workerNames={workerNames} />
+
         <div className="mt-auto flex items-center justify-end gap-2">
           {row.reviewed_at && (
             <span className="mr-auto text-xs text-muted-foreground">
@@ -181,8 +185,6 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
           )}
         </div>
       </div>
-
-      <ProofOfWorkRow row={row} workerNames={workerNames} />
     </div>
   );
 }
@@ -216,7 +218,7 @@ function ProofOfWorkRow({
   const issueCount = issues.data?.length ?? 0;
 
   return (
-    <div className="flex flex-col gap-2 border-t pt-3 lg:col-span-2">
+    <div className="flex flex-col gap-2 border-t pt-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
           <ProgressRing
