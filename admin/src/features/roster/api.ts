@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { instantiateShiftTasks } from '@/features/proof/task-instantiation';
 import type { TablesInsert, TablesUpdate } from '@/lib/database.types';
 
 export async function fetchShiftsRange(fromIso: string, toIso: string) {
@@ -56,9 +57,31 @@ export async function unassignShift(shiftId: string) {
   return data;
 }
 
+/**
+ * Creates the shift and immediately snapshots the site's task checklist onto
+ * it. The copy happens here — at creation — so a later template edit can never
+ * change a shift that already exists (spec §1).
+ */
 export async function createShift(input: TablesInsert<'shifts'>) {
   const { data, error } = await supabase.from('shifts').insert(input).select().single();
   if (error) throw error;
+
+  const { data: templates, error: templatesError } = await supabase
+    .from('task_templates')
+    .select('id, title, requires_photo, sort_order')
+    .eq('site_id', data.site_id)
+    .order('sort_order');
+  if (templatesError) throw templatesError;
+
+  const tasks = instantiateShiftTasks({
+    templates: templates ?? [],
+    shiftId: data.id,
+    companyId: data.company_id,
+  });
+  if (tasks.length > 0) {
+    const { error: tasksError } = await supabase.from('shift_tasks').insert(tasks);
+    if (tasksError) throw tasksError;
+  }
   return data;
 }
 

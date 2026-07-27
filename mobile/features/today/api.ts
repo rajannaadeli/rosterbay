@@ -53,8 +53,11 @@ export interface ClockInInput {
 
 /**
  * Clock in: insert the time entry (flags computed by the shared compliance
- * module), flip the shift to in_progress, and materialise shift_tasks from
- * the site's templates on first clock-in.
+ * module) and flip the shift to in_progress.
+ *
+ * The shift's checklist is *not* built here — it was snapshotted from the
+ * site's templates when the shift was created (admin side). Copying at
+ * clock-in would silently re-link an old shift to today's templates.
  */
 export async function clockIn({ shift, site, coords, distanceM }: ClockInInput) {
   const { flags, withinGeofence, status } = computeClockInFlags({
@@ -113,34 +116,6 @@ export async function clockIn({ shift, site, coords, distanceM }: ClockInInput) 
     throw new Error('Failed to update shift status — check RLS policies');
   }
 
-  // First clock-in at this shift: copy the site's checklist onto the shift.
-  const { count, error: countError } = await supabase
-    .from('shift_tasks')
-    .select('*', { count: 'exact', head: true })
-    .eq('shift_id', shift.id);
-  if (countError) throw countError;
-
-  if ((count ?? 0) === 0) {
-    const { data: templates, error: templatesError } = await supabase
-      .from('task_templates')
-      .select('*')
-      .eq('site_id', site.id)
-      .order('sort_order');
-    if (templatesError) throw templatesError;
-    if (templates.length > 0) {
-      const { error: insertError } = await supabase.from('shift_tasks').insert(
-        templates.map((template) => ({
-          company_id: shift.company_id,
-          shift_id: shift.id,
-          template_id: template.id,
-          title: template.title,
-          requires_photo: template.requires_photo,
-        }))
-      );
-      if (insertError) throw insertError;
-    }
-  }
-
   return entry;
 }
 
@@ -173,7 +148,7 @@ export async function fetchShiftTasks(shiftId: string) {
     .from('shift_tasks')
     .select('*')
     .eq('shift_id', shiftId)
-    .order('created_at');
+    .order('sort_order');
   if (error) throw error;
   return data;
 }
