@@ -36,57 +36,63 @@ export function IssueList({ issues, workerNames }: IssueListProps) {
         const open = issue.status === 'open';
         const photo = proofPhotoUrl(issue.photo_url);
         return (
+          // Note gets its own full-width line; the meta and the single action
+          // sit below it, so a long report can never crowd the thumbnail or
+          // push the panel wider than its column.
           <li
             key={issue.id}
             className={cn(
-              'flex items-start gap-2.5 rounded-lg border px-3 py-2.5',
+              'flex flex-col gap-2 rounded-lg border px-3 py-2.5',
               open ? 'border-danger/30 bg-danger/5' : 'bg-muted/30',
             )}
           >
-            <span
-              className={cn(
-                'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg',
-                open ? 'bg-danger/10 text-danger' : 'bg-muted text-muted-foreground',
-              )}
-            >
-              <Warning size={14} weight="duotone" aria-hidden />
-            </span>
+            <div className="flex items-start gap-2.5">
+              <span
+                className={cn(
+                  'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg',
+                  open ? 'bg-danger/10 text-danger' : 'bg-muted text-muted-foreground',
+                )}
+              >
+                <Warning size={14} weight="duotone" aria-hidden />
+              </span>
 
-            <div className="min-w-0 flex-1">
-              <p className="text-sm">{issue.note}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
+              <p className="min-w-0 flex-1 text-sm break-words">{issue.note}</p>
+
+              {photo && (
+                <button
+                  type="button"
+                  aria-label="View the reported issue photo"
+                  className="shrink-0 overflow-hidden rounded-lg border transition-shadow hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  onClick={() => setPhotoIssue(issue)}
+                >
+                  <img src={photo} alt="" className="size-11 object-cover" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pl-[34px]">
+              <p className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground">
                 {workerNames[issue.worker_id] ?? 'Worker'} ·{' '}
                 {formatDistanceToNowStrict(new Date(issue.created_at), { addSuffix: true })}
                 {!open && issue.acknowledged_at && (
                   <> · acknowledged {formatACST(issue.acknowledged_at, 'd MMM, h:mm a')}</>
                 )}
               </p>
+
+              {open ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
+                  disabled={acknowledge.isPending}
+                  onClick={() => acknowledge.mutate(issue.id)}
+                >
+                  Acknowledge
+                </Button>
+              ) : (
+                <StatusPill tone="success" label="Acknowledged" className="shrink-0" />
+              )}
             </div>
-
-            {photo && (
-              <button
-                type="button"
-                aria-label="View the reported issue photo"
-                className="shrink-0 overflow-hidden rounded-lg border transition-shadow hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                onClick={() => setPhotoIssue(issue)}
-              >
-                <img src={photo} alt="" className="size-11 object-cover" />
-              </button>
-            )}
-
-            {open ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="shrink-0"
-                disabled={acknowledge.isPending}
-                onClick={() => acknowledge.mutate(issue.id)}
-              >
-                Acknowledge
-              </Button>
-            ) : (
-              <StatusPill tone="success" label="Acknowledged" className="shrink-0" />
-            )}
           </li>
         );
       })}

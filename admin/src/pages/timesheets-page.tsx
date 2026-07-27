@@ -324,7 +324,10 @@ export function TimesheetsPage() {
         cell: ({ row }) => (
           <span className="flex items-center gap-1.5">
             {row.original.effective_flags.map((flag) => {
-              const meta = FLAG_META[flag];
+              // Skip rather than crash if the server grows a flag this client
+              // doesn't know about yet (deploy ordering, stale tab).
+              const meta = FLAG_META[flag] as (typeof FLAG_META)[TimeEntryFlag] | undefined;
+              if (!meta) return null;
               return (
                 <Tooltip key={flag}>
                   <TooltipTrigger render={<span className="inline-flex" aria-label={meta.label} />}>
@@ -575,6 +578,11 @@ export function TimesheetsPage() {
                         {row.getIsExpanded() && (
                           <TableRow className="hover:bg-transparent">
                             <TableCell colSpan={columns.length} className="p-0">
+                              {/* w-0 min-w-full: the panel fills the row but
+                                  never contributes to the table's max-content
+                                  width, so a long issue note wraps instead of
+                                  stretching every column. */}
+                              <div className="w-0 min-w-full">
                               <ReviewPanel
                                 row={row.original}
                                 site={siteById.get(row.original.site_id)}
@@ -582,6 +590,7 @@ export function TimesheetsPage() {
                                 busy={review.isPending}
                                 onReview={(next) => review.mutate({ id: row.original.id, status: next })}
                               />
+                              </div>
                             </TableCell>
                           </TableRow>
                         )}

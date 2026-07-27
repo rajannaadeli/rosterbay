@@ -141,7 +141,8 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
         {attendanceFlags.length > 0 ? (
           <div className="flex flex-col gap-2">
             {attendanceFlags.map((flag) => {
-              const FlagIcon = FLAG_ICON[flag];
+              const FlagIcon = FLAG_ICON[flag] as typeof Clock | undefined;
+              if (!FlagIcon) return null;
               return (
                 <Alert key={flag} variant="destructive">
                   <FlagIcon aria-hidden />
