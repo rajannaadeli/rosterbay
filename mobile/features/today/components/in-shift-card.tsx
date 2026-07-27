@@ -202,7 +202,7 @@ export function InShiftCard({ shift, site, entry, onReportIssue }: InShiftCardPr
               <TaskRow
                 key={task.id}
                 task={task}
-                busy={setDone.isPending || uploadingTaskId === task.id}
+                busy={uploadingTaskId === task.id}
                 onToggle={(t) => void toggleTask(t)}
               />
             ))

@@ -141,6 +141,7 @@ export default function ScheduleScreen() {
         sections={sections}
         keyExtractor={(shift) => shift.id}
         contentContainerClassName="p-4 pb-10"
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         stickySectionHeadersEnabled={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.mutedForeground} />
