@@ -22,13 +22,24 @@ scripts/   Node scripts (auth seeding). demo-ids.ts is the single source of fixe
 
 Package manager: **npm** in both apps. Env: `admin/.env` uses `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`; `mobile/.env` uses `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`. URLs are the **base** project URL (no `/rest/v1/`). Root `.env` holds `SUPABASE_SERVICE_ROLE_KEY` for scripts only — never committed, never imported by app code.
 
-## Design tokens (spec §6 — law)
+## Design tokens
 
-Surface `#FAFAF9` · ink `#1C1917` (stone-900) · ink-muted `#78716C` · border `#E7E5E4` · **one accent: teal `#0F766E`** · radius **10px** everywhere · Inter on web, system font on mobile · shadows whisper-quiet, 1px borders separate.
+**`admin/src/index.css` is the single source of truth for the web console** (rebuilt 2026-07-29, Visual Transformation Phase 1 — see DECISIONS.md). Never hardcode a color, font size, shadow or radius outside it; if a screen needs a value that isn't there, add it there first.
 
-**Semantic status-color law:** green `#16A34A` = compliant/approved/on-site/filled · amber `#D97706` = expiring/pending/warning · red `#DC2626` = expired/unfilled/flagged/blocked. **No status may ever be communicated with an off-system color.** No new hex values anywhere; no blue "info" badge; grays come from the Stone scale only. `StatusPill` (one per app) is the canonical rendering of these states — reuse it, don't re-implement.
+- **Both themes are designed.** Light is the product default; dark is a real design (layered near-blacks `#0A0B0D`→`#121418`→`#191C21`→`#21252B`, luminous teal `#2DD4BF`), not an inversion. Light keeps the spec §6 hues and gains the same ladder.
+- **Ladders, not flat values:** surface 1/2/3 · border subtle/default/strong · text primary/secondary/tertiary · elevation `.e0`–`.e3`. Every shadcn token (`--card`, `--muted`, `--border`…) is an *alias* onto these — never an independent value.
+- **One accent** still. `--accent-glow` is dark-only and permitted in exactly three places: primary actions, live indicators, active nav.
+- **Radius ladder 6/8/12/16** (`rounded-xs`/`sm`/`lg`/`xl`) — this supersedes the old "10px everywhere" law.
+- **Type:** Inter (self-hosted; no remote font imports) + **JetBrains Mono**. Scale `text-display/h2/h3/body/small/micro` — no ad-hoc sizes. Every numeral, time, duration, distance, count, code and ID uses `.num` (mono + tabular). `.label-micro` is the uppercase eyebrow.
+- **Motion:** `--duration-*` / `--ease-*` + `fade-up`/`shimmer`/`live-pulse` keyframes and `.stagger` in CSS; `lib/motion.ts` for JS-driven cases. **No animation library** — so `prefers-reduced-motion` is honoured in one media query.
 
-Skeletons wherever loading happens — no spinner-only screens. Every list gets a designed empty state.
+**Mobile has NOT been migrated** — it still runs the warm-Stone tokens in `mobile/global.css` + `lib/colors.ts` + `lib/theme.ts`. The two apps are knowingly divergent; porting the ladder is the first task of any mobile phase.
+
+**Semantic status colors are unchanged and still law** (green/amber/red, below).
+
+**Semantic status-color law:** green = compliant/approved/on-site/filled · amber = expiring/pending/warning · red = expired/unfilled/flagged/blocked. Each is tuned per theme (`--success`/`--warning`/`--danger` plus a `*-muted` fill) — the *meaning* is fixed, the hex is not. **No status may ever be communicated with an off-system color.** No new hex values in components; no blue "info" badge; neutrals come from the surface/text ladders. `StatusPill` (one per app) is the canonical rendering, and on web it maps straight onto the matching `Badge` variant — reuse it, don't re-implement.
+
+Skeletons wherever loading happens — no spinner-only screens; web skeletons shimmer (`.shimmer`), never spin. Every list gets a designed empty state — on web, `EmptyState` with a drawn `glyph`.
 
 ## TypeScript & data conventions
 
