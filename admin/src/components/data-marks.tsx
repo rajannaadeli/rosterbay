@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { LATE_THRESHOLD_MIN } from '@/lib/compliance';
 import { cn } from '@/lib/utils';
 
@@ -155,6 +157,27 @@ interface AttendanceBarProps {
 }
 
 /**
+ * Wall-clock "now", ticking each minute, but only while `active`.
+ *
+ * An in-progress shift has no end time, so its bar runs to the present moment
+ * — which means reading `Date.now()` during render (impure, and the bar would
+ * silently freeze at whatever the last unrelated re-render happened to be).
+ * Ticking makes the live bar actually grow as the shift runs, which is the
+ * behaviour the screen was implying anyway.
+ */
+function useNowMs(active: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!active) return;
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, [active]);
+
+  return now;
+}
+
+/**
  * Scheduled span as a track, actual span drawn over it.
  *
  * This is the whole timesheet question in one shape: a bar that starts right
@@ -173,10 +196,13 @@ export function AttendanceBar({
   graceMin = LATE_THRESHOLD_MIN,
   className,
 }: AttendanceBarProps) {
+  const inProgress = actualEnd === null;
+  const nowMs = useNowMs(inProgress);
+
   const schedFrom = new Date(scheduledStart).getTime();
   const schedTo = new Date(scheduledEnd).getTime();
   const actFrom = new Date(actualStart).getTime();
-  const actTo = actualEnd ? new Date(actualEnd).getTime() : Date.now();
+  const actTo = actualEnd ? new Date(actualEnd).getTime() : nowMs;
 
   const schedSpan = Math.max(1, schedTo - schedFrom);
   const pad = schedSpan * 0.12;
@@ -190,7 +216,6 @@ export function AttendanceBar({
   const graceMs = graceMin * 60_000;
   const late = actFrom - schedFrom > graceMs;
   const short = actualEnd !== null && schedTo - actTo > graceMs;
-  const inProgress = actualEnd === null;
 
   return (
     <span className={cn('relative block h-[18px] w-full', className)} aria-hidden>

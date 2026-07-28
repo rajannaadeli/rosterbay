@@ -28,6 +28,8 @@ Expo/React Native for the worker app.
 | `04-compliance-runway.png` | **Certification as a fuel gauge.** A twelve-month timeline per worker: distance from the TODAY line is the runway remaining. Expired documents render left of today with a hatched stub and the site they block named inline. |
 | `05-landing-hero.png` | **Landing page.** Dark product shot in a browser frame over an accent-derived wash. |
 | `06-og-image.png` | **Open Graph card**, 1200×630, generated from the dark UI by `scripts/make-og.mjs`. |
+| `07-timesheets-attendance.png` | **Attendance, drawn.** Each row shows the scheduled span as a track with the actual worked span beneath it — Dylan Murphy's 22-minute late start is a bar offset right of everyone else's, visible before you read a single time. Variance keeps its mono figure and adds a deviation bar around a fixed centre. |
+| `08-job-sites-coverage.png` | **Sites, with the week's gaps on the card.** Every site carries a seven-day cover strip: teal is covered, red is a day with an unfilled shift, flat is no cover at all. Turns a client directory into an operational read. |
 
 ## Talking points
 
@@ -43,9 +45,17 @@ Expo/React Native for the worker app.
   schedulers quietly break.
 - **Unfilled state is not colour-only.** It carries a drawn diagonal hatch, so it
   survives a colour-blind reader and a greyscale print.
-- **Everything is derived, nothing is added.** The coverage ribbon, all four KPI
-  micro-visuals and the runway read from data already in the query cache — no
-  extra round trips.
+- **Everything is derived, nothing is added.** The coverage ribbon, the KPI
+  micro-visuals, the runway, the attendance bars and the week strips all read
+  from data already in the query cache.
+- **Colour is calibrated, not decorative.** A two-minute late clock-in renders
+  neutral; amber starts at the same 15-minute grace the flag engine uses. Hue
+  encodes *magnitude past grace* and never direction — the geometry already
+  says short-or-over, and colouring "short" green would assert that
+  under-delivering a client's booked hours is the good outcome.
+- **Scales are honest.** Load bars are scaled to the busiest person on the
+  team, not to an invented weekly cap: the schema has no contracted-hours
+  model, so relative load is a fact where capacity would be a guess.
 
 ## Not in this folder
 

@@ -1,6 +1,8 @@
 import { Buildings, ListChecks, MapPinArea, Plus, UsersThree } from '@phosphor-icons/react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
+import type { DayLoad } from '@/components/data-marks';
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { StatStrip } from '@/components/stat-strip';
@@ -9,12 +11,41 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCertTypes } from '@/features/certs/hooks';
 import { SiteCard } from '@/features/sites/components/site-card';
 import { SiteDrawer } from '@/features/sites/components/site-drawer';
+import { useShiftsRange } from '@/features/roster/hooks';
 import { useSites, useTaskCounts } from '@/features/sites/hooks';
+import { formatACST } from '@/lib/format';
+import { acstWeekStart, weekBounds, weekDays } from '@/lib/week';
 
 export function SitesPage() {
   const sites = useSites();
   const certTypes = useCertTypes();
   const taskCounts = useTaskCounts();
+
+  // Same week query the roster already runs, so this is normally a cache hit.
+  // It is the one added dependency on this page and it earns its place: a site
+  // directory that can't tell you which sites are short this week is a list of
+  // addresses, not an ops screen.
+  const weekStart = useMemo(() => acstWeekStart(0), []);
+  const days = useMemo(() => weekDays(weekStart), [weekStart]);
+  const { fromIso, toIso } = useMemo(() => weekBounds(weekStart), [weekStart]);
+  const weekShifts = useShiftsRange(fromIso, toIso);
+
+  const coverBySite = useMemo(() => {
+    const dayIndex = new Map(days.map((day, index) => [formatACST(day, 'yyyy-MM-dd'), index]));
+    const map = new Map<string, DayLoad[]>();
+    for (const shift of weekShifts.data ?? []) {
+      if (shift.status === 'cancelled') continue;
+      const index = dayIndex.get(formatACST(shift.starts_at, 'yyyy-MM-dd'));
+      if (index === undefined) continue;
+      const cover = map.get(shift.site_id) ?? (Array(7).fill('none') as DayLoad[]);
+      // An unfilled shift outranks a filled one on the same day: the gap is
+      // the thing worth surfacing, not the fact that something else is covered.
+      if (shift.worker_id === null) cover[index] = 'unfilled';
+      else if (cover[index] === 'none') cover[index] = 'shift';
+      map.set(shift.site_id, cover);
+    }
+    return map;
+  }, [weekShifts.data, days]);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const openSiteId = searchParams.get('site');
@@ -97,6 +128,7 @@ export function SitesPage() {
               site={site}
               certTypes={certTypes.data ?? []}
               taskCount={taskCounts.data?.get(site.id) ?? 0}
+              {...(coverBySite.get(site.id) ? { weekCover: coverBySite.get(site.id)! } : {})}
               onOpen={() => openDrawer(site.id)}
             />
           ))}

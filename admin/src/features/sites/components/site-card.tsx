@@ -1,6 +1,7 @@
 import { MapPin } from '@phosphor-icons/react';
 import { Circle, MapContainer, Marker } from 'react-leaflet';
 
+import { WeekStrip, type DayLoad } from '@/components/data-marks';
 import { Badge } from '@/components/ui/badge';
 import type { Tables } from '@/lib/database.types';
 import { GEOFENCE_PATH_OPTIONS, MapTiles, siteIcon } from '@/lib/map-markers';
@@ -9,10 +10,12 @@ interface SiteCardProps {
   site: Tables<'job_sites'>;
   certTypes: Tables<'cert_types'>[];
   taskCount: number;
+  /** Monday-first cover state for this site's week; omitted while loading. */
+  weekCover?: readonly DayLoad[];
   onOpen: () => void;
 }
 
-export function SiteCard({ site, certTypes, taskCount, onOpen }: SiteCardProps) {
+export function SiteCard({ site, certTypes, taskCount, weekCover, onOpen }: SiteCardProps) {
   const requiredCerts = certTypes.filter((ct) => site.required_cert_type_ids.includes(ct.id));
 
   return (
@@ -49,6 +52,22 @@ export function SiteCard({ site, certTypes, taskCount, onOpen }: SiteCardProps) 
           </MapContainer>
         </div>
       </div>
+
+      {/* This week's cover, Monday to Sunday: a red tick is a day with an
+          unfilled shift, a flat one is a day with no cover at all. Turns the
+          card from a directory entry into an operational read. */}
+      {weekCover && (
+        <div className="flex items-center gap-2">
+          <span className="label-micro shrink-0">This week</span>
+          <WeekStrip days={weekCover} className="min-w-0 flex-1" />
+          {weekCover.includes('unfilled') && (
+            <span className="num shrink-0 text-nano font-semibold text-danger">
+              {weekCover.filter((d) => d === 'unfilled').length} gap
+              {weekCover.filter((d) => d === 'unfilled').length === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-1.5 border-t border-border-subtle pt-2.5">
         {requiredCerts.map((ct) => (
