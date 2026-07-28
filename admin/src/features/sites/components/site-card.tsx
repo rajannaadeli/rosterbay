@@ -45,18 +45,18 @@ export function SiteCard({ site, certTypes, taskCount, onOpen }: SiteCardProps) 
           >
             <MapTiles />
             <Circle center={[site.lat, site.lng]} radius={site.geofence_radius_m} pathOptions={GEOFENCE_PATH_OPTIONS} />
-            <Marker position={[site.lat, site.lng]} icon={siteIcon(site.name)} />
+            <Marker position={[site.lat, site.lng]} icon={siteIcon(site.name, { label: false })} />
           </MapContainer>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 border-t pt-2.5">
+      <div className="flex flex-wrap items-center gap-1.5 border-t border-border-subtle pt-2.5">
         {requiredCerts.map((ct) => (
           <Badge key={ct.id} variant="outline" className="text-micro tracking-normal">
             {ct.name}
           </Badge>
         ))}
-        <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
+        <span className="num ml-auto flex items-center gap-2 text-micro tracking-normal text-text-tertiary">
           <span>
             {taskCount} task{taskCount === 1 ? '' : 's'}
           </span>

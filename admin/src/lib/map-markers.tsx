@@ -17,15 +17,23 @@ import { OSM_ATTRIBUTION, TILE_URL } from '@/lib/leaflet';
  * its halo against a dark tile set.
  */
 
-export function siteIcon(name: string): L.DivIcon {
+/**
+ * @param label  Render the name chip under the pin. Off for thumbnails, where
+ *               a full site name is wider than the map it sits on and gets
+ *               clipped by the card edge.
+ */
+export function siteIcon(name: string, { label = true }: { label?: boolean } = {}): L.DivIcon {
   const initial = (name[0] ?? '?').toUpperCase();
+  const chip = label
+    ? `<span class="site-label max-w-32 truncate rounded-xs border border-border-default bg-surface-3 px-1.5 py-px text-micro tracking-normal font-medium text-foreground shadow-[var(--elevation-2)]">${name.replace(/</g, '&lt;')}</span>`
+    : '';
   return L.divIcon({
     className: '',
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     html: `<span class="flex flex-col items-center gap-0.5">
       <span class="map-pin-glow flex size-7 items-center justify-center rounded-sm bg-primary text-small font-semibold text-primary-foreground ring-2 ring-surface-1">${initial}</span>
-      <span class="site-label max-w-32 truncate rounded-xs border border-border-default bg-surface-3 px-1.5 py-px text-micro tracking-normal font-medium text-foreground shadow-[var(--elevation-2)]">${name.replace(/</g, '&lt;')}</span>
+      ${chip}
     </span>`,
   });
 }

@@ -1,6 +1,7 @@
 import { Certificate, FileText, Prohibit } from '@phosphor-icons/react';
 
 import { EmptyState } from '@/components/empty-state';
+import { CopyButton } from '@/components/copy-button';
 import { CertPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Tables, Views } from '@/lib/database.types';
@@ -68,7 +69,14 @@ export function DocumentWallet({ certs, certTypes, sites, isPending }: DocumentW
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h3 className="text-sm font-medium">{certType?.name ?? 'Certificate'}</h3>
-                <p className="text-xs text-muted-foreground">{certType?.code}</p>
+                <span className="group/copy flex items-center gap-1">
+                  <span className="num text-micro tracking-normal text-text-tertiary">
+                    {certType?.code}
+                  </span>
+                  {certType?.code && (
+                    <CopyButton value={certType.code} label={`Copy the ${certType.code} code`} />
+                  )}
+                </span>
               </div>
               <CertPill status={cert.status} />
             </div>

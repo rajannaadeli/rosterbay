@@ -4,6 +4,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { CopyButton } from '@/components/copy-button';
 import { PageHeader } from '@/components/page-header';
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
@@ -42,7 +43,19 @@ const columns: ColumnDef<WorkerRow>[] = [
     accessorKey: 'phone',
     header: 'Phone',
     enableSorting: false,
-    cell: ({ row }) => <span className="text-muted-foreground">{row.original.phone}</span>,
+    cell: ({ row }) => (
+      // group/copy: the button only fades in on row hover or keyboard focus,
+      // so 14 rows aren't peppered with icons at rest.
+      <span className="group/copy flex items-center gap-1.5">
+        <span className="num text-text-secondary">{row.original.phone}</span>
+        {row.original.phone && (
+          <CopyButton
+            value={row.original.phone}
+            label={`Copy ${row.original.full_name}'s phone number`}
+          />
+        )}
+      </span>
+    ),
   },
   {
     accessorKey: 'compliance_status',
