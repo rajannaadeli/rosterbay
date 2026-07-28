@@ -11,7 +11,9 @@ import { queryClient } from '@/lib/query';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light">
+    {/* System-preference default, persisted per browser. The class itself is
+        stamped before paint by the blocking script in index.html. */}
+    <ThemeProvider defaultTheme="system">
       <QueryClientProvider client={queryClient}>
         <App />
         <Toaster position="bottom-right" />

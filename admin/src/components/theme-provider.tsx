@@ -13,6 +13,8 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme
+  /** `theme` with "system" already collapsed — what is actually on screen. */
+  resolvedTheme: ResolvedTheme
   setTheme: (theme: Theme) => void
 }
 
@@ -39,22 +41,31 @@ function getSystemTheme(): ResolvedTheme {
   return "light"
 }
 
-function disableTransitionsTemporarily() {
+/**
+ * Cross-fades a theme swap over 200ms — colors only.
+ *
+ * Every element gets a transition on the four paint properties and nothing
+ * else, so the swap can't animate a width or a transform into a layout shift.
+ * The style tag is torn down once the fade lands, leaving each component's own
+ * hover/focus timings untouched.
+ */
+const THEME_CROSSFADE_MS = 200
+
+function crossfadeThemeChange() {
   const style = document.createElement("style")
+  style.setAttribute("data-theme-crossfade", "")
   style.appendChild(
     document.createTextNode(
-      "*,*::before,*::after{-webkit-transition:none!important;transition:none!important}"
+      `*,*::before,*::after{transition:background-color ${THEME_CROSSFADE_MS}ms ease,` +
+        `border-color ${THEME_CROSSFADE_MS}ms ease,` +
+        `color ${THEME_CROSSFADE_MS}ms ease,` +
+        `fill ${THEME_CROSSFADE_MS}ms ease!important}`
     )
   )
   document.head.appendChild(style)
 
   return () => {
-    window.getComputedStyle(document.body)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        style.remove()
-      })
-    })
+    window.setTimeout(() => style.remove(), THEME_CROSSFADE_MS)
   }
 }
 
@@ -92,6 +103,11 @@ export function ThemeProvider({
 
     return defaultTheme
   })
+  // Seeded from the class the blocking script in index.html already stamped,
+  // so the first render agrees with the first paint.
+  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>(() =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  )
 
   const setTheme = React.useCallback(
     (nextTheme: Theme) => {
@@ -104,18 +120,20 @@ export function ThemeProvider({
   const applyTheme = React.useCallback(
     (nextTheme: Theme) => {
       const root = document.documentElement
-      const resolvedTheme =
-        nextTheme === "system" ? getSystemTheme() : nextTheme
-      const restoreTransitions = disableTransitionOnChange
-        ? disableTransitionsTemporarily()
-        : null
+      const resolved = nextTheme === "system" ? getSystemTheme() : nextTheme
+
+      // Nothing to fade on the first apply — the blocking script already
+      // painted this class, so a crossfade here would be a no-op flicker.
+      const alreadyApplied = root.classList.contains(resolved)
+      const endCrossfade =
+        disableTransitionOnChange && !alreadyApplied ? crossfadeThemeChange() : null
 
       root.classList.remove("light", "dark")
-      root.classList.add(resolvedTheme)
+      root.classList.add(resolved)
+      root.style.colorScheme = resolved
+      setResolvedTheme(resolved)
 
-      if (restoreTransitions) {
-        restoreTransitions()
-      }
+      endCrossfade?.()
     },
     [disableTransitionOnChange]
   )
@@ -207,9 +225,10 @@ export function ThemeProvider({
   const value = React.useMemo(
     () => ({
       theme,
+      resolvedTheme,
       setTheme,
     }),
-    [theme, setTheme]
+    [theme, resolvedTheme, setTheme]
   )
 
   return (

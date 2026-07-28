@@ -1,72 +1,241 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
-
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * RosterBay design tokens — spec §6 is law.
- * Six colors only: surface, ink (+muted), border, teal accent, and the
- * semantic green/amber/red. Grays are the Stone scale. Radius 10px everywhere.
- * Light mode is canonical; dark mode is deliberately not themed (Phase 3
- * polish-day at most), so .dark resolves to the same light tokens.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * RosterBay design system — Visual Transformation Phase 1
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * One source of truth. Nothing below this file may hardcode a color, a font
+ * size, a shadow or a radius — if a screen needs a value that isn't here, the
+ * value belongs here first.
+ *
+ * Both themes are designed. Light stays the product default (ops managers work
+ * in daylight); dark is a genuine near-black design, never an inversion of
+ * light. The two share a structure, not a formula:
+ *
+ *   three surface layers  · bg-base → surface-1 → surface-2 → surface-3
+ *   three border weights   · subtle → default → strong
+ *   three text weights     · primary → secondary → tertiary
+ *   four elevation levels  · E0 flush · E1 card · E2 raised · E3 overlay
+ *
+ * In dark, borders carry the separation and shadows barely register.
+ * In light, shadows carry it and borders are hairlines. Same ladder, opposite
+ * emphasis — that's why this isn't an inversion.
  */
-:root {
-  --background: #fafaf9;
-  /* surface — Stone 50 */
-  --foreground: #1c1917;
-  /* ink — Stone 900 */
-  --card: #ffffff;
-  --card-foreground: #1c1917;
-  --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #0f766e;
-  /* the ONE accent: deep teal */
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f4;
-  /* Stone 100 */
-  --secondary-foreground: #1c1917;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  /* ink-muted — Stone 500 */
-  --accent: #f5f5f4;
-  --accent-foreground: #1c1917;
-  --destructive: #dc2626;
-  /* semantic red */
-  --border: #e7e5e4;
-  /* Stone 200 hairlines */
-  --input: #e7e5e4;
-  --ring: #0f766e;
-  --chart-1: #0f766e;
-  --chart-2: #16a34a;
-  --chart-3: #d97706;
-  --chart-4: #dc2626;
-  --chart-5: #78716c;
-  --radius: 0.625rem;
-  /* 10px */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1c1917;
-  --sidebar-primary: #0f766e;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f5f4;
-  --sidebar-accent-foreground: #1c1917;
-  --sidebar-border: #e7e5e4;
-  --sidebar-ring: #0f766e;
 
-  /* semantic status colors — green/amber/red, never off-system */
+/* ─────────────────────────────────────────────────────────────────────────
+   LIGHT — the hues of spec §6, with the depth it never had
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Surface ladder — replaces the old flat white-on-white */
+  --bg-base: #f4f4f2;
+  --surface-1: #ffffff;
+  --surface-2: #fafaf9;
+  --surface-3: #ffffff;
+
+  /* Border ladder */
+  --border-subtle: #efeeec;
+  --border-default: #e7e5e4;
+  --border-strong: #d6d3d1;
+
+  /* Text ladder */
+  --text-primary: #1c1917;
+  --text-secondary: #78716c;
+  --text-tertiary: #a8a29e;
+
+  /* The ONE accent */
+  --accent: #0f766e;
+  --accent-muted: rgb(15 118 110 / 0.10);
+  --accent-contrast: #ffffff;
+  /* Glow is a dark-mode instrument. In light it must not exist. */
+  --accent-glow: none;
+
+  /* Semantic status — meaning is fixed, tuning is per-theme */
   --success: #16a34a;
+  --success-muted: rgb(22 163 74 / 0.10);
   --warning: #d97706;
+  --warning-muted: rgb(217 119 6 / 0.10);
   --danger: #dc2626;
+  --danger-muted: rgb(220 38 38 / 0.10);
+
+  /* Elevation — light does its work with shadow */
+  --elevation-2: 0 1px 2px rgb(28 25 23 / 0.05), 0 1px 3px rgb(28 25 23 / 0.04);
+  --elevation-3: 0 8px 24px -6px rgb(28 25 23 / 0.12), 0 2px 6px rgb(28 25 23 / 0.05);
+
+  /* Map canvas behind the tiles, so a slow tile load isn't a white flash */
+  --map-canvas: #eae7e3;
+
+  /* ── shadcn contract ─────────────────────────────────────────────────────
+     Every installed primitive reads these. They are aliases onto the ladder
+     above — never independent values, or the two systems drift. */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-3);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-contrast);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-secondary);
+  --destructive: var(--danger);
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--accent);
+  --chart-1: var(--accent);
+  --chart-2: var(--success);
+  --chart-3: var(--warning);
+  --chart-4: var(--danger);
+  --chart-5: var(--text-secondary);
+  --sidebar: var(--surface-1);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-contrast);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--accent);
+
+  /* `accent` in shadcn means "hover tint", not "brand" — hence surface-2.
+     The brand accent lives in --primary. Naming inherited from shadcn. */
+  --accent-shadcn: var(--surface-2);
+  --accent-foreground: var(--text-primary);
+
+  color-scheme: light;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DARK — layered near-blacks. Designed, not inverted.
+   ───────────────────────────────────────────────────────────────────────── */
+.dark {
+  --bg-base: #0a0b0d;
+  --surface-1: #121418;
+  --surface-2: #191c21;
+  --surface-3: #21252b;
+
+  --border-subtle: rgb(255 255 255 / 0.06);
+  --border-default: rgb(255 255 255 / 0.10);
+  --border-strong: rgb(255 255 255 / 0.16);
+
+  --text-primary: #f2f3f5;
+  --text-secondary: #a0a5ad;
+  --text-tertiary: #6c727c;
+
+  /* Teal has to become luminous or it dies on black */
+  --accent: #2dd4bf;
+  --accent-muted: rgb(45 212 191 / 0.14);
+  --accent-contrast: #06211e;
+  /* Used in exactly three places: primary actions, live indicators,
+     active nav. Anywhere else and it stops meaning anything. */
+  --accent-glow: 0 0 24px rgb(45 212 191 / 0.18);
+
+  --success: #34d399;
+  --success-muted: rgb(52 211 153 / 0.13);
+  --warning: #fbbf24;
+  --warning-muted: rgb(251 191 36 / 0.13);
+  --danger: #f87171;
+  --danger-muted: rgb(248 113 113 / 0.13);
+
+  /* Dark leans on borders; the shadows just seat the surface */
+  --elevation-2: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elevation-3: 0 16px 40px -12px rgb(0 0 0 / 0.65), 0 2px 8px rgb(0 0 0 / 0.4);
+
+  --map-canvas: #16181c;
+
+  color-scheme: dark;
 }
 
 @theme inline {
-  /* --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-heading: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif; */
-  --font-sans: 'Plus Jakarta Sans', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-heading: 'Plus Jakarta Sans', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* ── Typography ────────────────────────────────────────────────────────
+     Two families, three roles. Mono is not decoration: every numeral, time,
+     duration, distance, count, code and identifier renders in it with
+     tabular figures, which is what makes dense ops data read as an
+     instrument rather than as a web page. */
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Scale — six steps, no ad-hoc sizes anywhere in the app */
+  --text-display: 1.375rem;      /* 22px — page titles, large metrics */
+  --text-display--line-height: 1.7rem;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 700;
+
+  --text-h2: 1.0625rem;          /* 17px */
+  --text-h2--line-height: 1.4rem;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 0.9375rem;          /* 15px */
+  --text-h3--line-height: 1.25rem;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 600;
+
+  --text-body: 0.875rem;         /* 14px */
+  --text-body--line-height: 1.25rem;
+
+  --text-small: 0.8125rem;       /* 13px */
+  --text-small--line-height: 1.125rem;
+
+  --text-micro: 0.6875rem;       /* 11px — labels, eyebrows, meta */
+  --text-micro--line-height: 0.9375rem;
+  --text-micro--letter-spacing: 0.06em;
+
+  /* ── Radii ───────────────────────────────────────────────────────────── */
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;    /*  8px — controls, chips, pills, inputs */
+  --radius-md: 0.5rem;    /*  8px */
+  --radius-lg: 0.75rem;   /* 12px — cards, panels, map containers */
+  --radius-xl: 1rem;      /* 16px — drawers, modals, command palette */
+  --radius-2xl: 1rem;
+  --radius-3xl: 1rem;
+  /* Kept full-round so shadcn's pill-shaped Badge/Button base still reads */
+  --radius-4xl: 9999px;
+
+  /* ── Motion ──────────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-micro: 120ms;      /* hover, focus, toggles */
+  --duration-standard: 220ms;   /* panels, popovers, expands */
+  --duration-entrance: 320ms;   /* route + section mounts */
+  --duration-stagger: 40ms;     /* per item, capped at 8 */
+
+  --animate-fade-up: fade-up var(--duration-entrance) var(--ease-out) both;
+  --animate-fade-in: fade-in var(--duration-standard) var(--ease-out) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-live-pulse: live-pulse 2s var(--ease-inout) infinite;
+  --animate-ping-ring: ping-ring 2s var(--ease-out) infinite;
+  --animate-spin-once: spin 400ms var(--ease-inout);
+
+  /* ── Surfaces, borders, text, semantics as Tailwind colors ───────────── */
+  --color-bg-base: var(--bg-base);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent-muted: var(--accent-muted);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-muted);
+  --color-map-canvas: var(--map-canvas);
+
+  /* shadcn colour contract */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -85,7 +254,7 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
+  --color-accent: var(--accent-shadcn);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -98,17 +267,37 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  /* Radius law: 10px everywhere — every step resolves to the same value. */
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
-  --radius-2xl: var(--radius);
-  --radius-3xl: var(--radius);
-  --radius-4xl: var(--radius);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion keyframes
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  from { background-position: -160% 0; }
+  to   { background-position: 260% 0; }
+}
+
+/* Live indicator — opacity only, so it survives reduced-motion as a static dot */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* Worker dots on the map: a ring that expands and fades */
+@keyframes ping-ring {
+  0%   { transform: scale(0.85); opacity: 0.55; }
+  70%  { transform: scale(2.1);  opacity: 0; }
+  100% { transform: scale(2.1);  opacity: 0; }
 }
 
 @layer base {
@@ -118,19 +307,51 @@
 
   body {
     @apply bg-background text-foreground;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html {
     @apply font-sans;
   }
 
-  /* ── Leaflet: quiet the default OSM tiles into the brand ───────────────── */
-  .leaflet-tile-pane {
-    filter: saturate(0.75) contrast(0.95) brightness(1.03);
+  /* Inter's optical sizing carries the display weight; headings get the
+     tightening that makes 22px read with authority instead of as "big text". */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 
+  /* Mono is a data typeface here — always tabular, never proportional. */
+  .font-mono,
+  code, kbd, samp, pre {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1;
+  }
+
+  /* Keyboard traversal should look deliberate everywhere, not just where
+     someone remembered to add a ring. */
+  :focus-visible {
+    outline: none;
+  }
+
+  /* ── Reduced motion: transforms and count-ups go, state changes stay ──── */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ── Leaflet ─────────────────────────────────────────────────────────── */
   .leaflet-container {
-    background: #eae7e3;
+    background: var(--map-canvas);
     font-family: inherit;
   }
 
@@ -140,19 +361,24 @@
   }
 
   .leaflet-popup-content-wrapper {
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
+    border-radius: var(--radius-lg);
+    background: var(--surface-3);
+    color: var(--text-primary);
+    box-shadow: var(--elevation-3);
+  }
+
+  .leaflet-popup-tip {
+    background: var(--surface-3);
   }
 
   .leaflet-popup-content {
     margin: 8px 12px;
-    font-size: 12px;
+    font-size: var(--text-small);
   }
 
-  /* ── Zoom control buttons ─────────────────────────────────────────────── */
+  /* Zoom controls — E2 material, same as every other floating control */
   .leaflet-bar {
     border: none !important;
-    /* box-shadow: none !important; */
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -165,12 +391,12 @@
     line-height: 32px !important;
     font-size: 16px !important;
     font-weight: 500 !important;
-    color: var(--foreground) !important;
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 5px !important;
-    /* box-shadow: 0 1px 3px rgb(0 0 0 / 0.06) !important; */
-    transition: all 0.15s ease;
+    color: var(--text-primary) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-default) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--elevation-2) !important;
+    transition: all var(--duration-micro) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,16 +404,14 @@
   }
 
   .leaflet-bar a:hover {
-    background: var(--secondary) !important;
-    border-color: var(--primary) !important;
-    color: var(--primary) !important;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
   }
 
   .leaflet-bar a:active {
-    background: var(--primary) !important;
-    color: var(--primary-foreground) !important;
-    border-color: var(--primary) !important;
+    background: var(--accent) !important;
+    color: var(--accent-contrast) !important;
+    border-color: var(--accent) !important;
     transform: scale(0.94);
   }
 
@@ -198,26 +422,136 @@
 
   .leaflet-control-attribution {
     font-size: 9px;
-    opacity: 0.6;
+    opacity: 0.55;
+    background: transparent !important;
+    color: var(--text-tertiary) !important;
+  }
+
+  .leaflet-control-attribution a {
+    color: var(--text-tertiary) !important;
   }
 }
 
 @layer utilities {
+  /* ═════════════════════════════════════════════════════════════════════
+     ELEVATION — four levels, one utility each. Never mix them by hand.
+     ═════════════════════════════════════════════════════════════════════ */
 
-  /* Bottom fade for internally-scrolling panels — no abrupt cut. */
+  /* E0 — flush on the base. Table rows, list items. Separation by hairline. */
+  .e0 {
+    background: transparent;
+    border-color: var(--border-subtle);
+  }
+
+  /* E1 — cards and panels. The default resting surface. */
+  .e1 {
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* E2 — raised. Sticky headers, hovered rows, floating controls, inputs. */
+  .e2 {
+    background: var(--surface-2);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--elevation-2);
+  }
+
+  /* E3 — overlays. Popovers, drawers, dialogs, command palette, lightbox. */
+  .e3 {
+    background: color-mix(in oklab, var(--surface-3) 92%, transparent);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--elevation-3);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  }
+
+  /* Accent glow — primary actions, live indicators, active nav. Three uses. */
+  .glow-accent {
+    box-shadow: var(--accent-glow);
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     TYPOGRAPHY ROLES
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* The uppercase eyebrow used for card headers, table headers, meta labels. */
+  .label-micro {
+    font-size: var(--text-micro);
+    line-height: var(--text-micro--line-height);
+    letter-spacing: var(--text-micro--letter-spacing);
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+
+  /* Every numeral in the product. Shorthand so call sites stay short. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     MOTION VARIANTS
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Stagger: parent opts in, children inherit the delay by index.
+     Capped at 8 — past that the last item feels broken, not choreographed. */
+  .stagger > * {
+    animation: fade-up var(--duration-entrance) var(--ease-out) both;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: calc(var(--duration-stagger) * 1); }
+  .stagger > *:nth-child(3) { animation-delay: calc(var(--duration-stagger) * 2); }
+  .stagger > *:nth-child(4) { animation-delay: calc(var(--duration-stagger) * 3); }
+  .stagger > *:nth-child(5) { animation-delay: calc(var(--duration-stagger) * 4); }
+  .stagger > *:nth-child(6) { animation-delay: calc(var(--duration-stagger) * 5); }
+  .stagger > *:nth-child(7) { animation-delay: calc(var(--duration-stagger) * 6); }
+  .stagger > *:nth-child(n + 8) { animation-delay: calc(var(--duration-stagger) * 7); }
+
+  /* Shimmer skeleton — a sweep across surface-2, not a pulsing block. */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-2);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--text-primary) 7%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    animation: var(--animate-shimmer);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Transforms and sweeps go; the surface stays so loading is still legible. */
+    .stagger > *,
+    .shimmer {
+      animation: none !important;
+    }
+    .shimmer {
+      background-image: none;
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     SCROLL AFFORDANCES (unchanged behaviour, tokenised values)
+     ═════════════════════════════════════════════════════════════════════ */
   .scroll-fade-y {
     mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
   }
 
-  /* Thin scrollbar, visible on hover only. */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
   }
 
   .scrollbar-thin:hover {
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--border-strong) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -231,6 +565,6 @@
   }
 
   .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: var(--border-strong);
   }
 }

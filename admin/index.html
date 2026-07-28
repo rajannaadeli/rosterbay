@@ -13,6 +13,27 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RosterBay — Roster, verify, and track your field workforce</title>
+    <script>
+      // Theme class before first paint — without this the app renders one
+      // light frame and then snaps to dark, which reads as a bug.
+      // Kept inline and dependency-free on purpose: any import would land
+      // after paint and defeat the point.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var resolved =
+            stored === 'dark' || stored === 'light'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.classList.add(resolved);
+          document.documentElement.style.colorScheme = resolved;
+        } catch (e) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
