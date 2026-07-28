@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { PageHeader } from '@/components/page-header';
+import { Segmented } from '@/components/segmented';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -28,7 +29,10 @@ import {
   type CreateShiftValues,
   type PendingAssignment,
 } from '@/features/roster/components/shift-dialogs';
+import { RosterDefs } from '@/features/roster/components/roster-defs';
 import { ShiftSheet } from '@/features/roster/components/shift-sheet';
+import { TimeGrid, type ZoomHours } from '@/features/roster/components/time-grid';
+import { WeekCoverageRibbon } from '@/features/roster/components/week-coverage-ribbon';
 import { useProofRealtime, useProofSummaries } from '@/features/proof/hooks';
 import { WorkerDragCard, WorkerPanel } from '@/features/roster/components/worker-panel';
 import {
@@ -46,6 +50,7 @@ import { useWorkers } from '@/features/workers/hooks';
 import type { Tables, Views } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
 import { acstTimestamp, acstWeekStart, weekBounds, weekDays } from '@/lib/week';
+import { usePersistentState } from '@/hooks/use-persistent-state';
 import { cn } from '@/lib/utils';
 
 type Shift = Tables<'shifts'>;
@@ -77,10 +82,25 @@ export function RosterPage() {
   const cancel = useCancelShift(fromIso);
   const company = useCompany();
 
+  // View preference outlives the session — an ops manager who works in day
+  // view should not land in week view every morning.
+  const [view, setView] = usePersistentState<'day' | 'week'>('rb-roster-view', 'day');
+  const [zoom, setZoom] = usePersistentState<ZoomHours>('rb-roster-zoom', 24);
+  // Day view opens on today, not on Monday — the ops manager's first question
+  // is about the shift running right now.
+  const [dayOffset, setDayOffset] = useState(() => {
+    const dow = new Date(`${formatACST(new Date(), 'yyyy-MM-dd')}T12:00:00+09:30`).getUTCDay();
+    return (dow + 6) % 7; // Sunday=0 → 6, Monday=1 → 0
+  });
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [activeWorker, setActiveWorker] = useState<WorkerRow | null>(null);
   const [pendingAssignment, setPendingAssignment] = useState<PendingAssignment | null>(null);
-  const [createCell, setCreateCell] = useState<{ siteId: string; dateYmd: string } | null>(null);
+  const [createCell, setCreateCell] = useState<{
+    siteId: string;
+    dateYmd: string;
+    start?: string;
+    end?: string;
+  } | null>(null);
   // Sheet state lives in the URL (?shift=<id>) so the dashboard can deep-link.
   const [searchParams, setSearchParams] = useSearchParams();
   const detailShiftId = searchParams.get('shift');
@@ -239,11 +259,54 @@ export function RosterPage() {
     return [...unique].sort();
   }, [workers.data]);
 
+  // Day view walks days; week view walks weeks. Both anchor on the same
+  // Monday so switching views never jumps you to a different part of the week.
+  const dayYmd = useMemo(
+    () => formatACST(addDays(weekStart, ((dayOffset % 7) + 7) % 7), 'yyyy-MM-dd'),
+    [weekStart, dayOffset],
+  );
+
+  const axisShifts = useMemo(
+    () =>
+      visibleShifts.map((s) => ({
+        id: s.id,
+        site_id: s.site_id,
+        starts_at: s.starts_at,
+        ends_at: s.ends_at,
+        worker_id: s.worker_id,
+        status: s.status,
+      })),
+    [visibleShifts],
+  );
+
+  // Index of today within the currently-displayed week, or Monday when the
+  // week on screen isn't the current one.
+  const todayIndexInWeek = useMemo(() => {
+    const index = days.findIndex((d) => formatACST(d, 'yyyy-MM-dd') === todayYmd);
+    return index === -1 ? 0 : index;
+  }, [days, todayYmd]);
+
+  // Stepping off either end of the week carries the week with it, so day view
+  // scrolls continuously instead of wrapping back to Monday.
+  const stepDay = (delta: number) => {
+    const next = dayOffset + delta;
+    if (next < 0) {
+      setWeekOffset((w) => w - 1);
+      setDayOffset(6);
+    } else if (next > 6) {
+      setWeekOffset((w) => w + 1);
+      setDayOffset(0);
+    } else {
+      setDayOffset(next);
+    }
+  };
+
   const isPending = shifts.isPending || sites.isPending || workers.isPending;
 
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
+        <RosterDefs />
         <PageHeader
           title="Roster"
           description="Drag workers onto shifts — compliance is checked before anything saves."
@@ -264,28 +327,61 @@ export function RosterPage() {
               <MegaphoneSimple size={13} weight="duotone" aria-hidden />
               Unfilled only
             </button>
+
+            <Segmented
+              label="Roster view"
+              value={view}
+              onChange={setView}
+              options={[
+                { value: 'day' as const, label: 'Day' },
+                { value: 'week' as const, label: 'Week' },
+              ]}
+            />
+
+            {view === 'day' && (
+              <Segmented
+                label="Time zoom"
+                value={zoom}
+                onChange={setZoom}
+                options={[
+                  { value: 6 as ZoomHours, label: '6h' },
+                  { value: 12 as ZoomHours, label: '12h' },
+                  { value: 24 as ZoomHours, label: '24h' },
+                ]}
+              />
+            )}
+
             <div className="mx-1 h-5 w-px bg-border-subtle" />
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label="Previous week"
-              onClick={() => setWeekOffset((w) => w - 1)}
+              aria-label={view === 'day' ? 'Previous day' : 'Previous week'}
+              onClick={() => (view === 'day' ? stepDay(-1) : setWeekOffset((w) => w - 1))}
             >
               <CaretLeft aria-hidden />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWeekOffset(0);
+                setDayOffset(todayIndexInWeek);
+              }}
+            >
               Today
             </Button>
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label="Next week"
-              onClick={() => setWeekOffset((w) => w + 1)}
+              aria-label={view === 'day' ? 'Next day' : 'Next week'}
+              onClick={() => (view === 'day' ? stepDay(1) : setWeekOffset((w) => w + 1))}
             >
               <CaretRight aria-hidden />
             </Button>
             <span className="num ml-2 text-small font-medium">
-              {formatACST(days[0]!, 'd MMM')} – {formatACST(days[6]!, 'd MMM yyyy')}
+              {view === 'day'
+                ? formatACST(`${dayYmd}T12:00:00+09:30`, 'EEE d MMM yyyy')
+                : `${formatACST(days[0]!, 'd MMM')} – ${formatACST(days[6]!, 'd MMM yyyy')}`}
             </span>
             </>
           }
@@ -300,14 +396,34 @@ export function RosterPage() {
               onToggleCollapsed={() => setPanelCollapsed((c) => !c)}
             />
 
-            <div className="max-h-[calc(100vh-11rem)] min-w-0 flex-1 overflow-auto rounded-lg border bg-card scrollbar-thin">
-              {isPending ? (
-                <div className="flex flex-col gap-2 p-4">
-                  {Array.from({ length: 6 }, (_, i) => (
-                    <Skeleton key={i} className="h-16 rounded-lg" />
-                  ))}
-                </div>
-              ) : (
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+            {isPending ? (
+              <div className="flex flex-col gap-2">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : view === 'day' ? (
+              <TimeGrid
+                ymd={dayYmd}
+                sites={sites.data ?? []}
+                shifts={visibleShifts}
+                workerById={workerById}
+                offerShiftIds={offerShiftIds}
+                zoom={zoom}
+                dimFilled={unfilledOnly}
+                dragOverShiftId={dragOver?.shiftId ?? null}
+                dragOverState={dragOver?.state ?? null}
+                onShiftClick={setDetailShiftId}
+                onBroadcast={setBroadcastShiftId}
+                onCreateAt={(siteId, start, end) =>
+                  setCreateCell({ siteId, dateYmd: dayYmd, start, end })
+                }
+              />
+            ) : (
+              <>
+              <WeekCoverageRibbon shifts={axisShifts} days={days} leftInsetPx={160} />
+              <div className="max-h-[calc(100vh-15rem)] overflow-auto rounded-lg border bg-card scrollbar-thin">
                 <div
                   className="grid min-w-[1080px]"
                   style={{ gridTemplateColumns: '160px repeat(7, minmax(132px, 1fr))' }}
@@ -399,7 +515,9 @@ export function RosterPage() {
                     );
                   })}
                 </div>
-              )}
+              </div>
+              </>
+            )}
             </div>
           </div>
 
@@ -420,6 +538,8 @@ export function RosterPage() {
           dateYmd={createCell.dateYmd}
           roles={roles}
           pending={create.isPending}
+          {...(createCell.start ? { defaultStart: createCell.start } : {})}
+          {...(createCell.end ? { defaultEnd: createCell.end } : {})}
           onSubmit={submitCreate}
         />
       )}

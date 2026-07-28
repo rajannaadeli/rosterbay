@@ -4,10 +4,47 @@ import { CheckCircle, CircleHalf, MegaphoneSimple } from '@phosphor-icons/react'
 import { UserAvatar } from '@/components/user-avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Tables, Views } from '@/lib/database.types';
-import { formatShiftRange } from '@/lib/format';
+import { formatACST, formatShiftRange } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { dayWindow, minutesInto } from '../time-axis';
 
 type Shift = Tables<'shifts'>;
+
+/**
+ * A 2px rail under the chip label showing where this shift sits in the day.
+ *
+ * The week grid can't encode time in position — every cell is one day — so
+ * the micro-track carries the metaphor across from the day view. It is the
+ * difference between "there is a shift on Thursday" and "the Thursday shift
+ * is the overnight one".
+ */
+function MicroTrack({ shift, tone }: { shift: Shift; tone: 'danger' | 'muted' | 'primary' }) {
+  const ymd = formatACST(shift.starts_at, 'yyyy-MM-dd');
+  const win = dayWindow(ymd);
+  const startMin = Math.max(0, minutesInto(win, shift.starts_at));
+  // Clipped at midnight: the remainder belongs to the next day's cell, and
+  // drawing it here would imply the shift ends at 23:59.
+  const endMin = Math.min(win.lengthMin, minutesInto(win, shift.ends_at));
+  const left = (startMin / win.lengthMin) * 100;
+  const width = Math.max(2, ((endMin - startMin) / win.lengthMin) * 100);
+
+  return (
+    <span
+      aria-hidden
+      className="absolute inset-x-1.5 bottom-[3px] h-[2px] overflow-hidden rounded-full bg-border-subtle"
+    >
+      <span
+        className={cn(
+          'absolute inset-y-0 rounded-full',
+          tone === 'danger' && 'bg-danger',
+          tone === 'muted' && 'bg-text-tertiary',
+          tone === 'primary' && 'bg-primary',
+        )}
+        style={{ left: `${left}%`, width: `${width}%` }}
+      />
+    </span>
+  );
+}
 
 interface ShiftChipProps {
   shift: Shift;
@@ -49,7 +86,7 @@ export function ShiftChip({
       type="button"
       onClick={onClick}
       className={cn(
-        'relative flex h-8 w-full items-center gap-1.5 rounded-lg border px-1.5 text-left text-micro tracking-normal whitespace-nowrap transition-all',
+        'relative flex h-[34px] w-full items-center gap-1.5 rounded-sm border px-1.5 pb-1 text-left text-micro tracking-normal whitespace-nowrap transition-all',
         unfilled
           ? 'border-dashed border-danger bg-danger/5 text-danger'
           : 'border-border bg-card hover:shadow-sm',
@@ -131,6 +168,11 @@ export function ShiftChip({
           )}
         </>
       )}
+
+      <MicroTrack
+        shift={shift}
+        tone={unfilled ? 'danger' : shift.status === 'in_progress' ? 'primary' : 'muted'}
+      />
     </button>
   );
 }

@@ -22,7 +22,24 @@ export function weekBounds(weekStart: TZDate): { fromIso: string; toIso: string 
   };
 }
 
-/** Builds a UTC ISO timestamp from an ACST calendar date + HH:mm. */
+/**
+ * Builds a UTC ISO timestamp from an ACST calendar date + HH:mm.
+ *
+ * Constructed from numeric components via `TZDate.tz`, never from a string.
+ * `new TZDate('2026-07-29T00:00:00', ACST)` parses the bare string in the
+ * *system* timezone and only then re-expresses it in ACST — so on a browser
+ * anywhere but Adelaide it silently produced a timestamp offset by the
+ * difference between the two zones (four hours from UTC+5:30, nine and a half
+ * from UTC). Seeded data hid it because the seed writes timestamps in SQL;
+ * only shifts created or retimed through the UI were wrong.
+ */
 export function acstTimestamp(dateYmd: string, timeHm: string): string {
-  return new TZDate(`${dateYmd}T${timeHm}:00`, ACST).toISOString();
+  const [year, month, day] = dateYmd.split('-').map(Number) as [number, number, number];
+  const [hours, minutes] = timeHm.split(':').map(Number) as [number, number];
+  return TZDate.tz(ACST, year, month - 1, day, hours, minutes, 0).toISOString();
+}
+
+/** 00:00 ACST on `dateYmd`, as a real instant. */
+export function acstMidnight(dateYmd: string): Date {
+  return new Date(acstTimestamp(dateYmd, '00:00'));
 }

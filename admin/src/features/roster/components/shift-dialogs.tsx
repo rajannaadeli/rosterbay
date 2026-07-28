@@ -52,6 +52,9 @@ interface CreateShiftDialogProps {
   dateYmd: string;
   roles: string[];
   pending: boolean;
+  /** Prefilled times — the day view's ghost bar supplies the slot it snapped to. */
+  defaultStart?: string;
+  defaultEnd?: string;
   onSubmit: (values: CreateShiftValues) => void;
 }
 
@@ -62,13 +65,19 @@ export function CreateShiftDialog({
   dateYmd,
   roles,
   pending,
+  defaultStart = '06:00',
+  defaultEnd = '14:00',
   onSubmit,
 }: CreateShiftDialogProps) {
   const form = useForm<CreateShiftValues>({
     resolver: zodResolver(createShiftSchema),
-    defaultValues: { start: '06:00', end: '14:00', role_required: 'Cleaner', notes: '' },
+    defaultValues: { start: defaultStart, end: defaultEnd, role_required: 'Cleaner', notes: '' },
   });
-  const [preset, setPreset] = useState<string>('morning');
+  // A prefilled slot matches a preset only by coincidence, so no preset starts
+  // selected — highlighting "Morning" on a 3:30pm ghost would be a lie.
+  const [preset, setPreset] = useState<string>(
+    PRESETS.find((p) => p.start === defaultStart && p.end === defaultEnd)?.id ?? '',
+  );
 
   const applyPreset = (id: string) => {
     setPreset(id);
@@ -82,7 +91,7 @@ export function CreateShiftDialog({
   const close = () => {
     onOpenChange(false);
     form.reset();
-    setPreset('morning');
+    setPreset('');
   };
 
   return (

@@ -322,6 +322,14 @@
   50%      { opacity: 0.35; }
 }
 
+/* In-progress shift bars: a slow accent sweep across the bar's own width.
+   Travels from fully off the left edge to fully off the right, so the bar is
+   momentarily clean between passes rather than perpetually shimmering. */
+@keyframes sheen-sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(240%); }
+}
+
 /* Worker dots on the map: a ring that expands and fades */
 @keyframes ping-ring {
   0%   { transform: scale(0.85); opacity: 0.55; }
@@ -525,6 +533,21 @@
   /* Accent glow — primary actions, live indicators, active nav. Three uses. */
   .glow-accent {
     box-shadow: var(--accent-glow);
+  }
+
+  /* The sweep inside an in-progress shift bar. Long and slow on purpose: this
+     runs on every live shift at once, and anything quicker turns the roster
+     into a light show. */
+  .rb-sheen {
+    animation: sheen-sweep 3.2s var(--ease-inout) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The bar keeps its accent fill and pulse dot, so "in progress" is still
+       legible — only the travelling highlight goes. */
+    .rb-sheen {
+      display: none;
+    }
   }
 
   /* ═════════════════════════════════════════════════════════════════════
