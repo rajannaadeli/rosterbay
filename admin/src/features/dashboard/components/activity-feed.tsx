@@ -62,12 +62,12 @@ export function ActivityFeed({
   const rows = items.map((item, index) => {
     const day = dayLabel(item.at);
     const showDivider = index === 0 || day !== dayLabel(items[index - 1]!.at);
-    return { item, day, showDivider };
+    return { item, day, showDivider, isLast: index === items.length - 1 };
   });
 
   return (
     <ul className="flex flex-col">
-      {rows.map(({ item, day, showDivider }) => {
+      {rows.map(({ item, day, showDivider, isLast }) => {
         const meta = KIND_META[item.kind];
         const KindIcon = meta.icon;
         const isNew = item.at > mountedAt;
@@ -81,11 +81,21 @@ export function ActivityFeed({
             )}
             <div
               className={cn(
-                'flex items-center gap-2.5 px-4 py-2 transition-colors duration-[var(--duration-micro)] hover:bg-surface-2/60',
+                'relative flex items-center gap-2.5 px-4 py-2 transition-colors duration-[var(--duration-micro)] hover:bg-surface-2/60',
                 isNew &&
                   'animate-in fade-in slide-in-from-top-2 rounded-sm bg-accent-muted duration-[var(--duration-standard)] ease-[var(--ease-out)]',
               )}
             >
+              {/* Timeline rail — drawn, so it can stop at a day divider and at
+                  the last row instead of running through them the way a
+                  border-left utility would. */}
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute left-[30px] w-px bg-border-subtle',
+                  showDivider ? 'top-1/2 bottom-0' : isLast ? 'top-0 bottom-1/2' : 'inset-y-0',
+                )}
+              />
               <div className="relative shrink-0">
                 {item.actor ? (
                   <UserAvatar name={item.actor} size="sm" />

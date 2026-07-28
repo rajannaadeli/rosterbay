@@ -1,4 +1,5 @@
 import type { Icon } from '@phosphor-icons/react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +10,8 @@ export interface StatSegment {
   label: string;
   value: number;
   icon: Icon;
+  /** Drawn micro-visual — the number's shape, sitting under it. */
+  spark?: ReactNode;
   /** Optional destination — segment becomes a link with hover tint. */
   to?: string;
   /** Optional click handler — segment becomes a filter button. */
@@ -49,16 +52,19 @@ export function StatStrip({ segments, loading }: { segments: StatSegment[]; load
             <div className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-accent-muted text-primary">
               <seg.icon size={16} weight="duotone" aria-hidden />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="label-micro truncate">{seg.label}</p>
               {loading ? (
                 <Skeleton className="mt-0.5 h-6 w-8" />
               ) : (
-                <SegmentValue
-                  value={seg.value}
-                  tone={seg.tone ?? 'default'}
-                  animate={seg.animate ?? false}
-                />
+                <div className="flex items-center gap-2.5">
+                  <SegmentValue
+                    value={seg.value}
+                    tone={seg.tone ?? 'default'}
+                    animate={seg.animate ?? false}
+                  />
+                  {seg.spark}
+                </div>
               )}
             </div>
           </>

@@ -13,6 +13,12 @@ import { addDays } from 'date-fns';
 
 import { PageHeader } from '@/components/page-header';
 import { RefreshButton } from '@/components/refresh-button';
+import {
+  DayTrackSpark,
+  PresenceSpark,
+  ReviewSplitSpark,
+  RunwaySpark,
+} from '@/components/stat-spark';
 import { StatStrip } from '@/components/stat-strip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,6 +42,7 @@ import { useSites } from '@/features/sites/hooks';
 import { useLiveTimesheets, useTimesheets } from '@/features/timesheets/hooks';
 import { useWorkers } from '@/features/workers/hooks';
 import { formatACST } from '@/lib/format';
+import { dayWindow, minutesInto } from '@/features/roster/time-axis';
 import { cn } from '@/lib/utils';
 
 interface AttentionRow {
@@ -164,6 +171,27 @@ export function DashboardPage() {
     () => new Map((timesheets.data ?? []).map((row) => [row.shift_id, row.id])),
     [timesheets.data],
   );
+
+  // Spark inputs. Every one is derived from data the page already holds; the
+  // strip issues no query of its own.
+  const unfilledWindows = useMemo<[number, number][]>(() => {
+    const win = dayWindow(todayYmd);
+    return unfilledToday.map((shift) => [
+      Math.max(0, minutesInto(win, shift.starts_at)),
+      Math.min(win.lengthMin, minutesInto(win, shift.ends_at)),
+    ]);
+  }, [unfilledToday, todayYmd]);
+
+  const expiringDays = useMemo(
+    () => expiringCerts.map((cert) => cert.days_until_expiry),
+    [expiringCerts],
+  );
+
+  const pendingCount = useMemo(
+    () => awaitingReview.filter((row) => row.effective_status === 'pending').length,
+    [awaitingReview],
+  );
+  const flaggedCount = awaitingReview.length - pendingCount;
 
   const attention: AttentionRow[] = useMemo(() => {
     const rows: AttentionRow[] = [];
@@ -357,6 +385,9 @@ export function DashboardPage() {
               to: '/app/timesheets',
               tone: onSite.length > 0 ? 'success' : 'default',
               animate: true,
+              spark: (
+                <PresenceSpark total={workers.data?.length ?? 0} active={onSite.length} />
+              ),
             },
             {
               label: 'Unfilled Today',
@@ -365,6 +396,7 @@ export function DashboardPage() {
               to: '/app/roster',
               tone: unfilledToday.length > 0 ? 'danger' : 'default',
               animate: true,
+              spark: <DayTrackSpark windows={unfilledWindows} />,
             },
             {
               label: 'Certs Expiring ≤30d',
@@ -373,6 +405,7 @@ export function DashboardPage() {
               to: '/app/workers?compliance=expiring_soon',
               tone: expiringCerts.length > 0 ? 'warning' : 'default',
               animate: true,
+              spark: <RunwaySpark daysUntil={expiringDays} />,
             },
             {
               label: 'Awaiting Review',
@@ -381,6 +414,9 @@ export function DashboardPage() {
               to: '/app/timesheets?status=pending',
               tone: awaitingReview.length > 0 ? 'warning' : 'default',
               animate: true,
+              spark: (
+                <ReviewSplitSpark pending={pendingCount} flagged={flaggedCount} />
+              ),
             },
           ]}
         />
