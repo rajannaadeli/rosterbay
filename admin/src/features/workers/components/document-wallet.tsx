@@ -1,6 +1,7 @@
 import { Certificate, FileText, Prohibit } from '@phosphor-icons/react';
 
 import { EmptyState } from '@/components/empty-state';
+import { ComplianceRunway } from './compliance-runway';
 import { CopyButton } from '@/components/copy-button';
 import { CertPill } from '@/components/status-pill';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,7 +51,10 @@ export function DocumentWallet({ certs, certTypes, sites, isPending }: DocumentW
   const typeById = new Map((certTypes ?? []).map((certType) => [certType.id, certType]));
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="flex flex-col gap-4">
+      <ComplianceRunway certs={certs ?? []} certTypes={certTypes} sites={sites} />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {certs?.map((cert) => {
         const certType = typeById.get(cert.cert_type_id);
         const blockedSites =
@@ -124,8 +128,9 @@ export function DocumentWallet({ certs, certTypes, sites, isPending }: DocumentW
               </p>
             ))}
           </article>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Navigate, Outlet } from 'react-router';
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/sidebar-context';
+import { SvgDefs } from '@/components/svg-defs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from '@/features/auth/hooks';
 
@@ -27,6 +28,7 @@ export function AppShell() {
 
   return (
     <SidebarProvider>
+      <SvgDefs />
       <div className="flex h-screen overflow-hidden">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

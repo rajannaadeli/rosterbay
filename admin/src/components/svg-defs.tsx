@@ -1,16 +1,20 @@
 /**
- * Document-global SVG pattern definitions for the roster.
+ * Document-global SVG pattern definitions.
  *
- * Rendered once at the roster root; every unfilled bar and every unfilled
- * coverage cell references these by id (`fill="url(#rb-hatch-danger)"`). SVG
- * defs resolve across separate `<svg>` elements in the same document, so one
- * definition serves a hundred bars without re-declaring the geometry.
+ * Rendered once in the app shell — not per feature — because the same hatch is
+ * referenced from the roster's unfilled bars, the coverage ribbon and the
+ * compliance runway's expired lanes, and a `url(#…)` reference only resolves
+ * if the def is present in the document that paints it. Scoping these to the
+ * roster made the runway's hatch silently render as flat fill.
+ *
+ * SVG defs resolve across separate `<svg>` elements, so one definition serves
+ * every consumer without re-declaring the geometry.
  *
  * The hatch is what makes an unfilled shift unmistakable at a glance — colour
  * alone would put the whole burden on the red/green axis, which is exactly
  * what a colour-blind ops manager can't use. Texture is the redundant channel.
  */
-export function RosterDefs() {
+export function SvgDefs() {
   return (
     <svg aria-hidden width="0" height="0" className="absolute" focusable="false">
       <defs>

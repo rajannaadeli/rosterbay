@@ -29,7 +29,6 @@ import {
   type CreateShiftValues,
   type PendingAssignment,
 } from '@/features/roster/components/shift-dialogs';
-import { RosterDefs } from '@/features/roster/components/roster-defs';
 import { ShiftSheet } from '@/features/roster/components/shift-sheet';
 import { TimeGrid, type ZoomHours } from '@/features/roster/components/time-grid';
 import { WeekCoverageRibbon } from '@/features/roster/components/week-coverage-ribbon';
@@ -306,7 +305,6 @@ export function RosterPage() {
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
-        <RosterDefs />
         <PageHeader
           title="Roster"
           description="Drag workers onto shifts — compliance is checked before anything saves."

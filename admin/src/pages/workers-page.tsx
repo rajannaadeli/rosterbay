@@ -11,10 +11,12 @@ import { EmptyState } from '@/components/empty-state';
 import { FilterChip } from '@/components/filter-chip';
 import { StatStrip } from '@/components/stat-strip';
 import { CompliancePill } from '@/components/status-pill';
+import { ComplianceRunwaySpark } from '@/features/workers/components/compliance-runway';
 import { UserAvatar } from '@/components/user-avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WorkerDrawer } from '@/features/workers/components/worker-drawer';
 import { useWorkers } from '@/features/workers/hooks';
+import { useAllWorkerCerts } from '@/features/roster/hooks';
 import type { CertStatus, Views } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
 
@@ -23,7 +25,9 @@ type ComplianceFilter = 'all' | CertStatus;
 
 const COMPLIANCE_RANK: Record<CertStatus, number> = { expired: 0, expiring_soon: 1, valid: 2 };
 
-const columns: ColumnDef<WorkerRow>[] = [
+type CertsByWorker = Map<string, Views<'worker_certs_with_status'>[]>;
+
+const buildColumns = (certsByWorker: CertsByWorker): ColumnDef<WorkerRow>[] => [
   {
     id: 'worker',
     header: 'Worker',
@@ -62,7 +66,14 @@ const columns: ColumnDef<WorkerRow>[] = [
     header: 'Compliance',
     sortingFn: (a, b) =>
       COMPLIANCE_RANK[a.original.compliance_status] - COMPLIANCE_RANK[b.original.compliance_status],
-    cell: ({ row }) => <CompliancePill status={row.original.compliance_status} />,
+    cell: ({ row }) => (
+      // Pill states *what*; the spark states *how much runway is left* — the
+      // same geometry as the drawer's full runway, at one-lane resolution.
+      <div className="flex w-28 flex-col gap-1.5">
+        <CompliancePill status={row.original.compliance_status} />
+        <ComplianceRunwaySpark certs={certsByWorker.get(row.original.id) ?? []} />
+      </div>
+    ),
   },
   {
     accessorKey: 'shifts_this_week',
@@ -105,6 +116,17 @@ const columns: ColumnDef<WorkerRow>[] = [
 
 export function WorkersPage() {
   const workers = useWorkers();
+  const allCerts = useAllWorkerCerts();
+  const certsByWorker = useMemo(() => {
+    const map: CertsByWorker = new Map();
+    for (const cert of allCerts.data ?? []) {
+      const list = map.get(cert.worker_id) ?? [];
+      list.push(cert);
+      map.set(cert.worker_id, list);
+    }
+    return map;
+  }, [allCerts.data]);
+  const columns = useMemo(() => buildColumns(certsByWorker), [certsByWorker]);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [role, setRole] = useState('all');
