@@ -26,21 +26,34 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
       {...attributes}
       {...listeners}
       className={cn(
-        'group flex h-14 cursor-grab items-center gap-2 rounded-lg border bg-card pl-1 pr-2 select-none active:cursor-grabbing mx-0.5',
+        'e1 group mx-0.5 flex h-14 cursor-grab items-center gap-2 rounded-sm pr-2 pl-1 select-none',
+        'transition-colors duration-[var(--duration-micro)] hover:border-border-strong hover:bg-surface-2',
+        'active:cursor-grabbing',
         isDragging && 'opacity-40',
       )}
     >
       <DotsSixVertical
         size={16}
-        className="shrink-0 text-muted-foreground/60 transition-colors group-hover:text-muted-foreground"
+        className="shrink-0 text-text-tertiary transition-colors group-hover:text-text-secondary"
         aria-hidden
       />
-      <UserAvatar name={worker.full_name} size="md" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{worker.full_name}</p>
-        <p className="truncate text-xs text-muted-foreground">{worker.job_title}</p>
+      <UserAvatar name={worker.full_name} size="sm" />
+      {/* Name owns its own line. Sharing it with the compliance pill left
+          ~80px in a 240px panel, which truncated most first names — and the
+          name is the thing being dragged. */}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="truncate text-small font-medium">{worker.full_name}</p>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <p className="truncate text-micro tracking-normal text-text-tertiary">
+            {worker.job_title}
+          </p>
+          <CompliancePill
+            status={worker.compliance_status}
+            showIcon={false}
+            className="h-4 shrink-0 px-1.5 text-[10px]"
+          />
+        </div>
       </div>
-      <CompliancePill status={worker.compliance_status} showIcon={false} className="px-1.5 text-micro tracking-normal" />
     </div>
   );
 }

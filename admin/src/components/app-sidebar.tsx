@@ -39,9 +39,12 @@ const expandedItemClasses = ({ isActive }: { isActive: boolean }) =>
     'relative flex items-center gap-2.5 rounded-sm px-3 py-2 text-body transition-colors duration-[var(--duration-micro)]',
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
     'before:absolute before:top-1/2 before:left-0 before:h-5 before:w-[2px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:transition-opacity before:duration-[var(--duration-micro)]',
+    // accent-muted, not surface-2: in light the sidebar already sits on
+    // surface-1 (#FFF) and surface-2 is a 2% step, so a surface fill left the
+    // active route effectively unmarked. The accent tint reads in both themes.
     isActive
-      ? 'bg-surface-2 font-medium text-foreground before:opacity-100 dark:before:shadow-[var(--accent-glow)] [&_svg]:text-primary'
-      : 'text-text-secondary before:opacity-0 hover:bg-surface-2/60 hover:text-foreground',
+      ? 'bg-accent-muted font-medium text-foreground before:opacity-100 dark:before:shadow-[var(--accent-glow)] [&_svg]:text-primary'
+      : 'text-text-secondary before:opacity-0 hover:bg-surface-2 hover:text-foreground dark:hover:bg-surface-2/60',
   );
 
 const railItemClasses = ({ isActive }: { isActive: boolean }) =>
@@ -50,8 +53,8 @@ const railItemClasses = ({ isActive }: { isActive: boolean }) =>
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
     'before:absolute before:top-1/2 before:-left-2 before:h-5 before:w-[2px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary before:transition-opacity before:duration-[var(--duration-micro)]',
     isActive
-      ? 'bg-surface-2 text-primary before:opacity-100 dark:before:shadow-[var(--accent-glow)]'
-      : 'text-text-secondary before:opacity-0 hover:bg-surface-2/60 hover:text-foreground',
+      ? 'bg-accent-muted text-primary before:opacity-100 dark:before:shadow-[var(--accent-glow)]'
+      : 'text-text-secondary before:opacity-0 hover:bg-surface-2 hover:text-foreground dark:hover:bg-surface-2/60',
   );
 
 export function AppSidebar() {

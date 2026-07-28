@@ -12,6 +12,7 @@ import { Link } from 'react-router';
 import { addDays } from 'date-fns';
 
 import { PageHeader } from '@/components/page-header';
+import { RefreshButton } from '@/components/refresh-button';
 import { StatStrip } from '@/components/stat-strip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,23 @@ interface AttentionRow {
   subtitle: string;
   to?: string;
   broadcastShiftId?: string;
+}
+
+/**
+ * The live indicator. Opacity-only pulse, so under prefers-reduced-motion it
+ * degrades to a solid dot rather than disappearing — "live" is information,
+ * not decoration.
+ */
+function LiveDot({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'shrink-0 animate-[live-pulse_2s_var(--ease-inout)_infinite] rounded-full bg-success',
+        size === 'sm' ? 'size-1.5' : 'size-2',
+      )}
+    />
+  );
 }
 
 export function DashboardPage() {
@@ -369,37 +387,46 @@ export function DashboardPage() {
 
         {/* Row 1: map (7) + needs attention (5), equal height. */}
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-          <div className="relative h-[380px] overflow-hidden rounded-lg border bg-card xl:col-span-7">
+          <div className="e1 relative h-[380px] overflow-hidden rounded-lg xl:col-span-7">
             {sites.data ? (
               <LiveMap
                 sites={sites.data}
                 onSite={onSite}
                 workerNames={workerNames}
                 siteNames={siteNames}
+                updatedAt={timesheets.dataUpdatedAt || null}
               />
             ) : (
               <Skeleton className="h-full w-full" />
             )}
             <div
               style={{ zIndex: 40 }}
-              className="pointer-events-none absolute top-3 right-3 flex items-center gap-1.5 rounded-lg border bg-card/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur"
+              className="pointer-events-none absolute top-3 right-3 flex items-center gap-1.5 rounded-sm border border-border-default bg-surface-1/90 px-2.5 py-1.5 shadow-[var(--elevation-2)] backdrop-blur-sm"
             >
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-success" />
+              <LiveDot />
+              <span className="label-micro text-text-secondary">
+                <span className="num">{onSite.length}</span> on site now
               </span>
-              {onSite.length} on site now
             </div>
           </div>
 
-          <section className="flex h-[380px] flex-col overflow-hidden rounded-lg border bg-card xl:col-span-5">
-            <div className="flex items-center gap-2 border-b px-4 py-2.5">
-              <h2 className="text-sm font-semibold">Needs attention</h2>
+          <section className="e1 flex h-[380px] flex-col overflow-hidden rounded-lg xl:col-span-5">
+            <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2.5">
+              <h2 className="label-micro">Needs attention</h2>
               {attention.length > 0 && (
-                <Badge variant="secondary" className="text-micro tracking-normal text-danger">
+                <Badge variant="destructive" className="num">
                   {attention.length}
                 </Badge>
               )}
+              <RefreshButton
+                label="Refresh what needs attention"
+                busy={timesheets.isFetching || windowShifts.isFetching}
+                onRefresh={() => {
+                  void timesheets.refetch();
+                  void windowShifts.refetch();
+                }}
+                className="ml-auto"
+              />
             </div>
             <div className="scrollbar-thin flex-1 overflow-y-auto">
               <ul className="scroll-fade-y flex flex-col pb-4">
@@ -408,7 +435,7 @@ export function DashboardPage() {
                     <Skeleton className="h-12 rounded-lg" />
                   </li>
                 ) : attention.length === 0 ? (
-                  <li className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <li className="px-4 py-10 text-center text-small text-text-secondary">
                     All clear — nothing needs attention right now.
                   </li>
                 ) : (
@@ -430,16 +457,22 @@ export function DashboardPage() {
         </div>
 
         {/* Row 2: activity, full width. */}
-        <section className="flex max-h-80 flex-col overflow-hidden rounded-lg border bg-card">
-          <div className="flex items-center gap-2 border-b px-4 py-2.5">
-            <h2 className="text-sm font-semibold">Activity</h2>
-            <span className="flex items-center gap-1 rounded-lg bg-success/10 px-1.5 py-0.5 text-micro tracking-normal font-medium text-success">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-success" />
-              </span>
+        <section className="e1 flex max-h-80 flex-col overflow-hidden rounded-lg">
+          <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2.5">
+            <h2 className="label-micro">Activity</h2>
+            <span className="label-micro flex items-center gap-1.5 rounded-xs bg-success-muted px-1.5 py-0.5 text-success">
+              <LiveDot size="sm" />
               Live
             </span>
+            <RefreshButton
+              label="Refresh the activity feed"
+              busy={timesheets.isFetching || taskActivity.isFetching}
+              onRefresh={() => {
+                void timesheets.refetch();
+                void taskActivity.refetch();
+              }}
+              className="ml-auto"
+            />
           </div>
           <div className="scrollbar-thin flex-1 overflow-y-auto">
             {loading ? (
@@ -447,7 +480,7 @@ export function DashboardPage() {
                 <Skeleton className="h-10 rounded-lg" />
               </div>
             ) : feed.length === 0 ? (
-              <p className="px-4 py-10 text-center text-sm text-muted-foreground">
+              <p className="px-4 py-10 text-center text-small text-text-secondary">
                 Activity appears here as the field moves.
               </p>
             ) : (

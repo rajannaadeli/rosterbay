@@ -12,9 +12,11 @@ interface LiveMapProps {
   onSite: TimesheetRow[];
   workerNames: Record<string, string>;
   siteNames: Record<string, string>;
+  /** Drives the ticking "Updated Ns ago" line — when the data last landed. */
+  updatedAt?: Date | string | number | null;
 }
 
-export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps) {
+export function LiveMap({ sites, onSite, workerNames, siteNames, updatedAt }: LiveMapProps) {
   const points: [number, number][] = [
     ...sites.map((s) => [s.lat, s.lng] as [number, number]),
     ...onSite
@@ -23,7 +25,7 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
   ];
 
   return (
-    <FullscreenMapWrapper className="h-full w-full">
+    <FullscreenMapWrapper className="h-full w-full" updatedAt={updatedAt}>
       <MapContainer
         center={[-34.928, 138.59]}
         zoom={11}
@@ -37,9 +39,9 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
         {sites.map((site) => (
           <Marker key={site.id} position={[site.lat, site.lng]} icon={siteIcon(site.name)}>
             <Popup>
-              <span className="text-sm font-medium">{site.name}</span>
+              <span className="text-body font-medium">{site.name}</span>
               <br />
-              <span className="text-xs">{site.client_name}</span>
+              <span className="text-small text-text-secondary">{site.client_name}</span>
             </Popup>
           </Marker>
         ))}
@@ -52,13 +54,13 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
               zIndexOffset={1000}
             >
               <Popup>
-                <span className="text-sm font-medium">
+                <span className="text-body font-medium">
                   {workerNames[entry.worker_id] ?? 'Worker'}
                 </span>
                 <br />
-                <span className="text-xs">
+                <span className="text-small text-text-secondary">
                   {siteNames[entry.site_id] ?? 'Site'} · on site since{' '}
-                  {formatACST(entry.clock_in_at, 'h:mm a')}
+                  <span className="num">{formatACST(entry.clock_in_at, 'h:mm a')}</span>
                 </span>
               </Popup>
             </Marker>

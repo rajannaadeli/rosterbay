@@ -28,13 +28,15 @@ export function ThemeToggle({ className }: { className?: string }) {
       role="radiogroup"
       aria-label="Color theme"
       className={cn(
-        'relative flex h-7 items-center rounded-sm border border-border-subtle bg-surface-2 p-0.5',
+        // Track sits on bg-base and the thumb on surface-1 — a surface-2
+        // track would put the thumb 2% away from it in light mode.
+        'relative flex h-7 items-center rounded-sm border border-border-subtle bg-bg-base p-0.5',
         className,
       )}
     >
       <span
         aria-hidden
-        className="absolute top-0.5 bottom-0.5 left-0.5 rounded-xs bg-surface-1 shadow-[var(--elevation-2)] transition-transform duration-[var(--duration-standard)] ease-[var(--ease-out)]"
+        className="absolute top-0.5 bottom-0.5 left-0.5 rounded-xs border border-border-subtle bg-surface-1 shadow-[var(--elevation-2)] transition-transform duration-[var(--duration-standard)] ease-[var(--ease-out)]"
         style={{
           width: `calc((100% - 0.25rem) / ${OPTIONS.length})`,
           transform: `translateX(${index * 100}%)`,

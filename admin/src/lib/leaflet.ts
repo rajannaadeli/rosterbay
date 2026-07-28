@@ -14,11 +14,17 @@ L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
  * status-coloured dots stay the loudest thing on the map, which the default
  * OSM skin (green parks, brown roads, blue water) never allowed.
  *
- * Retina tiles: `{r}` resolves to "@2x" on high-DPI screens.
+ * The @2x suffix is baked into the URL rather than left to Leaflet's
+ * `detectRetina`. That option assumes the provider has *no* high-DPI tiles,
+ * so it fakes them by incrementing `zoomOffset` and halving `tileSize` —
+ * which silently shifts the zoom math and pushed every marker off-screen when
+ * combined with a provider that does serve @2x.
  */
+const RETINA = typeof window !== 'undefined' && window.devicePixelRatio > 1 ? '@2x' : '';
+
 export const TILE_URL = {
-  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png',
+  light: `https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}${RETINA}.png`,
+  dark: `https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}${RETINA}.png`,
 } as const;
 
 export const OSM_ATTRIBUTION =

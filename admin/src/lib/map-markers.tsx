@@ -99,8 +99,9 @@ export function MapTiles() {
       key={resolvedTheme}
       url={TILE_URL[resolvedTheme]}
       attribution={OSM_ATTRIBUTION}
-      // CartoDB serves @2x tiles; without this they render soft on retina.
-      detectRetina
+      // CartoDB shards across a–d; Leaflet's default is only a–c.
+      subdomains="abcd"
+      maxZoom={20}
     />
   );
 }

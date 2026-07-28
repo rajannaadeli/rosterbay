@@ -517,10 +517,10 @@ export function TimesheetsPage() {
             description="Nothing matches these filters — widen the date range or clear the status filter."
           />
         ) : (
-          <div className="overflow-hidden rounded-lg border bg-card">
+          <div className="e1 overflow-hidden rounded-lg">
             <div className="max-h-[calc(100vh-19rem)] overflow-auto scrollbar-thin">
               <table className="relative w-full caption-bottom text-sm">
-                <TableHeader className="sticky top-0 z-10 bg-card shadow-[0_1px_0_var(--border)]">
+                <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
                   {table.getHeaderGroups().map((hg) => (
                     <TableRow key={hg.id}>
                       {hg.headers.map((header) => {
@@ -530,11 +530,11 @@ export function TimesheetsPage() {
                             {header.isPlaceholder ? null : canSort ? (
                               <button
                                 type="button"
-                                className="inline-flex items-center gap-1 hover:text-foreground"
+                                className="label-micro inline-flex items-center gap-1 rounded-xs transition-colors duration-[var(--duration-micro)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 onClick={header.column.getToggleSortingHandler()}
                               >
                                 {flexRender(header.column.columnDef.header, header.getContext())}
-                                <CaretUpDown size={12} className="text-muted-foreground/60" aria-hidden />
+                                <CaretUpDown size={12} className="text-text-tertiary" aria-hidden />
                               </button>
                             ) : (
                               flexRender(header.column.columnDef.header, header.getContext())
