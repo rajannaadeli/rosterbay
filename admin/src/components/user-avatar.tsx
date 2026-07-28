@@ -2,35 +2,29 @@ import { cn } from '@/lib/utils';
 
 /**
  * The one avatar for every surface: deterministic initials on a muted,
- * name-hashed background. No image pipeline, no doodles. The 8 tones are
- * desaturated slate/teal/sand/clay/mauve/denim/taupe — never the semantic
- * green/amber/red, which stay reserved for status.
+ * name-hashed background. No image pipeline, no doodles.
+ *
+ * The eight tones live in index.css as `--avatar-N-bg/fg` with a designed
+ * value per theme — they used to be light-only hexes here, which meant every
+ * avatar in the app stayed a pale chip on near-black. They encode identity,
+ * never status, so the semantic green/amber/red are not among them.
  */
 
-const TONES: { bg: string; fg: string }[] = [
-  { bg: '#E2E8F0', fg: '#475569' }, // slate
-  { bg: '#DDE3EA', fg: '#54606E' }, // steel
-  { bg: '#D2E4E1', fg: '#2F6E68' }, // teal (muted)
-  { bg: '#EBE2D3', fg: '#7C6A48' }, // sand
-  { bg: '#E9DBD3', fg: '#7E5A48' }, // clay
-  { bg: '#E7DEE7', fg: '#6E5B70' }, // mauve
-  { bg: '#DAE1EC', fg: '#4C5B72' }, // denim
-  { bg: '#E6E1DB', fg: '#6B6157' }, // taupe
-];
+const TONE_COUNT = 8;
 
 const SIZES = {
-  xs: { box: 20, text: 'text-[9px]' },
-  sm: { box: 28, text: 'text-[10px]' },
-  md: { box: 40, text: 'text-sm' },
-  lg: { box: 56, text: 'text-lg' },
+  xs: { box: 20, text: 'text-[10px]' },
+  sm: { box: 28, text: 'text-micro tracking-normal' },
+  md: { box: 40, text: 'text-body' },
+  lg: { box: 56, text: 'text-h2' },
 } as const;
 
 export type AvatarSize = keyof typeof SIZES;
 
-function toneFor(name: string) {
+function toneFor(name: string): number {
   let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash + name.charCodeAt(i)) % TONES.length;
-  return TONES[hash]!;
+  for (let i = 0; i < name.length; i++) hash = (hash + name.charCodeAt(i)) % TONE_COUNT;
+  return hash + 1;
 }
 
 function userInitials(name: string): string {
@@ -53,9 +47,14 @@ export function UserAvatar({ name, size = 'sm', className }: UserAvatarProps) {
   return (
     <span
       aria-hidden
-      style={{ width: box, height: box, backgroundColor: tone.bg, color: tone.fg }}
+      style={{
+        width: box,
+        height: box,
+        backgroundColor: `var(--avatar-${tone}-bg)`,
+        color: `var(--avatar-${tone}-fg)`,
+      }}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-black/5 select-none',
+        'inline-flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-border-subtle select-none',
         text,
         className,
       )}

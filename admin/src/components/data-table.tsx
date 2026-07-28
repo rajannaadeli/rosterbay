@@ -105,9 +105,9 @@ export function DataTable<T>({
   const pageCount = table.getPageCount();
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
+    <div className="e1 overflow-hidden rounded-lg">
       {(searchable || toolbar) && (
-        <div className="flex flex-col items-start gap-3 border-b bg-muted/20 px-4 py-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-start gap-3 border-b border-border-subtle px-4 py-3 sm:flex-row sm:items-center">
           {searchable && (
             <div className="relative w-full min-w-0 flex-1 sm:max-w-xs">
               <MagnifyingGlass
@@ -123,7 +123,7 @@ export function DataTable<T>({
                 placeholder={searchPlaceholder}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="h-8 bg-background pl-9"
+                className="pl-9"
               />
             </div>
           )}
@@ -134,7 +134,7 @@ export function DataTable<T>({
       {/* Scrollable table area — header sticks, body scrolls */}
       <div className="max-h-[calc(100vh-22rem)] overflow-auto scrollbar-thin">
         <table className="relative w-full caption-bottom text-sm">
-          <TableHeader className="sticky top-0 z-10 bg-[#FBFBFB]">
+          <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -145,7 +145,7 @@ export function DataTable<T>({
                       {header.isPlaceholder ? null : canSort ? (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                          className="label-micro inline-flex items-center gap-1 rounded-[4px] transition-colors duration-[var(--duration-micro)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -154,7 +154,7 @@ export function DataTable<T>({
                           ) : sorted === 'desc' ? (
                             <CaretDown size={12} aria-hidden />
                           ) : (
-                            <CaretUpDown size={12} className="text-muted-foreground/60" aria-hidden />
+                            <CaretUpDown size={12} className="text-text-tertiary opacity-0 transition-opacity duration-[var(--duration-micro)] group-hover/row:opacity-100 [th:hover_&]:opacity-100" aria-hidden />
                           )}
                         </button>
                       ) : (
@@ -179,7 +179,7 @@ export function DataTable<T>({
               ))
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="py-16 text-center">
+                <TableCell colSpan={columns.length} className="py-16 text-center whitespace-normal">
                   {emptyState ?? <p className="text-sm text-muted-foreground">No records found.</p>}
                 </TableCell>
               </TableRow>
@@ -188,7 +188,7 @@ export function DataTable<T>({
                 <TableRow
                   key={row.id}
                   tabIndex={onRowClick ? 0 : undefined}
-                  className={cn('hover:bg-muted/50', onRowClick && 'cursor-pointer')}
+                  className={cn(onRowClick && 'cursor-pointer')}
                   onClick={() => onRowClick?.(row.original)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') onRowClick?.(row.original);
@@ -207,9 +207,9 @@ export function DataTable<T>({
       </div>
 
       {!loading && (filteredCount > 0 || pageCount > 1) && (
-        <div className="flex items-center justify-between border-t px-4 py-2 text-sm text-muted-foreground">
+        <div className="flex items-center justify-between border-t border-border-subtle px-4 py-2 text-small text-text-secondary">
           <span>
-            {filteredCount} result{filteredCount === 1 ? '' : 's'}
+            <span className="num">{filteredCount}</span> result{filteredCount === 1 ? '' : 's'}
           </span>
           {pageCount > 1 && (
             <div className="flex items-center gap-1">
@@ -222,7 +222,7 @@ export function DataTable<T>({
               >
                 <CaretLeft aria-hidden />
               </Button>
-              <span className="px-2 tabular-nums">
+              <span className="num px-2 text-small">
                 {table.getState().pagination.pageIndex + 1} / {pageCount}
               </span>
               <Button

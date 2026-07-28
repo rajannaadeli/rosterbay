@@ -71,6 +71,20 @@
   /* Map canvas behind the tiles, so a slow tile load isn't a white flash */
   --map-canvas: #eae7e3;
 
+  /* ── Avatar identity tones ───────────────────────────────────────────────
+     Eight name-hashed chips. These encode *identity*, not status, which is
+     why they're allowed to exist alongside the one accent — but they stay in
+     the warm-neutral/sage/teal family so none of them can be mistaken for the
+     semantic green/amber/red or read as a stray "info blue". */
+  --avatar-1-bg: #e7e5e4; --avatar-1-fg: #57534e;
+  --avatar-2-bg: #e6e1db; --avatar-2-fg: #6b6157;
+  --avatar-3-bg: #d2e4e1; --avatar-3-fg: #2f6e68;
+  --avatar-4-bg: #ebe2d3; --avatar-4-fg: #7c6a48;
+  --avatar-5-bg: #e9dbd3; --avatar-5-fg: #7e5a48;
+  --avatar-6-bg: #dfe5dc; --avatar-6-fg: #55634e;
+  --avatar-7-bg: #e3e2de; --avatar-7-fg: #5c5b55;
+  --avatar-8-bg: #ded9d2; --avatar-8-fg: #6d6459;
+
   /* ── shadcn contract ─────────────────────────────────────────────────────
      Every installed primitive reads these. They are aliases onto the ladder
      above — never independent values, or the two systems drift. */
@@ -149,6 +163,18 @@
   --elevation-3: 0 16px 40px -12px rgb(0 0 0 / 0.65), 0 2px 8px rgb(0 0 0 / 0.4);
 
   --map-canvas: #16181c;
+
+  /* Same eight identities, re-designed for near-black: deep desaturated
+     chips with a light tint of their own hue. Inverting the light values
+     would have produced eight glaring pastel dots. */
+  --avatar-1-bg: #2a2c31; --avatar-1-fg: #b9bcc2;
+  --avatar-2-bg: #2e2b28; --avatar-2-fg: #c3bbb1;
+  --avatar-3-bg: #1c3330; --avatar-3-fg: #7fcfc4;
+  --avatar-4-bg: #322c22; --avatar-4-fg: #cbb68c;
+  --avatar-5-bg: #322722; --avatar-5-fg: #c8a08c;
+  --avatar-6-bg: #262d24; --avatar-6-fg: #a6bd9d;
+  --avatar-7-bg: #2b2b29; --avatar-7-fg: #b8b7b0;
+  --avatar-8-bg: #2f2b26; --avatar-8-fg: #c0b4a5;
 
   color-scheme: dark;
 }
@@ -358,6 +384,34 @@
   /* Site-name chips hide until zoomed close enough to read them. */
   .map-labels-hidden .site-label {
     display: none;
+  }
+
+  /* Leaflet writes path options to SVG presentation attributes, which don't
+     resolve var(). CSS properties do — and they win over the attribute — so
+     vector overlays get their token colours from here instead. */
+  .geofence-ring {
+    stroke: var(--accent);
+    fill: var(--accent);
+  }
+
+  .distance-line {
+    stroke: var(--danger);
+  }
+
+  /* Site pins glow on dark tiles, where an unlit chip disappears into them. */
+  .dark .map-pin-glow {
+    box-shadow: var(--accent-glow);
+  }
+
+  /* The dark tile set ships light label halos; this keeps them from
+     glowing white over near-black. */
+  .dark .leaflet-tile-pane {
+    filter: brightness(0.92) contrast(1.05);
+  }
+
+  /* Dark tiles arrive as a separate layer — fade rather than pop. */
+  .leaflet-tile {
+    transition: opacity var(--duration-standard) var(--ease-out);
   }
 
   .leaflet-popup-content-wrapper {

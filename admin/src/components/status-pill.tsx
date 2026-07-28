@@ -2,7 +2,6 @@ import { CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react';
 
 import { Badge } from '@/components/ui/badge';
 import type { CertStatus } from '@/lib/database.types';
-import { cn } from '@/lib/utils';
 
 /**
  * The canonical rendering of the semantic status system (CLAUDE.md law):
