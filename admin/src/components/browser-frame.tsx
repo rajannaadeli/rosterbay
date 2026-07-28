@@ -35,7 +35,7 @@ export function BrowserFrame({ src, alt, url = 'rosterbay.com/app/roster', class
           <span className="size-2.5 rounded-full bg-border-strong" />
           <span className="size-2.5 rounded-full bg-border-strong" />
         </span>
-        <span className="num mx-auto truncate rounded-xs bg-surface-2 px-3 py-0.5 text-[10px] leading-relaxed text-text-tertiary">
+        <span className="num mx-auto truncate rounded-xs bg-surface-2 px-3 py-0.5 text-nano leading-relaxed text-text-tertiary">
           {url}
         </span>
       </div>

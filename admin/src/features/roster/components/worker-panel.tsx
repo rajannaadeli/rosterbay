@@ -50,7 +50,7 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
           <CompliancePill
             status={worker.compliance_status}
             showIcon={false}
-            className="h-4 shrink-0 px-1.5 text-[10px]"
+            className="h-4 shrink-0 px-1.5 text-nano"
           />
         </div>
       </div>

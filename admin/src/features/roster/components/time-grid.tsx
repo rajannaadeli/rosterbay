@@ -136,11 +136,11 @@ export function TimeGrid({
                     <p className="label-micro truncate">{site.client_name}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-1">
-                    <span className="num rounded-xs bg-surface-2 px-1.5 py-0.5 text-[10px] leading-none text-text-tertiary">
+                    <span className="num rounded-xs bg-surface-2 px-1.5 py-0.5 text-nano leading-none text-text-tertiary">
                       {shiftCount} shifts
                     </span>
                     {unfilledCount > 0 && (
-                      <span className="num rounded-xs bg-danger-muted px-1.5 py-0.5 text-[10px] leading-none font-medium text-danger">
+                      <span className="num rounded-xs bg-danger-muted px-1.5 py-0.5 text-nano leading-none font-medium text-danger">
                         {unfilledCount} unfilled
                       </span>
                     )}
@@ -244,7 +244,7 @@ function AxisHeader({ win, zoom, isToday }: { win: DayWindow; zoom: ZoomHours; i
             key={m}
             id={`rb-tick-${m}`}
             style={{ left: `${(m / win.lengthMin) * 100}%` }}
-            className="num absolute top-1.5 -translate-x-1/2 text-[10px] leading-none text-text-tertiary first:translate-x-0"
+            className="num absolute top-1.5 -translate-x-1/2 text-nano leading-none text-text-tertiary first:translate-x-0"
           >
             {formatACST(new Date(win.startMs + m * 60_000), 'HH:mm')}
           </span>
@@ -312,7 +312,7 @@ function NowLine({ win, showCapsule }: { win: DayWindow; showCapsule: boolean })
     <div aria-hidden className="pointer-events-none absolute inset-y-0 z-10" style={{ left }}>
       <div className="absolute inset-y-0 w-px bg-primary dark:shadow-[var(--accent-glow)]" />
       {showCapsule && (
-        <span className="num absolute -top-0.5 left-1/2 -translate-x-1/2 rounded-xs bg-primary px-1.5 py-0.5 text-[10px] leading-none font-semibold text-primary-foreground">
+        <span className="num absolute -top-0.5 left-1/2 -translate-x-1/2 rounded-xs bg-primary px-1.5 py-0.5 text-nano leading-none font-semibold text-primary-foreground">
           {formatACST(new Date(), 'HH:mm')}
         </span>
       )}

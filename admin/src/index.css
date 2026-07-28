@@ -215,6 +215,12 @@
   --text-micro--line-height: 0.9375rem;
   --text-micro--letter-spacing: 0.06em;
 
+  /* 10px — the floor. Only inside elements too small for micro: axis ticks,
+     count badges within a 32px bar, the keycap. Added in phase 2 rather than
+     letting ten ad-hoc text-[10px] accumulate against phase 1's own rule. */
+  --text-nano: 0.625rem;
+  --text-nano--line-height: 0.875rem;
+
   /* ── Radii ───────────────────────────────────────────────────────────── */
   --radius: 0.75rem;
   /* xs is the optical fit for anything under ~24px — keycaps, 20px icon

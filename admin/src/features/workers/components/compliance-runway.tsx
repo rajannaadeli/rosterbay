@@ -80,7 +80,7 @@ export function ComplianceRunway({ certs, certTypes, sites }: ComplianceRunwayPr
         <div className="relative h-4 min-w-0 flex-1 pr-6">
           <span
             style={{ left: `${todayPct}%` }}
-            className="num absolute -translate-x-1/2 rounded-xs bg-primary px-1 py-px text-[10px] leading-none font-semibold text-primary-foreground"
+            className="num absolute -translate-x-1/2 rounded-xs bg-primary px-1 py-px text-nano leading-none font-semibold text-primary-foreground"
           >
             TODAY
           </span>
@@ -88,7 +88,7 @@ export function ComplianceRunway({ certs, certTypes, sites }: ComplianceRunwayPr
             <span
               key={month}
               style={{ left: `${PAST_SHARE * 100 + (month / 12) * (1 - PAST_SHARE) * 100}%` }}
-              className="num absolute -translate-x-1/2 text-[10px] leading-none text-text-tertiary"
+              className="num absolute -translate-x-1/2 text-nano leading-none text-text-tertiary"
             >
               +{month}m
             </span>
@@ -118,7 +118,7 @@ export function ComplianceRunway({ certs, certTypes, sites }: ComplianceRunwayPr
                 <p className="truncate text-small font-medium">
                   {certType?.name ?? 'Certificate'}
                 </p>
-                <p className="num truncate text-[10px] leading-tight text-text-tertiary">
+                <p className="num truncate text-nano leading-tight text-text-tertiary">
                   {certType?.code}
                 </p>
               </div>
@@ -193,7 +193,7 @@ export function ComplianceRunway({ certs, certTypes, sites }: ComplianceRunwayPr
                 {/* Days-remaining label, parked clear of the marker */}
                 <span
                   className={cn(
-                    'num absolute top-1/2 -translate-y-1/2 text-[10px] leading-none font-semibold whitespace-nowrap',
+                    'num absolute top-1/2 -translate-y-1/2 text-nano leading-none font-semibold whitespace-nowrap',
                     expired
                       ? 'text-danger'
                       : expiring
@@ -213,7 +213,7 @@ export function ComplianceRunway({ certs, certTypes, sites }: ComplianceRunwayPr
               </div>
 
               {blockedSites.length > 0 && (
-                <span className="ml-3 flex shrink-0 items-center gap-1 text-[10px] leading-none font-semibold text-danger">
+                <span className="ml-3 flex shrink-0 items-center gap-1 text-nano leading-none font-semibold text-danger">
                   <Prohibit size={12} weight="bold" aria-hidden />
                   Blocks: {blockedSites.map((site) => site.name).join(', ')}
                 </span>
