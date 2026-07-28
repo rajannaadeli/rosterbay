@@ -157,7 +157,7 @@ export function AppSidebar() {
             {NAV_ITEMS.map(({ label, href, icon: ItemIcon }) => (
               <NavLink key={href} to={href} className={expandedItemClasses}>
                 <ItemIcon size={22} weight="duotone" className="shrink-0" aria-hidden />
-                <span className="truncate">{label}</span>
+                <span className="truncate pt-[4px]">{label}</span>
               </NavLink>
             ))}
           </div>

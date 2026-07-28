@@ -4,6 +4,26 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
+/*
+ * ITC Avant Garde Gothic Std Medium — the product typeface.
+ *
+ * Self-hosted from public/fonts, so there is still no remote font request.
+ * A licensed face ships with the app rather than through a CDN kit, which
+ * also means it renders identically offline and in the OG/capture pipeline.
+ *
+ * Only the Medium weight is licensed here, so `font-weight` is declared as the
+ * 400–700 range against that single file: the browser synthesises the heavier
+ * steps instead of silently falling back to Inter mid-heading. Inter stays in
+ * the stack underneath for any glyph Avant Garde doesn't carry.
+ */
+@font-face {
+  font-family: 'ITC Avant Garde Std';
+  src: url('/fonts/itc-avant-garde-std-md.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -185,8 +205,8 @@
      duration, distance, count, code and identifier renders in it with
      tabular figures, which is what makes dense ops data read as an
      instrument rather than as a web page. */
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-heading: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'ITC Avant Garde Std', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: 'ITC Avant Garde Std', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Scale — six steps, no ad-hoc sizes anywhere in the app */
