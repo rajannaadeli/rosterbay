@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { PageHeader } from '@/components/page-header';
+import type { DayLoad } from '@/components/data-marks';
 import { Segmented } from '@/components/segmented';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -300,6 +301,27 @@ export function RosterPage() {
     }
   };
 
+  /**
+   * worker id → Monday-first day states for the displayed week.
+   *
+   * Derived from the shifts already loaded for this week, so the panel costs
+   * nothing extra. Bucketed by the shift's ACST start date, which is the same
+   * rule the week grid uses — a night shift belongs to the day it begins.
+   */
+  const weekLoadByWorker = useMemo(() => {
+    const dayIndex = new Map(days.map((day, index) => [formatACST(day, 'yyyy-MM-dd'), index]));
+    const map = new Map<string, DayLoad[]>();
+    for (const shift of visibleShifts) {
+      if (shift.worker_id === null) continue;
+      const index = dayIndex.get(formatACST(shift.starts_at, 'yyyy-MM-dd'));
+      if (index === undefined) continue;
+      const load = map.get(shift.worker_id) ?? (Array(7).fill('none') as DayLoad[]);
+      load[index] = 'shift';
+      map.set(shift.worker_id, load);
+    }
+    return map;
+  }, [visibleShifts, days]);
+
   const isPending = shifts.isPending || sites.isPending || workers.isPending;
 
   return (
@@ -391,6 +413,7 @@ export function RosterPage() {
               workers={workers.data}
               isPending={workers.isPending}
               collapsed={panelCollapsed}
+              weekLoadByWorker={weekLoadByWorker}
               onToggleCollapsed={() => setPanelCollapsed((c) => !c)}
             />
 

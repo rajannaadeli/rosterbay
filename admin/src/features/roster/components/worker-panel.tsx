@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { DotsSixVertical, MagnifyingGlass, SidebarSimple } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
+import { WeekStrip, type DayLoad } from '@/components/data-marks';
 import { CompliancePill } from '@/components/status-pill';
 import { UserAvatar } from '@/components/user-avatar';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,14 @@ import { cn } from '@/lib/utils';
 
 type WorkerRow = Views<'worker_overview'>;
 
-export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
+export function WorkerDragCard({
+  worker,
+  weekLoad,
+}: {
+  worker: WorkerRow;
+  /** Monday-first day states for the displayed week; omitted in the drag overlay. */
+  weekLoad?: readonly DayLoad[];
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `worker-${worker.id}`,
     data: { worker },
@@ -54,6 +62,19 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
           />
         </div>
       </div>
+
+      {/* Which days this worker already covers, before you drop them on
+          another one. Four shifts spread across the week and four stacked
+          Thursday-to-Sunday are very different availability, and the count in
+          the table cannot tell them apart. */}
+      {weekLoad && (
+        <span
+          className="flex w-8 shrink-0 flex-col items-end"
+          title={`${weekLoad.filter((d) => d !== 'none').length} shifts this week (Mon–Sun)`}
+        >
+          <WeekStrip days={weekLoad} className="w-full" />
+        </span>
+      )}
     </div>
   );
 }
@@ -68,10 +89,18 @@ interface WorkerPanelProps {
   workers: WorkerRow[] | undefined;
   isPending: boolean;
   collapsed: boolean;
+  /** worker id → Monday-first day states for the displayed week. */
+  weekLoadByWorker?: Map<string, DayLoad[]>;
   onToggleCollapsed: () => void;
 }
 
-export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }: WorkerPanelProps) {
+export function WorkerPanel({
+  workers,
+  isPending,
+  collapsed,
+  weekLoadByWorker,
+  onToggleCollapsed,
+}: WorkerPanelProps) {
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('all');
   const query = useDebounce(search, 300);
@@ -102,7 +131,7 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
   }
 
   return (
-    <aside className="flex max-h-[calc(100vh-11rem)] w-60 shrink-0 flex-col gap-2.5 self-start rounded-lg border bg-card p-3">
+    <aside className="flex max-h-[calc(100vh-11rem)] w-64 shrink-0 flex-col gap-2.5 self-start rounded-lg border bg-card p-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Workers</h2>
         <Button
@@ -159,7 +188,15 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
         <div className="scroll-fade-y flex flex-col gap-1.5 pb-3">
           {isPending
             ? Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)
-            : filtered.map((worker) => <WorkerDragCard key={worker.id} worker={worker} />)}
+            : filtered.map((worker) => (
+                <WorkerDragCard
+                  key={worker.id}
+                  worker={worker}
+                  {...(weekLoadByWorker?.get(worker.id)
+                    ? { weekLoad: weekLoadByWorker.get(worker.id)! }
+                    : {})}
+                />
+              ))}
           {!isPending && filtered.length === 0 && (
             <p className="py-6 text-center text-xs text-muted-foreground">No workers match.</p>
           )}

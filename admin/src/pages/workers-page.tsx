@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { CopyButton } from '@/components/copy-button';
+import { LoadBar } from '@/components/data-marks';
 import { PageHeader } from '@/components/page-header';
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
@@ -27,7 +28,10 @@ const COMPLIANCE_RANK: Record<CertStatus, number> = { expired: 0, expiring_soon:
 
 type CertsByWorker = Map<string, Views<'worker_certs_with_status'>[]>;
 
-const buildColumns = (certsByWorker: CertsByWorker): ColumnDef<WorkerRow>[] => [
+const buildColumns = (
+  certsByWorker: CertsByWorker,
+  shiftsPeak: number,
+): ColumnDef<WorkerRow>[] => [
   {
     id: 'worker',
     header: 'Worker',
@@ -80,7 +84,13 @@ const buildColumns = (certsByWorker: CertsByWorker): ColumnDef<WorkerRow>[] => [
     header: 'Shifts / wk',
     meta: { className: 'text-center' },
     cell: ({ row }) => (
-      <span className="block text-center tabular-nums">{row.original.shifts_this_week}</span>
+      // Scaled to the busiest person on the team, not to an invented weekly
+      // cap — the schema has no contracted-hours model, so relative load is a
+      // fact where capacity would be a guess.
+      <span className="mx-auto flex w-14 flex-col items-center gap-1">
+        <span className="num">{row.original.shifts_this_week}</span>
+        <LoadBar value={row.original.shifts_this_week} peak={shiftsPeak} />
+      </span>
     ),
   },
   {
@@ -126,7 +136,14 @@ export function WorkersPage() {
     }
     return map;
   }, [allCerts.data]);
-  const columns = useMemo(() => buildColumns(certsByWorker), [certsByWorker]);
+  const shiftsPeak = useMemo(
+    () => Math.max(1, ...(workers.data ?? []).map((w) => w.shifts_this_week)),
+    [workers.data],
+  );
+  const columns = useMemo(
+    () => buildColumns(certsByWorker, shiftsPeak),
+    [certsByWorker, shiftsPeak],
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [role, setRole] = useState('all');

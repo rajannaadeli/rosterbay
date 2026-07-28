@@ -13,6 +13,7 @@ import {
 import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { AttendanceBar, DeviationBar } from '@/components/data-marks';
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { FilterChip } from '@/components/filter-chip';
@@ -276,22 +277,35 @@ export function TimesheetsPage() {
         header: 'Scheduled',
         enableSorting: false,
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground tabular-nums">
+          <span className="num text-micro tracking-normal text-text-tertiary">
             {formatACST(row.original.shift_starts_at, 'h:mma').toLowerCase()}–
             {formatACST(row.original.shift_ends_at, 'h:mma').toLowerCase()}
           </span>
         ),
       },
       {
-        id: 'actual',
-        header: 'Actual',
+        id: 'attendance',
+        header: 'Attended',
         enableSorting: false,
+        meta: { className: 'w-40' },
         cell: ({ row }) => (
-          <span className="text-xs text-foreground tabular-nums">
-            {formatACST(row.original.clock_in_at, 'h:mma').toLowerCase()}–
-            {row.original.clock_out_at
-              ? formatACST(row.original.clock_out_at, 'h:mma').toLowerCase()
-              : '…'}
+          // Scheduled track with the actual span drawn under it: a bar
+          // starting right of the track is a late clock-in, one ending short
+          // is an early finish. The times stay below in mono — the shape is
+          // added, not substituted.
+          <span className="flex w-36 flex-col gap-0.5">
+            <AttendanceBar
+              scheduledStart={row.original.shift_starts_at}
+              scheduledEnd={row.original.shift_ends_at}
+              actualStart={row.original.clock_in_at}
+              actualEnd={row.original.clock_out_at}
+            />
+            <span className="num text-nano text-text-secondary">
+              {formatACST(row.original.clock_in_at, 'h:mma').toLowerCase()}–
+              {row.original.clock_out_at
+                ? formatACST(row.original.clock_out_at, 'h:mma').toLowerCase()
+                : '…'}
+            </span>
           </span>
         ),
       },
@@ -302,17 +316,22 @@ export function TimesheetsPage() {
         meta: { className: 'w-20' },
         cell: ({ row }) => {
           const v = variance(row.original);
-          if (v === null) return <span className="text-xs text-muted-foreground">—</span>;
+          if (v === null) {
+            return <span className="text-micro tracking-normal text-text-tertiary">—</span>;
+          }
           const beyondGrace = Math.abs(v) > 5;
           return (
-            <span
-              className={cn(
-                'rounded-lg px-1.5 py-0.5 text-xs font-medium tabular-nums',
-                beyondGrace ? 'bg-warning/10 text-warning' : 'text-muted-foreground',
-              )}
-            >
-              {v >= 0 ? '+' : '−'}
-              {Math.abs(v)}m
+            <span className="flex w-16 flex-col gap-1">
+              <span
+                className={cn(
+                  'num text-micro font-medium tracking-normal',
+                  beyondGrace ? 'text-warning' : 'text-text-tertiary',
+                )}
+              >
+                {v >= 0 ? '+' : '−'}
+                {Math.abs(v)}m
+              </span>
+              <DeviationBar value={v} />
             </span>
           );
         },
