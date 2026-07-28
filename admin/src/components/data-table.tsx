@@ -184,11 +184,17 @@ export function DataTable<T>({
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map((row) => (
+              rows.map((row, rowIndex) => (
                 <TableRow
                   key={row.id}
                   tabIndex={onRowClick ? 0 : undefined}
-                  className={cn(onRowClick && 'cursor-pointer')}
+                  // Capped at 8: past that a stagger stops reading as
+                  // choreography and starts reading as lag.
+                  style={{ animationDelay: `${Math.min(rowIndex, 7) * 40}ms` }}
+                  className={cn(
+                    'animate-[fade-up_var(--duration-standard)_var(--ease-out)_both]',
+                    onRowClick && 'cursor-pointer',
+                  )}
                   onClick={() => onRowClick?.(row.original)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') onRowClick?.(row.original);

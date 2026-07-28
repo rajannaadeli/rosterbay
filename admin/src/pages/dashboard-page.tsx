@@ -376,6 +376,7 @@ export function DashboardPage() {
         />
 
         <StatStrip
+          className="seq-1"
           loading={loading}
           segments={[
             {
@@ -422,7 +423,7 @@ export function DashboardPage() {
         />
 
         {/* Row 1: map (7) + needs attention (5), equal height. */}
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div className="seq-2 grid grid-cols-1 gap-4 xl:grid-cols-12">
           <div className="e1 relative h-[380px] overflow-hidden rounded-lg xl:col-span-7">
             {sites.data ? (
               <LiveMap
@@ -493,7 +494,7 @@ export function DashboardPage() {
         </div>
 
         {/* Row 2: activity, full width. */}
-        <section className="e1 flex max-h-80 flex-col overflow-hidden rounded-lg">
+        <section className="seq-3 e1 flex max-h-80 flex-col overflow-hidden rounded-lg">
           <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2.5">
             <h2 className="label-micro">Activity</h2>
             <span className="label-micro flex items-center gap-1.5 rounded-xs bg-success-muted px-1.5 py-0.5 text-success">

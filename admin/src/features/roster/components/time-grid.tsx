@@ -97,7 +97,7 @@ export function TimeGrid({
   const isToday = ymd === formatACST(new Date(), 'yyyy-MM-dd');
 
   return (
-    <div className="e1 overflow-hidden rounded-lg">
+    <div className="seq-1 e1 overflow-hidden rounded-lg">
       <div className="scrollbar-thin overflow-x-auto">
         <div style={{ minWidth: SITE_COL_PX + trackMinPx }}>
           <AxisHeader win={win} zoom={zoom} isToday={isToday} />
@@ -198,6 +198,11 @@ export function TimeGrid({
                         laneHeight={LANE_HEIGHT}
                         leftPct={(seg.startMin / win.lengthMin) * 100}
                         widthPct={widthPct}
+                        enterDelayMs={
+                          // Staggered by start time, capped — the day fills in
+                          // left to right the way it is read.
+                          Math.min(240, Math.round((seg.startMin / win.lengthMin) * 260))
+                        }
                         onHover={setHoveredShiftId}
                         onClick={() => onShiftClick(shift.id)}
                         onBroadcast={() => onBroadcast(shift.id)}

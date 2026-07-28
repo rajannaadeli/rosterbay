@@ -330,6 +330,12 @@
   to   { transform: translateX(240%); }
 }
 
+/* Shift bars entering along the axis: grow from the left edge, not fade. */
+@keyframes bar-grow {
+  from { opacity: 0; transform: scaleX(0.4); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
 /* Worker dots on the map: a ring that expands and fades */
 @keyframes ping-ring {
   0%   { transform: scale(0.85); opacity: 0.55; }
@@ -589,6 +595,35 @@
   .stagger > *:nth-child(6) { animation-delay: calc(var(--duration-stagger) * 5); }
   .stagger > *:nth-child(7) { animation-delay: calc(var(--duration-stagger) * 6); }
   .stagger > *:nth-child(n + 8) { animation-delay: calc(var(--duration-stagger) * 7); }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     ROUTE CHOREOGRAPHY
+
+     A route doesn't fade in as one block — it assembles in the order an ops
+     manager reads it. Each screen tags its sections with `.seq-N` and they
+     enter in sequence, the whole thing landing inside ~500ms.
+
+     Deliberately CSS, not a JS orchestration layer: these fire on mount with
+     no state, so a re-render can't replay them and a slow query can't strand
+     a section mid-animation.
+     ═════════════════════════════════════════════════════════════════════ */
+  .seq-1 { animation: fade-up var(--duration-entrance) var(--ease-out) both; animation-delay: 0ms; }
+  .seq-2 { animation: fade-up var(--duration-entrance) var(--ease-out) both; animation-delay: 60ms; }
+  .seq-3 { animation: fade-up var(--duration-entrance) var(--ease-out) both; animation-delay: 120ms; }
+  .seq-4 { animation: fade-up var(--duration-entrance) var(--ease-out) both; animation-delay: 180ms; }
+
+  /* Shift bars scale out from their left edge — the roster visibly assembles
+     along the time axis rather than appearing all at once. */
+  .bar-enter {
+    animation: bar-grow var(--duration-standard) var(--ease-out) both;
+    transform-origin: left center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seq-1, .seq-2, .seq-3, .seq-4, .bar-enter {
+      animation: none !important;
+    }
+  }
 
   /* Shimmer skeleton — a sweep across surface-2, not a pulsing block. */
   .shimmer {

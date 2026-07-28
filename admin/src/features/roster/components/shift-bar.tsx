@@ -37,6 +37,8 @@ interface ShiftBarProps {
   widthPx: number;
   /** True when the pointer is over either half of a midnight-wrapped shift. */
   paired: boolean;
+  /** Entrance delay, staggered by the segment's start time. */
+  enterDelayMs: number;
   laneTop: number;
   laneHeight: number;
   leftPct: number;
@@ -63,6 +65,7 @@ export function ShiftBar({
   dimmed,
   widthPx,
   paired,
+  enterDelayMs,
   laneTop,
   laneHeight,
   leftPct,
@@ -93,9 +96,10 @@ export function ShiftBar({
         width: `${widthPct}%`,
         top: laneTop,
         height: laneHeight,
+        animationDelay: `${enterDelayMs}ms`,
       }}
       className={cn(
-        'group/bar absolute flex items-center gap-1.5 overflow-hidden rounded-sm border pr-1.5 pl-2 text-left',
+        'bar-enter group/bar absolute flex items-center gap-1.5 overflow-hidden rounded-sm border pr-1.5 pl-2 text-left',
         'transition-[opacity,box-shadow,border-color] duration-[var(--duration-micro)]',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         // The 3px status cap is a box-shadow inset rather than a border so it

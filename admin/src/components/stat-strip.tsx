@@ -43,9 +43,17 @@ function SegmentValue({ value, tone, animate }: { value: number; tone: keyof typ
  * Low-height stat strip: one bordered card, segments split by hairlines, each
  * optionally routing to a filtered view. Replaces tall KPI cards (spec §6).
  */
-export function StatStrip({ segments, loading }: { segments: StatSegment[]; loading?: boolean }) {
+export function StatStrip({
+  segments,
+  loading,
+  className,
+}: {
+  segments: StatSegment[];
+  loading?: boolean;
+  className?: string;
+}) {
   return (
-    <div className="e1 flex divide-x divide-border-subtle overflow-hidden rounded-lg">
+    <div className={cn('e1 flex divide-x divide-border-subtle overflow-hidden rounded-lg', className)}>
       {segments.map((seg) => {
         const inner = (
           <>
