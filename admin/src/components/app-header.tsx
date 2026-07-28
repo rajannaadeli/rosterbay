@@ -161,7 +161,7 @@ export function AppHeader() {
             <MagnifyingGlass size={14} aria-hidden />
             <span className="hidden sm:inline">Search…</span>
             {/* Keycap, not a bordered label — it should read as the physical key. */}
-            <kbd className="num pointer-events-none hidden rounded-[5px] border border-border-default border-b-2 bg-surface-1 px-1.5 py-0.5 text-[10px] leading-none font-medium text-text-tertiary select-none sm:inline">
+            <kbd className="num pointer-events-none hidden rounded-xs border border-border-default border-b-2 bg-surface-1 px-1.5 py-0.5 text-micro tracking-normal leading-none font-medium text-text-tertiary select-none sm:inline">
               {isMac ? '⌘K' : 'Ctrl K'}
             </kbd>
           </button>

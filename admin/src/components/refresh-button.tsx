@@ -40,7 +40,7 @@ export function RefreshButton({ onRefresh, label, busy, className }: RefreshButt
         onRefresh();
       }}
       className={cn(
-        'inline-flex size-6 shrink-0 items-center justify-center rounded-[5px] text-text-tertiary',
+        'inline-flex size-6 shrink-0 items-center justify-center rounded-xs text-text-tertiary',
         'transition-colors duration-[var(--duration-micro)] hover:bg-surface-2 hover:text-foreground',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         className,

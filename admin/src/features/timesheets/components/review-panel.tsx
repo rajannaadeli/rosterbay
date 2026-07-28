@@ -1,6 +1,6 @@
 import { Clock, ListChecks, MapPin, Question, Warning } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { Circle, MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet';
+import { Circle, MapContainer, Marker, Polyline } from 'react-leaflet';
 
 import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
 
@@ -14,9 +14,15 @@ import { useShiftIssues, useShiftTasks } from '@/features/proof/hooks';
 import { LATE_THRESHOLD_MIN, MISSING_CLOCK_OUT_GRACE_H } from '@/lib/compliance';
 import type { Tables, TimeEntryFlag } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
-import { OSM_ATTRIBUTION, OSM_TILE_URL } from '@/lib/leaflet';
 import { proofPhotoUrl } from '@/lib/supabase';
-import { clockInDotIcon, FitBounds, GEOFENCE_PATH_OPTIONS, siteIcon } from '@/lib/map-markers';
+import {
+  clockInDotIcon,
+  DISTANCE_LINE_PATH_OPTIONS,
+  FitBounds,
+  GEOFENCE_PATH_OPTIONS,
+  MapTiles,
+  siteIcon,
+} from '@/lib/map-markers';
 import { cn } from '@/lib/utils';
 import type { TimesheetRow } from '../hooks';
 
@@ -46,9 +52,9 @@ function flagExplanation(flag: TimeEntryFlag, row: TimesheetRow, site?: Tables<'
 
 function StatCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border bg-card px-3 py-2">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium tabular-nums">{value}</p>
+    <div className="e1 rounded-sm px-3 py-2">
+      <p className="label-micro">{label}</p>
+      <p className="num mt-0.5 text-body font-medium">{value}</p>
     </div>
   );
 }
@@ -76,18 +82,21 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
   const attendanceFlags = row.effective_flags.filter((flag) => flag !== 'incomplete_tasks');
 
   return (
-    <div className="grid grid-cols-1 gap-4 border-t bg-muted/20 p-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 border-t border-border-subtle bg-surface-2/40 p-4 lg:grid-cols-2">
       <div className="relative">
         {hasPoint ? (
           <>
-            <FullscreenMapWrapper className="h-[260px] overflow-hidden rounded-lg border">
+            <FullscreenMapWrapper
+              className="h-[260px] overflow-hidden rounded-lg border border-border-subtle"
+              hint={false}
+            >
               <MapContainer
                 center={[site.lat, site.lng]}
                 zoom={15}
                 className="z-0 h-full w-full"
                 scrollWheelZoom={true}
               >
-                <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+                <MapTiles />
                 <FullscreenInvalidate />
                 <FitBounds
                   points={[
@@ -104,21 +113,26 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
                     [site.lat, site.lng],
                     [row.in_lat as number, row.in_lng as number],
                   ]}
-                  pathOptions={{ color: '#DC2626', dashArray: '6 6', weight: 2 }}
+                  pathOptions={DISTANCE_LINE_PATH_OPTIONS}
                 />
               </MapContainer>
               <span
                 style={{ zIndex: 999 }}
-                className="absolute bottom-3 left-3 rounded-lg border bg-card/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur"
+                className="absolute bottom-3 left-3 rounded-sm border border-border-default bg-surface-1/90 px-2 py-1.5 shadow-[var(--elevation-2)] backdrop-blur-sm"
               >
-                <span className={row.within_geofence === false ? 'text-danger' : 'text-foreground'}>
+                <span
+                  className={cn(
+                    'num text-micro tracking-normal',
+                    row.within_geofence === false ? 'text-danger' : 'text-text-secondary',
+                  )}
+                >
                   {Math.round(Number(row.distance_from_site_m ?? 0))} m from site
                 </span>
               </span>
             </FullscreenMapWrapper>
           </>
         ) : (
-          <div className="flex h-[260px] items-center justify-center rounded-lg border text-sm text-muted-foreground">
+          <div className="flex h-[260px] items-center justify-center rounded-lg border border-dashed border-border-default text-small text-text-secondary">
             No clock-in location recorded.
           </div>
         )}
@@ -153,7 +167,7 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
             })}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-small text-text-secondary">
             Clean entry — clocked in on time, inside the geofence.
           </p>
         )}
@@ -164,8 +178,8 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
 
         <div className="mt-auto flex items-center justify-end gap-2">
           {row.reviewed_at && (
-            <span className="mr-auto text-xs text-muted-foreground">
-              Reviewed {formatACST(row.reviewed_at, 'd MMM, h:mm a')}
+            <span className="mr-auto text-micro tracking-normal text-text-tertiary">
+              Reviewed <span className="num">{formatACST(row.reviewed_at, 'd MMM, h:mm a')}</span>
             </span>
           )}
           {reviewable && (
@@ -219,7 +233,7 @@ function ProofOfWorkRow({
   const issueCount = issues.data?.length ?? 0;
 
   return (
-    <div className="flex flex-col gap-2 border-t pt-3">
+    <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
           <ProgressRing
@@ -229,10 +243,10 @@ function ProofOfWorkRow({
             tone={row.incomplete_tasks ? 'warning' : 'primary'}
           />
           <div>
-            <p className="text-[11px] text-muted-foreground">Proof of work</p>
+            <p className="label-micro">Proof of work</p>
             <p
               className={cn(
-                'text-xs font-medium',
+                'mt-0.5 text-small font-medium',
                 row.incomplete_tasks && 'text-warning',
               )}
             >

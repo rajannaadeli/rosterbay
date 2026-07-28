@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Reac
 import { useMap } from 'react-leaflet';
 
 import { LiveRelativeTime } from '@/components/live-relative-time';
-import { formatACST } from '@/lib/format';
 
 /**
  * Drop-in Leaflet fullscreen wrapper — wrap any `<MapContainer>` content and
@@ -86,7 +85,7 @@ export function FullscreenMapWrapper({
         className="pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-3"
       >
         {hint ? (
-          <span className="label-micro rounded-[6px] bg-surface-1/85 px-1.5 py-1 text-text-tertiary backdrop-blur-sm">
+          <span className="label-micro rounded-xs bg-surface-1/85 px-1.5 py-1 text-text-tertiary backdrop-blur-sm">
             {hint}
           </span>
         ) : (
@@ -116,10 +115,9 @@ export function FullscreenMapWrapper({
 /** "Updated 4s ago", ticking, with a live dot. Absolute time on hover. */
 function MapLiveStamp({ at }: { at: Date | string | number }) {
   return (
-    <span
-      className="flex items-center gap-1.5 rounded-sm border border-border-default bg-surface-1/90 px-2 py-1.5 shadow-[var(--elevation-2)] backdrop-blur-sm"
-      title={formatACST(at, 'd MMM yyyy, h:mm:ss a')}
-    >
+    // No title here — LiveRelativeTime already carries the absolute time, and
+    // two nested tooltips means the outer one wins and the precise one never shows.
+    <span className="flex items-center gap-1.5 rounded-sm border border-border-default bg-surface-1/90 px-2 py-1.5 shadow-[var(--elevation-2)] backdrop-blur-sm">
       <span className="size-1.5 shrink-0 animate-[live-pulse_2s_var(--ease-inout)_infinite] rounded-full bg-success" />
       <span className="label-micro text-text-secondary">
         Updated <LiveRelativeTime at={at} />

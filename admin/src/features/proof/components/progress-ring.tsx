@@ -62,7 +62,7 @@ export function ProgressRing({
       <span
         className={cn(
           'absolute inset-0 flex items-center justify-center font-semibold tabular-nums',
-          size >= 44 ? 'text-[11px]' : 'text-[10px]',
+          size >= 44 ? 'text-micro tracking-normal' : 'text-micro tracking-normal',
           tone === 'warning' && 'text-warning',
         )}
       >

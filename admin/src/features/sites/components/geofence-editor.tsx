@@ -1,7 +1,7 @@
 import { Crosshair } from '@phosphor-icons/react';
 import type { Marker as LeafletMarker } from 'leaflet';
 import { useCallback, useEffect, useState } from 'react';
-import { Circle, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
+import { Circle, MapContainer, Marker, useMap } from 'react-leaflet';
 
 import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
 
@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { OSM_ATTRIBUTION, OSM_TILE_URL } from '@/lib/leaflet';
-import { draggablePinIcon, GEOFENCE_PATH_OPTIONS } from '@/lib/map-markers';
+import { draggablePinIcon, GEOFENCE_PATH_OPTIONS, MapTiles } from '@/lib/map-markers';
 
 interface GeofenceValue {
   lat: number;
@@ -71,7 +70,7 @@ export function GeofenceEditor({ value, onChange, siteName = '', height = 240 }:
     <div className="z-0 flex flex-col gap-3">
       <FullscreenMapWrapper className="overflow-hidden rounded-lg border" style={{ height }}>
         <MapContainer center={[value.lat, value.lng]} zoom={15} className="z-0 h-full w-full">
-          <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+          <MapTiles />
           <FullscreenInvalidate />
           <Marker
             position={[value.lat, value.lng]}

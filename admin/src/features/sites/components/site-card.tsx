@@ -1,10 +1,9 @@
 import { MapPin } from '@phosphor-icons/react';
-import { Circle, MapContainer, Marker, TileLayer } from 'react-leaflet';
+import { Circle, MapContainer, Marker } from 'react-leaflet';
 
 import { Badge } from '@/components/ui/badge';
 import type { Tables } from '@/lib/database.types';
-import { OSM_ATTRIBUTION, OSM_TILE_URL } from '@/lib/leaflet';
-import { GEOFENCE_PATH_OPTIONS, siteIcon } from '@/lib/map-markers';
+import { GEOFENCE_PATH_OPTIONS, MapTiles, siteIcon } from '@/lib/map-markers';
 
 interface SiteCardProps {
   site: Tables<'job_sites'>;
@@ -44,7 +43,7 @@ export function SiteCard({ site, certTypes, taskCount, onOpen }: SiteCardProps) 
             keyboard={false}
             attributionControl={false}
           >
-            <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+            <MapTiles />
             <Circle center={[site.lat, site.lng]} radius={site.geofence_radius_m} pathOptions={GEOFENCE_PATH_OPTIONS} />
             <Marker position={[site.lat, site.lng]} icon={siteIcon(site.name)} />
           </MapContainer>
@@ -53,7 +52,7 @@ export function SiteCard({ site, certTypes, taskCount, onOpen }: SiteCardProps) 
 
       <div className="flex flex-wrap items-center gap-1.5 border-t pt-2.5">
         {requiredCerts.map((ct) => (
-          <Badge key={ct.id} variant="outline" className="text-[11px]">
+          <Badge key={ct.id} variant="outline" className="text-micro tracking-normal">
             {ct.name}
           </Badge>
         ))}

@@ -13,6 +13,7 @@ import {
 import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { FilterChip } from '@/components/filter-chip';
 import { StatusPill, type StatusTone } from '@/components/status-pill';
@@ -404,33 +405,33 @@ export function TimesheetsPage() {
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Timesheets</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Review clock-ins — flags explain themselves, clean entries approve in bulk.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={cleanPendingIds.length === 0 || bulk.isPending}
-              onClick={() => setBulkOpen(true)}
-            >
-              Approve {cleanPendingIds.length} clean
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={data.length === 0}
-              onClick={() => exportTimesheetsCsv(data, workerNames, siteNames, range.from, range.to)}
-            >
-              <DownloadSimple aria-hidden />
-              Export CSV
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title="Timesheets"
+          description="Review clock-ins — flags explain themselves, clean entries approve in bulk."
+          actions={
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={cleanPendingIds.length === 0 || bulk.isPending}
+                onClick={() => setBulkOpen(true)}
+              >
+                Approve <span className="num">{cleanPendingIds.length}</span> clean
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={data.length === 0}
+                onClick={() =>
+                  exportTimesheetsCsv(data, workerNames, siteNames, range.from, range.to)
+                }
+              >
+                <DownloadSimple aria-hidden />
+                Export CSV
+              </Button>
+            </>
+          }
+        />
 
         {/* Count chips drive the status filter. */}
         <div className="flex flex-wrap items-center gap-2">
@@ -441,7 +442,7 @@ export function TimesheetsPage() {
         </div>
 
         {/* Filter bar. */}
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card px-3 py-2.5">
+        <div className="e1 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2.5">
           <FilterChip
             label="Worker"
             value={workerId}

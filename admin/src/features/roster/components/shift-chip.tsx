@@ -49,7 +49,7 @@ export function ShiftChip({
       type="button"
       onClick={onClick}
       className={cn(
-        'relative flex h-8 w-full items-center gap-1.5 rounded-lg border px-1.5 text-left text-[11px] whitespace-nowrap transition-all',
+        'relative flex h-8 w-full items-center gap-1.5 rounded-lg border px-1.5 text-left text-micro tracking-normal whitespace-nowrap transition-all',
         unfilled
           ? 'border-dashed border-danger bg-danger/5 text-danger'
           : 'border-border bg-card hover:shadow-sm',

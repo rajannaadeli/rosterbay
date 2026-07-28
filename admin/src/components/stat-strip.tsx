@@ -30,7 +30,7 @@ const TONE_TEXT = {
 function SegmentValue({ value, tone, animate }: { value: number; tone: keyof typeof TONE_TEXT; animate: boolean }) {
   const counted = useCountUp(animate ? value : value, animate ? 600 : 0);
   return (
-    <span className={cn('text-xl font-semibold tabular-nums', TONE_TEXT[tone])}>
+    <span className={cn('num text-h2 font-bold', TONE_TEXT[tone])}>
       {animate ? counted : value}
     </span>
   );
@@ -42,15 +42,15 @@ function SegmentValue({ value, tone, animate }: { value: number; tone: keyof typ
  */
 export function StatStrip({ segments, loading }: { segments: StatSegment[]; loading?: boolean }) {
   return (
-    <div className="flex divide-x overflow-hidden rounded-lg border bg-card">
+    <div className="e1 flex divide-x divide-border-subtle overflow-hidden rounded-lg">
       {segments.map((seg) => {
         const inner = (
           <>
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-accent-muted text-primary">
               <seg.icon size={16} weight="duotone" aria-hidden />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-xs text-muted-foreground">{seg.label}</p>
+              <p className="label-micro truncate">{seg.label}</p>
               {loading ? (
                 <Skeleton className="mt-0.5 h-6 w-8" />
               ) : (
@@ -65,10 +65,11 @@ export function StatStrip({ segments, loading }: { segments: StatSegment[]; load
         );
         const interactive = Boolean(seg.to || seg.onClick);
         const className = cn(
-          'relative flex flex-1 items-center gap-2.5 px-4 py-2.5 text-left transition-colors',
-          interactive && 'hover:bg-muted/50',
+          'relative flex flex-1 items-center gap-2.5 px-4 py-2.5 text-left transition-colors duration-[var(--duration-micro)]',
+          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
+          interactive && 'hover:bg-surface-2',
           seg.active &&
-            'bg-primary/5 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary',
+            'bg-accent-muted after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary',
         );
         if (seg.to) {
           return (

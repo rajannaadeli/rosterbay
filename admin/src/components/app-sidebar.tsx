@@ -170,7 +170,7 @@ export function AppSidebar() {
                   <span className="num truncate text-micro leading-none tracking-normal text-text-tertiary">
                     {email}
                   </span>
-                  <Badge variant="secondary" className="h-4 shrink-0 px-1 text-[10px] leading-none">
+                  <Badge variant="secondary" className="h-4 shrink-0 px-1 text-micro tracking-normal leading-none">
                     Admin
                   </Badge>
                 </div>

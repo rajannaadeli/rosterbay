@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 const TONE_COUNT = 8;
 
 const SIZES = {
-  xs: { box: 20, text: 'text-[10px]' },
+  xs: { box: 20, text: 'text-micro tracking-normal' },
   sm: { box: 28, text: 'text-micro tracking-normal' },
   md: { box: 40, text: 'text-body' },
   lg: { box: 56, text: 'text-h2' },

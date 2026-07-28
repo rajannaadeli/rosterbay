@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { addDays } from 'date-fns';
 
+import { PageHeader } from '@/components/page-header';
 import { StatStrip } from '@/components/stat-strip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -323,12 +324,10 @@ export function DashboardPage() {
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            The ops manager's 7am — live across all five sites.
-          </p>
-        </div>
+        <PageHeader
+          title="Dashboard"
+          description="The ops manager's 7am — live across all five sites."
+        />
 
         <StatStrip
           loading={loading}
@@ -397,7 +396,7 @@ export function DashboardPage() {
             <div className="flex items-center gap-2 border-b px-4 py-2.5">
               <h2 className="text-sm font-semibold">Needs attention</h2>
               {attention.length > 0 && (
-                <Badge variant="secondary" className="text-[11px] text-danger">
+                <Badge variant="secondary" className="text-micro tracking-normal text-danger">
                   {attention.length}
                 </Badge>
               )}
@@ -434,7 +433,7 @@ export function DashboardPage() {
         <section className="flex max-h-80 flex-col overflow-hidden rounded-lg border bg-card">
           <div className="flex items-center gap-2 border-b px-4 py-2.5">
             <h2 className="text-sm font-semibold">Activity</h2>
-            <span className="flex items-center gap-1 rounded-lg bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">
+            <span className="flex items-center gap-1 rounded-lg bg-success/10 px-1.5 py-0.5 text-micro tracking-normal font-medium text-success">
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-success" />

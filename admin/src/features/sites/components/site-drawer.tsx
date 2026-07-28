@@ -155,7 +155,7 @@ export function SiteDrawer({ siteId, onClose }: SiteDrawerProps) {
               className="h-8 border-transparent bg-transparent px-0 text-base font-semibold shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:px-2"
             />
             {draft.client_name.trim() !== '' && (
-              <Badge variant="secondary" className="w-fit text-[11px]">
+              <Badge variant="secondary" className="w-fit text-micro tracking-normal">
                 {draft.client_name}
               </Badge>
             )}
@@ -253,7 +253,7 @@ export function SiteDrawer({ siteId, onClose }: SiteDrawerProps) {
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{ct.name}</p>
-                    <span className="rounded bg-muted px-1 py-px font-mono text-[10px] text-muted-foreground">
+                    <span className="rounded bg-muted px-1 py-px font-mono text-micro tracking-normal text-muted-foreground">
                       {ct.code}
                     </span>
                   </div>

@@ -46,7 +46,7 @@ export function CopyButton({ value, label, className }: CopyButtonProps) {
       aria-label={copied ? 'Copied' : label}
       onClick={handleCopy}
       className={cn(
-        'inline-flex size-5 shrink-0 items-center justify-center rounded-[5px] text-text-tertiary',
+        'inline-flex size-5 shrink-0 items-center justify-center rounded-xs text-text-tertiary',
         'opacity-0 transition-[opacity,color,background-color] duration-[var(--duration-micro)]',
         'group-hover/copy:opacity-100 focus-visible:opacity-100',
         'hover:bg-surface-2 hover:text-foreground',

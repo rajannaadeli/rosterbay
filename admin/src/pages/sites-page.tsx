@@ -1,6 +1,7 @@
 import { Buildings, ListChecks, MapPinArea, Plus, UsersThree } from '@phosphor-icons/react';
 import { useSearchParams } from 'react-router';
 
+import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
 import { StatStrip } from '@/components/stat-strip';
 import { Button } from '@/components/ui/button';
@@ -37,18 +38,16 @@ export function SitesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Job Sites</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Client sites, geofences and task checklists.
-          </p>
-        </div>
-        <Button onClick={() => openDrawer('new')}>
-          <Plus aria-hidden />
-          New site
-        </Button>
-      </div>
+      <PageHeader
+        title="Job Sites"
+        description="Client sites, geofences and task checklists."
+        actions={
+          <Button onClick={() => openDrawer('new')}>
+            <Plus aria-hidden />
+            New site
+          </Button>
+        }
+      />
 
       <StatStrip
         loading={isPending}

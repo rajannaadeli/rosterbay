@@ -95,7 +95,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
             { label: 'Last shift', value: lastClockIn ? formatACST(lastClockIn, 'd MMM') : '—' },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-lg border bg-card px-3 py-2">
-              <p className="text-[11px] text-muted-foreground">{label}</p>
+              <p className="text-micro tracking-normal text-muted-foreground">{label}</p>
               <p className="text-sm font-semibold tabular-nums">{value}</p>
             </div>
           ))}

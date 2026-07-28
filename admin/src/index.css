@@ -217,6 +217,9 @@
 
   /* ── Radii ───────────────────────────────────────────────────────────── */
   --radius: 0.75rem;
+  /* xs is the optical fit for anything under ~24px — keycaps, 20px icon
+     buttons, badges. 8px on a 20px box reads as a circle. */
+  --radius-xs: 0.375rem;  /*  6px */
   --radius-sm: 0.5rem;    /*  8px — controls, chips, pills, inputs */
   --radius-md: 0.5rem;    /*  8px */
   --radius-lg: 0.75rem;   /* 12px — cards, panels, map containers */

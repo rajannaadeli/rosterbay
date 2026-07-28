@@ -103,11 +103,11 @@ export function ThemeProvider({
 
     return defaultTheme
   })
-  // Seeded from the class the blocking script in index.html already stamped,
-  // so the first render agrees with the first paint.
-  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>(() =>
-    document.documentElement.classList.contains("dark") ? "dark" : "light"
-  )
+  // Tracked separately from `theme` and updated only by the media-query
+  // listener, so `resolvedTheme` can be derived during render instead of
+  // being pushed from inside an effect (which cascades renders).
+  const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>(getSystemTheme)
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme
 
   const setTheme = React.useCallback(
     (nextTheme: Theme) => {
@@ -131,7 +131,6 @@ export function ThemeProvider({
       root.classList.remove("light", "dark")
       root.classList.add(resolved)
       root.style.colorScheme = resolved
-      setResolvedTheme(resolved)
 
       endCrossfade?.()
     },
@@ -147,6 +146,7 @@ export function ThemeProvider({
 
     const mediaQuery = window.matchMedia(COLOR_SCHEME_QUERY)
     const handleChange = () => {
+      setSystemTheme(getSystemTheme())
       applyTheme("system")
     }
 

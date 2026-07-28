@@ -24,8 +24,8 @@ export function siteIcon(name: string): L.DivIcon {
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     html: `<span class="flex flex-col items-center gap-0.5">
-      <span class="map-pin-glow flex size-7 items-center justify-center rounded-[9px] bg-primary text-[13px] font-semibold text-primary-foreground ring-2 ring-surface-1">${initial}</span>
-      <span class="site-label max-w-32 truncate rounded-[6px] border border-border-default bg-surface-3 px-1.5 py-px text-[10px] font-medium text-foreground shadow-[var(--elevation-2)]">${name.replace(/</g, '&lt;')}</span>
+      <span class="map-pin-glow flex size-7 items-center justify-center rounded-sm bg-primary text-small font-semibold text-primary-foreground ring-2 ring-surface-1">${initial}</span>
+      <span class="site-label max-w-32 truncate rounded-xs border border-border-default bg-surface-3 px-1.5 py-px text-micro tracking-normal font-medium text-foreground shadow-[var(--elevation-2)]">${name.replace(/</g, '&lt;')}</span>
     </span>`,
   });
 }
@@ -58,7 +58,7 @@ export function draggablePinIcon(name: string): L.DivIcon {
     className: '',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
-    html: `<span class="map-pin-glow flex size-8 cursor-grab items-center justify-center rounded-[10px] bg-primary text-body font-semibold text-primary-foreground ring-2 ring-surface-1">${initial}</span>`,
+    html: `<span class="map-pin-glow flex size-8 cursor-grab items-center justify-center rounded-sm bg-primary text-body font-semibold text-primary-foreground ring-2 ring-surface-1">${initial}</span>`,
   });
 }
 

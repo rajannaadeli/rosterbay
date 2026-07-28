@@ -220,7 +220,7 @@ export function ShiftSheet({
           <h3 className="flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             Issues
             {(issues.data ?? []).some((issue) => issue.status === 'open') && (
-              <Badge variant="secondary" className="text-[10px] text-danger">
+              <Badge variant="secondary" className="text-micro tracking-normal text-danger">
                 {(issues.data ?? []).filter((issue) => issue.status === 'open').length} open
               </Badge>
             )}

@@ -193,14 +193,14 @@ function TaskRow({ task, editable, busy, onTogglePhoto, onRemove }: TaskRowProps
           {task.title}
         </p>
         {task.done && task.done_at && (
-          <p className="text-[11px] text-success tabular-nums">
+          <p className="text-micro tracking-normal text-success tabular-nums">
             Done {formatACST(task.done_at, 'h:mm a')}
           </p>
         )}
       </div>
 
       {task.source === 'adhoc' && (
-        <Badge variant="secondary" className="shrink-0 text-[10px]">
+        <Badge variant="secondary" className="shrink-0 text-micro tracking-normal">
           Added
         </Badge>
       )}

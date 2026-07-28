@@ -27,19 +27,19 @@ export function KpiCard({ title, value, icon: CardIcon, to, loading, tone = 'def
   return (
     <Link
       to={to}
-      className="group flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 outline-none transition-shadow hover:shadow-sm focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      className="e1 group flex items-center justify-between gap-3 rounded-lg px-4 py-3 outline-none transition-[border-color,background-color] duration-[var(--duration-micro)] hover:border-border-strong hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring/60"
     >
       <div>
-        <p className="text-xs font-medium text-muted-foreground">{title}</p>
+        <p className="label-micro">{title}</p>
         {loading ? (
           <Skeleton className="mt-1 h-7 w-10" />
         ) : (
-          <p className={cn('text-2xl font-semibold tracking-tight tabular-nums', TONE_TEXT[tone])}>
+          <p className={cn('num mt-1 text-display', TONE_TEXT[tone])}>
             {displayed}
           </p>
         )}
       </div>
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-accent-muted text-primary">
         <CardIcon size={18} weight="duotone" aria-hidden />
       </div>
     </Link>

@@ -34,7 +34,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     >
       <span
         aria-hidden
-        className="absolute top-0.5 bottom-0.5 left-0.5 rounded-[6px] bg-surface-1 shadow-[var(--elevation-2)] transition-transform duration-[var(--duration-standard)] ease-[var(--ease-out)]"
+        className="absolute top-0.5 bottom-0.5 left-0.5 rounded-xs bg-surface-1 shadow-[var(--elevation-2)] transition-transform duration-[var(--duration-standard)] ease-[var(--ease-out)]"
         style={{
           width: `calc((100% - 0.25rem) / ${OPTIONS.length})`,
           transform: `translateX(${index * 100}%)`,
@@ -52,7 +52,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             title={label}
             onClick={() => setTheme(value)}
             className={cn(
-              'relative z-10 flex h-6 flex-1 items-center justify-center rounded-[6px] transition-colors duration-[var(--duration-micro)]',
+              'relative z-10 flex h-6 flex-1 items-center justify-center rounded-xs transition-colors duration-[var(--duration-micro)]',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
               active ? 'text-foreground' : 'text-text-tertiary hover:text-text-secondary',
             )}

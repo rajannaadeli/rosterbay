@@ -71,7 +71,7 @@ export function IssueList({ issues, workerNames }: IssueListProps) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 pl-[34px]">
-              <p className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground">
+              <p className="min-w-0 flex-1 truncate text-micro tracking-normal text-muted-foreground">
                 {workerNames[issue.worker_id] ?? 'Worker'} ·{' '}
                 {formatDistanceToNowStrict(new Date(issue.created_at), { addSuffix: true })}
                 {!open && issue.acknowledged_at && (

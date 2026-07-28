@@ -42,7 +42,7 @@ export function NotificationsBell() {
       >
         <Bell size={16} aria-hidden />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-danger text-[9px] font-semibold text-white">
+          <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-danger text-micro tracking-normal font-semibold text-white">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -79,7 +79,7 @@ export function NotificationsBell() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{row.title}</p>
                     {row.body && <p className="text-xs text-muted-foreground">{row.body}</p>}
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    <p className="mt-0.5 text-micro tracking-normal text-muted-foreground">
                       {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
                     </p>
                   </div>

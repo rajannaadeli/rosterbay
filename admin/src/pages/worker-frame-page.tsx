@@ -52,21 +52,31 @@ export function WorkerFramePage() {
       {/* Fit area — the observer measures this; the phone scales to fill it. */}
       <div ref={fitRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
         <div style={{ width: DEVICE_W * scale, height: DEVICE_H * scale }}>
+          {/* Device silhouette, not a UI surface: the chassis radii and its
+              near-black shell are physical dimensions of the phone being
+              depicted, so they sit outside the control radius ladder and
+              outside the theme — a handset doesn't turn white in light mode. */}
           <div
-            style={{ width: DEVICE_W, height: DEVICE_H, transform: `scale(${scale})`, transformOrigin: 'top left' }}
-            className="relative rounded-[3.2rem] bg-neutral-950 shadow-2xl ring-1 ring-black/20"
+            style={{
+              width: DEVICE_W,
+              height: DEVICE_H,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              backgroundColor: '#0a0a0a',
+            }}
+            className="relative rounded-[3.2rem] shadow-[0_24px_60px_-12px_rgb(0_0_0/0.45)] ring-1 ring-black/20"
           >
             <div style={{ padding: BEZEL }} className="h-full w-full">
               {/* side buttons */}
-              <span className="absolute left-[-3px] top-[104px] h-8 w-[3px] rounded-l bg-neutral-800" aria-hidden />
-              <span className="absolute left-[-3px] top-[152px] h-12 w-[3px] rounded-l bg-neutral-800" aria-hidden />
-              <span className="absolute left-[-3px] top-[210px] h-12 w-[3px] rounded-l bg-neutral-800" aria-hidden />
-              <span className="absolute right-[-3px] top-[168px] h-16 w-[3px] rounded-r bg-neutral-800" aria-hidden />
+              <span className="absolute left-[-3px] top-[104px] h-8 w-[3px] rounded-l bg-[#262626]" aria-hidden />
+              <span className="absolute left-[-3px] top-[152px] h-12 w-[3px] rounded-l bg-[#262626]" aria-hidden />
+              <span className="absolute left-[-3px] top-[210px] h-12 w-[3px] rounded-l bg-[#262626]" aria-hidden />
+              <span className="absolute right-[-3px] top-[168px] h-16 w-[3px] rounded-r bg-[#262626]" aria-hidden />
 
               <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[2.5rem] bg-card">
                 {/* iOS status bar + Dynamic Island */}
                 <div className="relative flex h-11 shrink-0 items-center justify-between px-6">
-                  <span className="text-[13px] font-semibold tracking-tight text-foreground">9:41</span>
+                  <span className="text-small font-semibold tracking-tight text-foreground">9:41</span>
                   <div className="absolute left-1/2 top-[9px] h-[26px] w-24 -translate-x-1/2 rounded-full bg-black" />
                   <div className="flex items-center gap-1.5">
                     <span className="flex items-end gap-[2px]" aria-hidden>

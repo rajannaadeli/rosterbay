@@ -246,7 +246,7 @@ function SortableTaskRow({
         onBlur={(event) => onRename(event.target.value.trim())}
       />
 
-      <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
+      <span className="shrink-0 text-micro tracking-normal text-muted-foreground tabular-nums">
         {usedOnShifts === 0
           ? 'not on any upcoming shift yet'
           : `used on ${usedOnShifts} upcoming shift${usedOnShifts === 1 ? '' : 's'}`}

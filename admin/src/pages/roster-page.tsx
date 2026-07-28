@@ -10,6 +10,7 @@ import { addDays } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -243,27 +244,27 @@ export function RosterPage() {
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Drag workers onto shifts — compliance is checked before anything saves.
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
+        <PageHeader
+          title="Roster"
+          description="Drag workers onto shifts — compliance is checked before anything saves."
+          actions={
+            <>
             <button
               type="button"
               aria-pressed={unfilledOnly}
               onClick={() => setUnfilledOnly((v) => !v)}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
-                unfilledOnly ? 'border-danger/40 bg-danger/5 text-danger' : 'hover:bg-muted/50',
+                'flex h-8 items-center gap-1.5 rounded-sm border px-2.5 text-small font-medium transition-colors duration-[var(--duration-micro)]',
+                'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                unfilledOnly
+                  ? 'border-danger/40 bg-danger-muted text-danger'
+                  : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-foreground',
               )}
             >
               <MegaphoneSimple size={13} weight="duotone" aria-hidden />
               Unfilled only
             </button>
-            <div className="mx-1 h-5 w-px bg-border" />
+            <div className="mx-1 h-5 w-px bg-border-subtle" />
             <Button
               variant="outline"
               size="icon-sm"
@@ -283,11 +284,12 @@ export function RosterPage() {
             >
               <CaretRight aria-hidden />
             </Button>
-            <span className="ml-2 text-sm font-medium tabular-nums">
+            <span className="num ml-2 text-small font-medium">
               {formatACST(days[0]!, 'd MMM')} – {formatACST(days[6]!, 'd MMM yyyy')}
             </span>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         <DndContext onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
           <div className="flex items-start gap-4">
@@ -311,7 +313,7 @@ export function RosterPage() {
                   style={{ gridTemplateColumns: '160px repeat(7, minmax(132px, 1fr))' }}
                 >
                   {/* Corner + day headers (sticky top). */}
-                  <div className="sticky top-0 left-0 z-30 border-r border-b bg-card" />
+                  <div className="sticky top-0 left-0 z-30 border-r border-b border-border-subtle bg-surface-1" />
                   {days.map((day) => {
                     const ymd = formatACST(day, 'yyyy-MM-dd');
                     const isToday = ymd === todayYmd;
@@ -321,17 +323,20 @@ export function RosterPage() {
                       <div
                         key={ymd}
                         className={cn(
-                          'sticky top-0 z-20 border-b border-l bg-white px-2 py-2 text-center',
-                          isToday && 'bg-[#F4F8F7]',
-                          !isToday && isWeekend && 'bg-[#FDFAF6]',
+                          'sticky top-0 z-20 border-b border-l border-border-subtle bg-surface-1 px-2 py-2 text-center',
+                          // Today is an accent wash; weekends a half-step down
+                          // the surface ladder. Both were hardcoded near-whites
+                          // that turned the header into a light bar in dark mode.
+                          isToday && 'bg-accent-muted',
+                          !isToday && isWeekend && 'bg-surface-2',
                         )}
                       >
-                        <p className={cn('text-xs font-semibold', isToday && 'text-primary')}>
+                        <p className={cn('label-micro', isToday && 'text-primary')}>
                           {formatACST(day, 'EEE')}
                         </p>
                         <p
                           className={cn(
-                            'text-[11px] text-muted-foreground',
+                            'num text-micro tracking-normal text-text-tertiary',
                             isToday && 'text-primary/80',
                           )}
                         >
@@ -349,16 +354,16 @@ export function RosterPage() {
                         <div className="sticky left-0 z-10 flex flex-col gap-1 border-b bg-card px-3 py-2">
                           <div>
                             <p className="text-xs font-semibold leading-tight">{site.name}</p>
-                            <p className="truncate text-[11px] text-muted-foreground">
+                            <p className="truncate text-micro tracking-normal text-muted-foreground">
                               {site.client_name}
                             </p>
                           </div>
                           <div className="flex flex-wrap items-center gap-1">
-                            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums">
+                            <span className="rounded bg-muted px-1.5 py-0.5 text-micro tracking-normal font-medium text-muted-foreground tabular-nums">
                               {siteShifts.length} shifts
                             </span>
                             {unfilledCount > 0 && (
-                              <span className="rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-medium text-danger tabular-nums">
+                              <span className="rounded bg-danger/10 px-1.5 py-0.5 text-micro tracking-normal font-medium text-danger tabular-nums">
                                 {unfilledCount} unfilled
                               </span>
                             )}

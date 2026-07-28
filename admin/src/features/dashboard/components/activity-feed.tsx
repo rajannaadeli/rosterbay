@@ -7,10 +7,8 @@ import {
   SignOut,
   Warning,
 } from '@phosphor-icons/react';
-import { formatDistanceToNowStrict } from 'date-fns';
-
+import { LiveRelativeTime } from '@/components/live-relative-time';
 import { UserAvatar } from '@/components/user-avatar';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatACST } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +34,7 @@ export interface ActivityItem {
 
 const KIND_META: Record<FeedKind, { icon: typeof SignIn; className: string }> = {
   clock_in: { icon: SignIn, className: 'text-success' },
-  clock_out: { icon: SignOut, className: 'text-muted-foreground' },
+  clock_out: { icon: SignOut, className: 'text-text-tertiary' },
   offer: { icon: Megaphone, className: 'text-primary' },
   approval: { icon: CheckCircle, className: 'text-success' },
   task_photo: { icon: Camera, className: 'text-primary' },
@@ -77,49 +75,45 @@ export function ActivityFeed({
         return (
           <li key={item.id}>
             {showDivider && (
-              <p className="bg-muted/30 px-4 py-1 text-[11px] font-medium text-muted-foreground">
+              <p className="label-micro sticky top-0 z-10 bg-surface-2/90 px-4 py-1.5 backdrop-blur-sm">
                 {day}
               </p>
             )}
             <div
               className={cn(
-                'flex items-center gap-2.5 px-4 py-2',
-                isNew && 'animate-in fade-in slide-in-from-top-2 rounded-lg bg-primary/5 duration-200',
+                'flex items-center gap-2.5 px-4 py-2 transition-colors duration-[var(--duration-micro)] hover:bg-surface-2/60',
+                isNew &&
+                  'animate-in fade-in slide-in-from-top-2 rounded-sm bg-accent-muted duration-[var(--duration-standard)] ease-[var(--ease-out)]',
               )}
             >
               <div className="relative shrink-0">
                 {item.actor ? (
                   <UserAvatar name={item.actor} size="sm" />
                 ) : (
-                  <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-[10px] text-muted-foreground ring-1 ring-inset ring-black/5">
+                  <span className="inline-flex size-7 items-center justify-center rounded-full bg-surface-2 text-micro tracking-normal text-text-tertiary ring-1 ring-inset ring-border-subtle">
                     •
                   </span>
                 )}
                 <span
                   className={cn(
-                    'absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full bg-card',
+                    'absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full bg-surface-1',
                     meta.className,
                   )}
                 >
                   <KindIcon size={11} weight="fill" aria-hidden />
                 </span>
               </div>
-              <p className="min-w-0 flex-1 truncate text-sm">
+              <p className="min-w-0 flex-1 truncate text-body">
                 <span className="font-medium">{item.lead}</span>{' '}
-                <span className="text-muted-foreground">{item.detail}</span>
+                <span className="text-text-secondary">{item.detail}</span>
               </p>
-              <Tooltip>
-                <TooltipTrigger
-                  render={<span className="shrink-0 text-[11px] text-muted-foreground tabular-nums" />}
-                >
-                  {formatDistanceToNowStrict(new Date(item.at), { addSuffix: false })
-                    .replace(/ seconds?/, 's')
-                    .replace(/ minutes?/, 'm')
-                    .replace(/ hours?/, 'h')
-                    .replace(/ days?/, 'd')}
-                </TooltipTrigger>
-                <TooltipContent>{formatACST(item.at, 'd MMM, h:mm a')}</TooltipContent>
-              </Tooltip>
+              {/* Ticks on its own now — this used to be a frozen relative
+                  time on a screen that claims to be live. */}
+              <LiveRelativeTime
+                at={item.at}
+                suffix={false}
+                className="shrink-0 text-micro tracking-normal text-text-tertiary"
+              />
             </div>
           </li>
         );

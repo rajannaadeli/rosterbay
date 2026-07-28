@@ -4,6 +4,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { PageHeader } from '@/components/page-header';
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { FilterChip } from '@/components/filter-chip';
@@ -145,12 +146,10 @@ export function WorkersPage() {
   return (
     <TooltipProvider delay={200}>
       <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Workers</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            The Torrens field team — compliance at a glance.
-          </p>
-        </div>
+        <PageHeader
+          title="Workers"
+          description="The Torrens field team — compliance at a glance."
+        />
 
         <StatStrip
           loading={workers.isPending}

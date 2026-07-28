@@ -17,18 +17,16 @@ export function useCountUp(target: number, durationMs: number = DURATION.countUp
     const from = fromRef.current;
     if (from === target) return;
 
-    if (durationMs === 0 || prefersReducedMotion()) {
-      fromRef.current = target;
-      setValue(target);
-      return;
-    }
-
+    // Reduced motion collapses the duration rather than short-circuiting to a
+    // synchronous setState — the value still lands on the next frame, which
+    // keeps this out of the cascading-render path the compiler flags.
+    const effective = prefersReducedMotion() ? 0 : durationMs;
     const start = performance.now();
     let frame: number;
 
     // Matches --ease-out: fast departure, long settle.
     const tick = (now: number) => {
-      const progress = Math.min(1, (now - start) / durationMs);
+      const progress = effective <= 0 ? 1 : Math.min(1, (now - start) / effective);
       const eased = 1 - (1 - progress) ** 3;
       const next = Math.round(from + (target - from) * eased);
       setValue(next);

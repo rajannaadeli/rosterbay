@@ -1,11 +1,10 @@
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { MapContainer, Marker, Popup } from 'react-leaflet';
 
 import { FullscreenInvalidate, FullscreenMapWrapper } from '@/components/fullscreen-map-wrapper';
 import type { Tables } from '@/lib/database.types';
 import type { TimesheetRow } from '@/features/timesheets/hooks';
 import { formatACST } from '@/lib/format';
-import { OSM_ATTRIBUTION, OSM_TILE_URL } from '@/lib/leaflet';
-import { FitBounds, SiteLabelVisibility, siteIcon, workerDotIcon } from '@/lib/map-markers';
+import { FitBounds, MapTiles, siteIcon, SiteLabelVisibility, workerDotIcon } from '@/lib/map-markers';
 
 interface LiveMapProps {
   sites: Tables<'job_sites'>[];
@@ -31,7 +30,7 @@ export function LiveMap({ sites, onSite, workerNames, siteNames }: LiveMapProps)
         className="z-0 h-full w-full"
         scrollWheelZoom={true}
       >
-        <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
+        <MapTiles />
         <FitBounds points={points} maxZoom={13} />
         <SiteLabelVisibility />
         <FullscreenInvalidate />

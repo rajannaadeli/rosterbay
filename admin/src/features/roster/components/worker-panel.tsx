@@ -40,7 +40,7 @@ export function WorkerDragCard({ worker }: { worker: WorkerRow }) {
         <p className="truncate text-sm font-medium">{worker.full_name}</p>
         <p className="truncate text-xs text-muted-foreground">{worker.job_title}</p>
       </div>
-      <CompliancePill status={worker.compliance_status} showIcon={false} className="px-1.5 text-[10px]" />
+      <CompliancePill status={worker.compliance_status} showIcon={false} className="px-1.5 text-micro tracking-normal" />
     </div>
   );
 }
@@ -140,7 +140,7 @@ export function WorkerPanel({ workers, isPending, collapsed, onToggleCollapsed }
         ))}
       </div>
 
-      <p className="text-[11px] text-muted-foreground">Drag a worker onto a shift to assign.</p>
+      <p className="text-micro tracking-normal text-muted-foreground">Drag a worker onto a shift to assign.</p>
 
       <div className="scrollbar-thin -mr-1 min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="scroll-fade-y flex flex-col gap-1.5 pb-3">

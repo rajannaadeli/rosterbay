@@ -78,14 +78,14 @@ export function RosterCell({
             render={
               <button
                 type="button"
-                className="flex h-6 w-full items-center justify-center rounded-lg border border-dashed text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="flex h-6 w-full items-center justify-center rounded-lg border border-dashed text-micro tracking-normal font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               />
             }
           >
             +{overflow.length} more
           </PopoverTrigger>
           <PopoverContent align="start" className="w-56 p-2">
-            <p className="mb-1.5 px-1 text-[11px] font-medium text-muted-foreground">
+            <p className="mb-1.5 px-1 text-micro tracking-normal font-medium text-muted-foreground">
               {site.name} · {formatACST(day, 'EEE d MMM')}
             </p>
             <div className="flex flex-col gap-1">{overflow.map(renderChip)}</div>
