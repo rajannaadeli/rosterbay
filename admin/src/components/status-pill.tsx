@@ -13,10 +13,15 @@ import { cn } from '@/lib/utils';
 
 export type StatusTone = 'success' | 'warning' | 'danger';
 
-const toneClasses: Record<StatusTone, string> = {
-  success: 'bg-success/10 text-success',
-  warning: 'bg-warning/10 text-warning',
-  danger: 'bg-danger/10 text-danger',
+/**
+ * The three tones map straight onto Badge variants — the muted fill, solid
+ * text and 24% border live there, so a status pill can never drift from an
+ * ordinary badge of the same hue.
+ */
+const toneVariants: Record<StatusTone, 'success' | 'warning' | 'destructive'> = {
+  success: 'success',
+  warning: 'warning',
+  danger: 'destructive',
 };
 
 const toneIcons: Record<StatusTone, typeof CheckCircle> = {
@@ -35,7 +40,7 @@ interface StatusPillProps {
 export function StatusPill({ tone, label, showIcon = true, className }: StatusPillProps) {
   const Icon = toneIcons[tone];
   return (
-    <Badge variant="secondary" className={cn(toneClasses[tone], className)}>
+    <Badge variant={toneVariants[tone]} className={className}>
       {showIcon && <Icon size={13} weight="duotone" aria-hidden />}
       {label}
     </Badge>

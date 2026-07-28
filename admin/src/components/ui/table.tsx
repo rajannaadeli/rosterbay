@@ -50,12 +50,14 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
+/** E0 rows: hairline dividers, surface-2 tint on hover at --duration-micro. */
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "group/row border-b border-border-subtle transition-colors duration-[var(--duration-micro)]",
+        "hover:bg-surface-2 has-aria-expanded:bg-surface-2 data-[state=selected]:bg-accent-muted",
         className
       )}
       {...props}
@@ -63,12 +65,13 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   )
 }
 
+/** Micro-label headers — uppercase, tracked, tertiary. */
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       data-slot="table-head"
       className={cn(
-        "h-12 px-3 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        "label-micro h-10 px-3 text-left align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -76,12 +79,13 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   )
 }
 
+/** ~52px rows at this padding — dense enough to scan, loose enough to click. */
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
       className={cn(
-        "p-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "px-3 py-4 align-middle text-body whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
