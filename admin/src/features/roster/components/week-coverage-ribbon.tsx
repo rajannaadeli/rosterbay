@@ -7,7 +7,7 @@ import { coverageBuckets, dayWindow, type AxisShift } from '../time-axis';
 
 /** Two-hour resolution: 12 rows keeps the matrix under 44px per the spec. */
 const BUCKET_MIN = 120;
-const ROW_HEIGHT = 3;
+const ROW_HEIGHT = 2;
 const ROW_GAP = 1;
 
 interface WeekCoverageRibbonProps {
@@ -88,7 +88,7 @@ export function WeekCoverageRibbon({ shifts, days, leftInsetPx }: WeekCoverageRi
                         className={cn(
                           'rounded-[1px]',
                           empty && 'bg-surface-2',
-                          bucket.unfilled > 0 && 'bg-danger',
+                          bucket.unfilled > 0 && 'bg-danger/75',
                         )}
                       />
                     }
