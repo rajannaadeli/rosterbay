@@ -2,5 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "redirects": [
+    {
+      "source": "/download/worker-app.apk",
+      "destination": "https://github.com/rajannaadeli/rosterbay/releases/download/worker-app/rosterbay-worker.apk",
+      "permanent": false
+    }
+  ],
+  "rewrites": [{ "source": "/((?!download/).*)", "destination": "/index.html" }]
 }

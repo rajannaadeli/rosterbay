@@ -8,7 +8,11 @@ node_modules/
 dist/
 web-build/
 
-# Native
+# Native — continuous native generation. `android/` and `ios/` are outputs of
+# `expo prebuild`, regenerated from app.json on every APK build, so committing
+# them would only create a second source of truth that silently drifts.
+android/
+ios/
 *.orig.*
 *.jks
 *.p8

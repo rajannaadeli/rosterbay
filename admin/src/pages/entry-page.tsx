@@ -2,17 +2,24 @@ import { DeviceMobile, DownloadSimple, UserGear } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router';
 
 import { BrowserFrame } from '@/components/browser-frame';
+import { LiveRelativeTime } from '@/components/live-relative-time';
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
 import { useSignInAsAdmin } from '@/features/auth/hooks';
+import { useWorkerAppRelease } from '@/features/release/hooks';
+import { APK_DOWNLOAD_PATH } from '@/lib/release-target';
 
-const APK_URL = import.meta.env.VITE_APK_URL ?? '';
+// A permanent path, not a per-build artifact URL: CI republishes the APK to the
+// same release tag on every mobile change, so this link is always the newest
+// build without anyone editing an env var. `VITE_APK_URL` still overrides it.
+const APK_URL = import.meta.env.VITE_APK_URL || APK_DOWNLOAD_PATH;
 const PORTFOLIO_URL = import.meta.env.VITE_PORTFOLIO_URL ?? 'https://rajanna.dev';
 const UPWORK_URL = import.meta.env.VITE_UPWORK_URL ?? '#';
 
 export function EntryPage() {
   const navigate = useNavigate();
   const signIn = useSignInAsAdmin();
+  const apk = useWorkerAppRelease();
 
   return (
     <div className="relative flex min-h-svh flex-col overflow-hidden px-6 pt-14 pb-10">
@@ -73,17 +80,27 @@ export function EntryPage() {
           </p>
         )}
 
-        <a
-          href={APK_URL || '#'}
-          aria-disabled={APK_URL === ''}
-          className="inline-flex items-center justify-center gap-1.5 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          onClick={(event) => {
-            if (APK_URL === '') event.preventDefault();
-          }}
-        >
-          <DownloadSimple size={15} aria-hidden />
-          Install the worker app (APK{APK_URL === '' ? ' — coming soon' : ''})
-        </a>
+        {/* Android only, and said so — a link that installs nothing on the
+            iPhone in someone's hand is worse than no link. */}
+        <div className="flex flex-col items-center gap-0.5 py-1">
+          <a
+            href={APK_URL}
+            className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <DownloadSimple size={15} aria-hidden />
+            Install the worker app (Android APK)
+          </a>
+          {/* The build stamp is the whole point: it says out loud that this
+              file tracks the deploy rather than being a one-off upload. Absent
+              until GitHub answers, so the link never waits on it. */}
+          {apk.data && (
+            <p className="text-micro tracking-normal text-text-tertiary">
+              <span className="num">{(apk.data.sizeBytes / 1_048_576).toFixed(1)} MB</span>
+              {' · built '}
+              <LiveRelativeTime at={apk.data.updatedAt} className="text-text-tertiary" />
+            </p>
+          )}
+        </div>
       </div>
 
       {/* The product itself, tilted just enough to read as an object on a

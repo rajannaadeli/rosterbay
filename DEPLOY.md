@@ -27,7 +27,7 @@ Items marked **[you]** need your accounts/credentials; nothing else proceeds unt
    | `VITE_SUPABASE_URL` | `https://pjlpfutdktviadtpimcc.supabase.co` |
    | `VITE_SUPABASE_ANON_KEY` | your anon (publishable) key |
    | `VITE_WORKER_APP_URL` | `https://worker.rosterbay.com` |
-   | `VITE_APK_URL` | *(blank for now — step 4 fills it)* |
+   | `VITE_APK_URL` | *(leave unset — the landing page uses `/download/worker-app.apk`, see step 4)* |
    | `VITE_PORTFOLIO_URL` | `https://rajanna.dev` |
    | `VITE_UPWORK_URL` | your Upwork profile URL |
 
@@ -57,13 +57,33 @@ Items marked **[you]** need your accounts/credentials; nothing else proceeds unt
 
 Then Actions tab → run **Supabase keep-alive** once manually to confirm green.
 
-## 4. Android APK (20 min, mostly waiting)
+The same two secrets are baked into the Android build in step 4 — the APK has no runtime
+config, so without them it compiles and then throws on launch. The workflow fails fast
+rather than publishing one.
 
-1. **[you]** `cd mobile && npx eas login` (Expo account) → `npx eas build:configure` if prompted →
-   `npx eas build -p android --profile preview`
-2. When the build finishes, copy the **build artifact URL** from the EAS output/dashboard.
-3. **[you]** Paste it into Vercel (admin project) as `VITE_APK_URL` → redeploy.
-   The landing page's "Install the worker app (APK)" link goes live automatically.
+## 4. Android APK (20 min, mostly waiting — then never again)
+
+Built by GitHub Actions, not EAS: no Expo account, no free-tier build quota, and no
+30-day artifact expiry. `.github/workflows/worker-apk.yml` prebuilds the native project,
+assembles a release APK and re-uploads it to one fixed release tag, so
+`https://rosterbay.com/download/worker-app.apk` is permanent while the file behind it
+tracks `main`. **Step 3's secrets are a prerequisite** — they're what points the APK at
+the demo Supabase project.
+
+1. **[you]** Actions tab → **Worker APK** → *Run workflow* (this first run creates the
+   release; after that any push to `main` touching `mobile/**` rebuilds it automatically).
+2. Confirm the release exists: repo → Releases → **Worker app · 1.0.0+N**, with
+   `rosterbay-worker.apk` attached.
+3. Nothing to paste anywhere. `admin/vercel.json` already redirects
+   `/download/worker-app.apk` to that asset, and the landing page shows the APK's size
+   and build age underneath the link.
+4. Sanity: open `https://rosterbay.com/download/worker-app.apk` on an Android phone →
+   allow installs from the browser → sign-in is pre-filled with Liam; tap *Use demo worker*.
+
+Rebuilding by hand later is the same *Run workflow* button. To build locally instead you
+need **JDK 17** (`brew install openjdk@17`) — the React Native gradle plugin pins a Java 17
+toolchain and Gradle matches on the exact major version — then
+`cd mobile && npx expo prebuild --platform android --clean --no-install && cd android && ./gradlew assembleRelease`.
 
 ## 5. UptimeRobot (5 min)
 

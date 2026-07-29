@@ -49,7 +49,7 @@
 | Camera/photos | **expo-image-picker** | Task photo proof, cert uploads |
 | Session | **expo-secure-store** | Reuse your SecureStore chunking adapter pattern |
 | Web export | `npx expo export --platform web` | Hosted at `app.shiftdeck.xxx` inside a phone-frame page — desktop prospects try the worker app instantly. Browser geolocation + file-input fallbacks make clock-in and photo proof work on web too |
-| Native build | **EAS free tier → APK** | Link on landing for serious prospects |
+| Native build | **GitHub Actions → APK** (`expo prebuild` + `gradle assembleRelease`) | Republished to one fixed release tag on every mobile change, so the landing link is permanent and never stale. EAS was the original plan; its free tier expires artifacts after 30 days |
 
 ### Backend — Supabase (entire backend)
 | Piece | Use |
