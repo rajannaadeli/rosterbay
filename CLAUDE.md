@@ -30,7 +30,7 @@ Package manager: **npm** in both apps. Env: `admin/.env` uses `VITE_SUPABASE_URL
 - **Ladders, not flat values:** surface 1/2/3 · border subtle/default/strong · text primary/secondary/tertiary · elevation `.e0`–`.e3`. Every shadcn token (`--card`, `--muted`, `--border`…) is an *alias* onto these — never an independent value.
 - **One accent** still. `--accent-glow` is dark-only and permitted in exactly three places: primary actions, live indicators, active nav.
 - **Radius ladder 6/8/12/16** (`rounded-xs`/`sm`/`lg`/`xl`) — this supersedes the old "10px everywhere" law.
-- **Type:** Inter (self-hosted; no remote font imports) + **JetBrains Mono**. Scale `text-display/h2/h3/body/small/micro` — no ad-hoc sizes. Every numeral, time, duration, distance, count, code and ID uses `.num` (mono + tabular). `.label-micro` is the uppercase eyebrow.
+- **Type:** ITC Avant Garde Gothic Std Medium (self-hosted from `admin/public/fonts`; no remote font imports) over Inter as the fallback, + **JetBrains Mono** for data. Scale `text-display/h2/h3/body/small/micro` — no ad-hoc sizes. Every numeral, time, duration, distance, count, code and ID uses `.num` (mono + tabular). `.label-micro` is the uppercase eyebrow.
 - **Motion:** `--duration-*` / `--ease-*` + `fade-up`/`shimmer`/`live-pulse` keyframes and `.stagger` in CSS; `lib/motion.ts` for JS-driven cases. **No animation library** — so `prefers-reduced-motion` is honoured in one media query.
 
 **Mobile has NOT been migrated** — it still runs the warm-Stone tokens in `mobile/global.css` + `lib/colors.ts` + `lib/theme.ts`. The two apps are knowingly divergent; porting the ladder is the first task of any mobile phase.
