@@ -20,7 +20,7 @@ const W = 1200;
 const H = 630;
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const SHOT = join(ROOT, 'admin/public/hero-roster.jpg');
+const SHOT = join(ROOT, 'admin/public/hero-roster.png');
 const OUT = join(ROOT, 'admin/public/og.png');
 
 // Dark-theme tokens, mirrored from admin/src/index.css. Hardcoded here on
@@ -43,15 +43,15 @@ const ACCENT = '#2dd4bf';
  * leaves the SVG with nothing to get wrong.
  */
 function cropToGrid(tmpDir) {
-  const cropped = join(tmpDir, 'grid.jpg');
-  // Source is 1568×763; the grid starts after the worker panel (x≈555) and
-  // below the page header (y≈150).
-  execFileSync(
-    'sips',
-    ['-c', '600', '1010', '--cropOffset', '150', '555', SHOT, '--out', cropped],
-    { stdio: 'ignore' },
-  );
-  return readFileSync(cropped).toString('base64');
+      const cropped = join(tmpDir, 'grid.jpg');
+      // Source is 1568×763; the grid starts after the worker panel (x≈555) and
+      // below the page header (y≈150).
+      execFileSync(
+            'sips',
+            ['-c', '600', '1010', '--cropOffset', '150', '555', SHOT, '--out', cropped],
+            { stdio: 'ignore' },
+      );
+      return readFileSync(cropped).toString('base64');
 }
 
 /**
@@ -129,14 +129,14 @@ const buildSvg = (shot) => `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink=
 
 const tmp = mkdtempSync(join(tmpdir(), 'rb-og-'));
 try {
-  const svgPath = join(tmp, 'og.svg');
-  writeFileSync(svgPath, buildSvg(cropToGrid(tmp)));
-  execFileSync('qlmanage', ['-t', '-s', String(W), '-o', tmp, svgPath], { stdio: 'ignore' });
-  // Centre-crop, not resize: -z would squash the square back to 1200×630.
-  execFileSync('sips', ['-c', String(H), String(W), join(tmp, 'og.svg.png'), '--out', OUT], {
-    stdio: 'ignore',
-  });
-  console.log(`og.png regenerated → ${OUT}`);
+      const svgPath = join(tmp, 'og.svg');
+      writeFileSync(svgPath, buildSvg(cropToGrid(tmp)));
+      execFileSync('qlmanage', ['-t', '-s', String(W), '-o', tmp, svgPath], { stdio: 'ignore' });
+      // Centre-crop, not resize: -z would squash the square back to 1200×630.
+      execFileSync('sips', ['-c', String(H), String(W), join(tmp, 'og.svg.png'), '--out', OUT], {
+            stdio: 'ignore',
+      });
+      console.log(`og.png regenerated → ${OUT}`);
 } finally {
-  rmSync(tmp, { recursive: true, force: true });
+      rmSync(tmp, { recursive: true, force: true });
 }

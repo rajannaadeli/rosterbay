@@ -110,7 +110,7 @@ export function ShiftSheet({
       dirty={dirty}
       srTitle={`${siteName} — ${formatACST(active.starts_at, 'EEE d MMM')}`}
       header={
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 bg-red-500">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold">{siteName}</h2>

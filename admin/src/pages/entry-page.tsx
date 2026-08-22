@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { BrowserFrame } from '@/components/browser-frame';
 import { LiveRelativeTime } from '@/components/live-relative-time';
+import { useTheme } from '@/components/theme-provider';
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
 import { useSignInAsAdmin } from '@/features/auth/hooks';
@@ -20,6 +21,8 @@ export function EntryPage() {
   const navigate = useNavigate();
   const signIn = useSignInAsAdmin();
   const apk = useWorkerAppRelease();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <div className="relative flex min-h-svh flex-col overflow-hidden px-6 pt-14 pb-10">
@@ -106,13 +109,29 @@ export function EntryPage() {
       {/* The product itself, tilted just enough to read as an object on a
           surface rather than a flat inline image. Hidden below `sm` — at
           phone width the frame would be illegible and the buttons are the
-          point there. */}
+          point there.
+
+          Both light and dark hero screenshots are always rendered and stacked;
+          only opacity toggles, so the crossfade is instant on switch with no
+          image-load flash. The `will-change` hint lets the compositor keep
+          both layers on the GPU so the 500 ms fade can't jank. */}
       <div className="hidden max-h-[46vh] w-full overflow-hidden [perspective:1800px] sm:block">
-        <BrowserFrame
-          src="/hero-roster.jpg"
-          alt="The RosterBay roster in day view — shifts drawn proportionally on a 24-hour time axis, with the coverage ribbon above and the live now-line."
-          className="origin-top transition-transform duration-[600ms] ease-[var(--ease-out)] [transform:rotateX(7deg)_rotateZ(-0.6deg)_scale(0.97)] hover:[transform:rotateX(0deg)_rotateZ(0deg)_scale(1)]"
-        />
+        <div className="relative origin-top transition-transform duration-[600ms] ease-[var(--ease-out)] [transform:rotateX(7deg)_rotateZ(-0.6deg)_scale(0.97)] hover:[transform:rotateX(0deg)_rotateZ(0deg)_scale(1)]">
+          <BrowserFrame
+            src="/hero-roster.png"
+            alt="The RosterBay roster in day view — light theme."
+            className={`transition-opacity duration-500 ease-in-out will-change-[opacity] ${
+              isDark ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+          <BrowserFrame
+            src="/hero-roster-dark.png"
+            alt="The RosterBay roster in day view — dark theme."
+            className={`absolute inset-0 transition-opacity duration-500 ease-in-out will-change-[opacity] ${
+              isDark ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        </div>
       </div>
       </div>
 
