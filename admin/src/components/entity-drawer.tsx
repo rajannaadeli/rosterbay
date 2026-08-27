@@ -101,11 +101,11 @@ export function EntityDrawer({
       <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">{children}</div>
 
       {/* Sticky footer */}
-      {footer && (
+      {/* {footer && (
         <div className="flex items-center justify-end gap-2 border-t bg-card px-5 py-3">
           {footer}
         </div>
-      )}
+      )} */}
     </>
   );
 

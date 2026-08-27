@@ -54,7 +54,7 @@ export function UserAvatar({ name, size = 'sm', className }: UserAvatarProps) {
         color: `var(--avatar-${tone}-fg)`,
       }}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-border-subtle select-none',
+        'inline-flex shrink-0 text-[9px] items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-border-subtle select-none',
         text,
         className,
       )}

@@ -450,7 +450,7 @@ export function RosterPage() {
                   style={{ gridTemplateColumns: '160px repeat(7, minmax(132px, 1fr))' }}
                 >
                   {/* Corner + day headers (sticky top). */}
-                  <div className="sticky top-0 left-0 z-30 border-r border-b border-border-subtle bg-surface-1" />
+                  <div className="sticky top-0 left-0 z-30 border-r border-b border-border-subtle bg-surface-2" />
                   {days.map((day) => {
                     const ymd = formatACST(day, 'yyyy-MM-dd');
                     const isToday = ymd === todayYmd;
@@ -460,7 +460,7 @@ export function RosterPage() {
                       <div
                         key={ymd}
                         className={cn(
-                          'sticky top-0 z-20 border-b border-l border-border-subtle bg-surface-1 px-2 py-2 text-center',
+                          'sticky top-0 z-20 border-b border-l border-border-subtle bg-surface-2 px-2 py-2 text-center',
                           // Today is an accent wash; weekends a half-step down
                           // the surface ladder. Both were hardcoded near-whites
                           // that turned the header into a light bar in dark mode.
@@ -488,7 +488,7 @@ export function RosterPage() {
                     const unfilledCount = siteShifts.filter((s) => s.worker_id === null).length;
                     return (
                       <div key={site.id} className="contents">
-                        <div className="sticky left-0 z-10 flex flex-col gap-1 border-b bg-card px-3 py-2">
+                        <div className="sticky left-0 z-10 flex flex-col gap-1 border-b bg-surface-2 px-3 py-2">
                           <div>
                             <p className="text-xs font-semibold leading-tight">{site.name}</p>
                             <p className="truncate text-micro tracking-normal text-muted-foreground">
