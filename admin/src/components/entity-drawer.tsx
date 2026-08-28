@@ -53,7 +53,6 @@ export function EntityDrawer({
   tabs,
   activeTab,
   onTabChange,
-  footer,
   children,
 }: EntityDrawerProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
