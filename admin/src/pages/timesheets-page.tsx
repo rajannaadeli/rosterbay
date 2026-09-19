@@ -119,7 +119,9 @@ function RowActions({ row }: { row: Row<TimesheetRow> }) {
       <Button
         size="sm"
         variant="ghost"
-        className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        // Hover-reveal is a mouse idiom. On a coarse pointer the row's only
+        // approve affordance would otherwise be invisible and undiscoverable.
+        className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 coarse:opacity-100"
         disabled={review.isPending}
         onClick={(e) => {
           e.stopPropagation();
@@ -135,7 +137,7 @@ function RowActions({ row }: { row: Row<TimesheetRow> }) {
             <Button
               size="icon-sm"
               variant="ghost"
-              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 coarse:opacity-100"
               aria-label="More actions"
               onClick={(e) => e.stopPropagation()}
             />
@@ -403,7 +405,8 @@ export function TimesheetsPage() {
       type="button"
       onClick={() => setStatus((s) => (s === key ? 'all' : key))}
       className={cn(
-        'flex items-baseline gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors',
+        'flex shrink-0 items-baseline gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-11 coarse:items-center',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         status === key ? 'border-primary bg-primary/5' : 'hover:bg-muted/50',
       )}
     >
@@ -432,6 +435,7 @@ export function TimesheetsPage() {
               <Button
                 variant="outline"
                 size="sm"
+                className="shrink-0"
                 disabled={cleanPendingIds.length === 0 || bulk.isPending}
                 onClick={() => setBulkOpen(true)}
               >
@@ -440,6 +444,7 @@ export function TimesheetsPage() {
               <Button
                 variant="outline"
                 size="sm"
+                className="shrink-0"
                 disabled={data.length === 0}
                 onClick={() =>
                   exportTimesheetsCsv(data, workerNames, siteNames, range.from, range.to)
@@ -452,8 +457,10 @@ export function TimesheetsPage() {
           }
         />
 
-        {/* Count chips drive the status filter. */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Count chips drive the status filter. They scroll as one row on a
+            phone rather than wrapping — four short chips reading as a single
+            switch is clearer than two ragged rows of two. */}
+        <div className="scroll-x-contained scrollbar-thin -mx-4 flex items-center gap-2 px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           {countChip('all', 'Entries', counts.all, 'default')}
           {countChip('pending', 'Pending', counts.pending, 'warning')}
           {countChip('flagged', 'Flagged', counts.flagged, 'danger')}
@@ -490,7 +497,8 @@ export function TimesheetsPage() {
                 type="button"
                 onClick={() => setPreset(p)}
                 className={cn(
-                  'rounded-lg border px-2.5 py-1 text-xs transition-colors',
+                  'shrink-0 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-11 coarse:px-3',
+                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                   preset === p ? 'border-primary bg-primary/5 text-primary' : 'hover:bg-muted/50',
                 )}
               >
@@ -500,14 +508,14 @@ export function TimesheetsPage() {
           </div>
 
           {preset === 'custom' && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex w-full items-center gap-1.5 sm:w-auto">
               <Label htmlFor="ts-from" className="sr-only">
                 From
               </Label>
               <Input
                 id="ts-from"
                 type="date"
-                className="h-8 w-36 bg-background"
+                className="h-8 w-full bg-background sm:w-36"
                 value={custom.from}
                 onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}
               />
@@ -515,7 +523,7 @@ export function TimesheetsPage() {
               <Input
                 aria-label="To"
                 type="date"
-                className="h-8 w-36 bg-background"
+                className="h-8 w-full bg-background sm:w-36"
                 value={custom.to}
                 onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}
               />
@@ -537,7 +545,56 @@ export function TimesheetsPage() {
           />
         ) : (
           <div className="e1 overflow-hidden rounded-lg">
-            <div className="max-h-[calc(100vh-19rem)] overflow-auto scrollbar-thin">
+            {/* Phone: a card per entry, grouped by day exactly as the table
+                is. Eight columns cannot be made legible at 320px, and a
+                horizontal scroller would bury the flags — which are the only
+                reason anyone opens this screen. */}
+            <div className="flex flex-col md:hidden">
+              {rows.map((row, index) => {
+                const day = formatACST(row.original.shift_starts_at, 'yyyy-MM-dd');
+                const prevDay =
+                  index > 0
+                    ? formatACST(rows[index - 1]!.original.shift_starts_at, 'yyyy-MM-dd')
+                    : null;
+                return (
+                  <Fragment key={`m-${row.id}`}>
+                    {day !== prevDay && (
+                      <p className="sticky top-0 z-10 border-b border-border-subtle bg-surface-2 px-4 py-1.5 text-xs font-semibold text-muted-foreground">
+                        {formatACST(row.original.shift_starts_at, 'EEEE d MMMM')}
+                      </p>
+                    )}
+                    <div
+                      className={cn(
+                        'border-b border-border-subtle last:border-b-0',
+                        liveIds.has(row.id) &&
+                          'animate-in fade-in slide-in-from-top-2 duration-200',
+                      )}
+                    >
+                      <TimesheetCard
+                        row={row.original}
+                        expanded={row.getIsExpanded()}
+                        onToggle={() => row.toggleExpanded()}
+                        workerName={workerNames[row.original.worker_id] ?? '—'}
+                        siteName={siteNames[row.original.site_id] ?? '—'}
+                      />
+                      {row.getIsExpanded() && (
+                        <ReviewPanel
+                          row={row.original}
+                          site={siteById.get(row.original.site_id)}
+                          workerNames={workerNames}
+                          busy={review.isPending}
+                          onReview={(next) =>
+                            review.mutate({ id: row.original.id, status: next })
+                          }
+                        />
+                      )}
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
+
+            <div className="hidden max-h-[calc(100dvh-19rem)] overflow-auto scrollbar-thin md:block">
               <table className="relative w-full caption-bottom text-sm">
                 <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
                   {table.getHeaderGroups().map((hg) => (
@@ -647,5 +704,136 @@ export function TimesheetsPage() {
         </Dialog>
       </div>
     </TooltipProvider>
+  );
+}
+
+/**
+ * One time entry, as a phone card.
+ *
+ * Two departures from the table, both deliberate:
+ *
+ *  - Flags are spelled out. In the table they are bare icons whose meaning
+ *    lives in a tooltip, and a tooltip is a mouse affordance — on touch the
+ *    flag would be an unexplained glyph next to somebody's pay.
+ *  - Approve and Review are always-visible full-height buttons rather than
+ *    hover-revealed ghosts, because approving is the task this screen exists
+ *    for and a phone has no hover to reveal them with.
+ */
+function TimesheetCard({
+  row,
+  expanded,
+  onToggle,
+  workerName,
+  siteName,
+}: {
+  row: TimesheetRow;
+  expanded: boolean;
+  onToggle: () => void;
+  workerName: string;
+  siteName: string;
+}) {
+  const review = useReviewEntry();
+  const reviewable = row.effective_status === 'pending' || row.effective_status === 'flagged';
+  const delta = variance(row);
+
+  return (
+    <div className="flex flex-col gap-2.5 px-4 py-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="flex items-start gap-2.5 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        <UserAvatar name={workerName} size="sm" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium">{workerName}</span>
+          <span className="block truncate text-xs text-muted-foreground">{siteName}</span>
+        </span>
+        <StatusPill
+          tone={STATUS_TONE[row.effective_status]}
+          label={STATUS_LABEL[row.effective_status]}
+        />
+        {expanded ? (
+          <CaretDown size={14} className="mt-1 shrink-0 text-muted-foreground" aria-hidden />
+        ) : (
+          <CaretRight size={14} className="mt-1 shrink-0 text-muted-foreground" aria-hidden />
+        )}
+      </button>
+
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="num text-text-secondary">
+          {formatACST(row.clock_in_at, 'h:mma').toLowerCase()}
+          {'–'}
+          {row.clock_out_at ? formatACST(row.clock_out_at, 'h:mma').toLowerCase() : '…'}
+        </span>
+        <span className="num">
+          sched {formatACST(row.shift_starts_at, 'h:mma').toLowerCase()}
+          {'–'}
+          {formatACST(row.shift_ends_at, 'h:mma').toLowerCase()}
+        </span>
+        {delta !== null && delta !== 0 && (
+          <span className={cn('num', delta > 0 ? 'text-text-secondary' : 'text-danger')}>
+            {delta > 0 ? '+' : ''}
+            {delta}m
+          </span>
+        )}
+      </div>
+
+      {/* Named, not iconified — see the note above. */}
+      {row.effective_flags.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5">
+          {row.effective_flags.map((flag) => {
+            const meta = FLAG_META[flag];
+            if (!meta) return null;
+            return (
+              <li
+                key={flag}
+                className={cn(
+                  'flex items-center gap-1 rounded-xs bg-surface-2 px-1.5 py-1 text-nano leading-none font-medium tracking-normal',
+                  meta.tone,
+                )}
+              >
+                <meta.icon size={12} weight="duotone" aria-hidden />
+                {meta.label}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {reviewable && (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="flex-1"
+            disabled={review.isPending}
+            onClick={() => review.mutate({ id: row.id, status: 'approved' })}
+          >
+            <CheckCircle aria-hidden />
+            Approve
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1" onClick={onToggle}>
+            {expanded ? 'Hide detail' : 'Review'}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button size="icon-sm" variant="ghost" aria-label="More actions" />
+              }
+            >
+              <DotsThree size={16} aria-hidden />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => review.mutate({ id: row.id, status: 'rejected' })}
+              >
+                Reject entry
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+    </div>
   );
 }
