@@ -103,7 +103,7 @@ export function SitesPage() {
       />
 
       {isPending ? (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-40 rounded-lg" />
           ))}
@@ -121,7 +121,7 @@ export function SitesPage() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {sites.data?.map((site) => (
             <SiteCard
               key={site.id}

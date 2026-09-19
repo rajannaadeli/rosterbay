@@ -7,6 +7,7 @@ import { useTheme } from '@/components/theme-provider';
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
 import { useSignInAsAdmin } from '@/features/auth/hooks';
+import { MQ_SM, useMediaQuery } from '@/hooks/use-media-query';
 import { useWorkerAppRelease } from '@/features/release/hooks';
 import { APK_DOWNLOAD_PATH } from '@/lib/release-target';
 
@@ -23,9 +24,14 @@ export function EntryPage() {
   const apk = useWorkerAppRelease();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  // The two hero shots are ~1200px wide and there are two of them (one per
+  // theme, stacked for an instant crossfade). `hidden sm:block` stops them
+  // being *seen* on a phone but not from being fetched, which is the entire
+  // cost. Gating the render means a phone never asks for them.
+  const showHero = useMediaQuery(MQ_SM);
 
   return (
-    <div className="relative flex min-h-svh flex-col overflow-hidden px-6 pt-14 pb-10">
+    <div className="px-safe relative flex min-h-dvh flex-col overflow-hidden px-4 pt-10 pb-8 sm:px-6 sm:pt-14 sm:pb-10">
       {/* Accent-derived wash. Two soft radials rather than a linear gradient:
           a linear ramp reads as a template background, where an off-centre
           glow reads as light falling on something. */}
@@ -46,9 +52,9 @@ export function EntryPage() {
         ROSTERBAY
       </span>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 sm:gap-8">
       <div className="flex flex-col items-center gap-3 text-center">
-        <Wordmark className="text-3xl" iconSize={34} />
+        <Wordmark className="text-2xl sm:text-3xl" iconSize={30} />
         <p className="max-w-md text-balance text-muted-foreground">
           Roster, verify, and track your field workforce.
         </p>
@@ -57,7 +63,7 @@ export function EntryPage() {
       <div className="flex w-full max-w-sm flex-col gap-3">
         <Button
           size="lg"
-          className="h-12 text-base"
+          className="h-12 text-base whitespace-normal"
           disabled={signIn.isPending}
           onClick={() => {
             signIn.mutate(undefined, { onSuccess: () => void navigate('/app') });
@@ -70,7 +76,9 @@ export function EntryPage() {
         <Button
           variant="outline"
           size="lg"
-          className="h-12 text-base"
+          // `h-auto min-h-12` + wrapping: at 320px this label is two lines,
+          // and a fixed-height button would clip its own second line.
+          className="h-auto min-h-12 py-2 text-center text-base whitespace-normal"
           onClick={() => void navigate('/worker')}
         >
           <DeviceMobile size={20} weight="duotone" aria-hidden />
@@ -115,7 +123,8 @@ export function EntryPage() {
           only opacity toggles, so the crossfade is instant on switch with no
           image-load flash. The `will-change` hint lets the compositor keep
           both layers on the GPU so the 500 ms fade can't jank. */}
-      <div className="hidden max-h-[46vh] w-full overflow-hidden [perspective:1800px] sm:block">
+      {showHero && (
+      <div className="max-h-[46dvh] w-full overflow-hidden [perspective:1800px]">
         <div className="relative origin-top transition-transform duration-[600ms] ease-[var(--ease-out)] [transform:rotateX(7deg)_rotateZ(-0.6deg)_scale(0.97)] hover:[transform:rotateX(0deg)_rotateZ(0deg)_scale(1)]">
           <BrowserFrame
             src="/hero-roster.png"
@@ -133,11 +142,12 @@ export function EntryPage() {
           />
         </div>
       </div>
+      )}
       </div>
 
       {/* Not fixed: the page scrolls now that the hero shot is below the
           fold, and a pinned footer sat on top of it. */}
-      <footer className="mx-auto mt-14 flex max-w-2xl flex-col items-center gap-1 px-6 text-center text-small text-text-secondary">
+      <footer className="pb-safe mx-auto mt-10 flex max-w-2xl flex-col items-center gap-1 px-2 text-center text-small text-text-secondary sm:mt-14 sm:px-6">
         <p>
           RosterBay is a demonstration platform built by Rajanna Adeli — full-stack developer
           specialising in workforce management software.

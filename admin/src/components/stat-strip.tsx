@@ -43,12 +43,17 @@ function SegmentValue({ value, tone, animate }: { value: number; tone: keyof typ
  * Low-height stat strip: one bordered card, segments split by hairlines, each
  * optionally routing to a filtered view. Replaces tall KPI cards (spec §6).
  *
- * It is a grid rather than a flex row so it can reflow to 2×2 on a phone —
- * four segments sharing 320px gives each ~74px, which is narrower than the
- * icon plus its padding and leaves nothing for the number that is the whole
- * point. The hairlines come from a per-cell `border-l border-t` pulled back a
- * pixel and clipped by the container, so they land in the right places at any
- * column count without the divider utilities needing to know the breakpoint.
+ * It wraps rather than sitting in one fixed row, because four segments sharing
+ * 320px gives each ~74px — narrower than the icon plus its padding, leaving
+ * nothing for the number that is the whole point. Two per row on a phone, four
+ * from `sm`, and one row from `lg`.
+ *
+ * `grow` + a per-breakpoint basis rather than a grid: callers pass four
+ * segments on most pages and five on Workers, and with flex the odd one out
+ * stretches to fill its row instead of leaving a half-width hole. The
+ * hairlines come from a per-cell `border-l border-t` pulled back a pixel and
+ * clipped by the container, so they land correctly at any wrap point without
+ * the divider utilities needing to know the breakpoint.
  */
 export function StatStrip({
   segments,
@@ -61,10 +66,7 @@ export function StatStrip({
 }) {
   return (
     <div
-      className={cn(
-        'e1 grid grid-cols-2 overflow-hidden rounded-lg sm:grid-cols-4',
-        className,
-      )}
+      className={cn('e1 flex flex-wrap overflow-hidden rounded-lg', className)}
     >
       {segments.map((seg) => {
         const inner = (
@@ -91,7 +93,8 @@ export function StatStrip({
         );
         const interactive = Boolean(seg.to || seg.onClick);
         const className = cn(
-          '-mt-px -ml-px flex min-w-0 items-center gap-2 border-t border-l border-border-subtle px-3 py-2.5 text-left',
+          '-mt-px -ml-px flex min-w-0 grow basis-1/2 items-center gap-2 sm:basis-1/4 lg:basis-0',
+          'border-t border-l border-border-subtle px-3 py-2.5 text-left',
           'relative transition-colors duration-[var(--duration-micro)] sm:gap-2.5 sm:px-4',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
           interactive && 'hover:bg-surface-2',

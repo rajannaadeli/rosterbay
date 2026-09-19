@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
+import { MQ_SM, useMediaQuery } from '@/hooks/use-media-query';
 
 const WORKER_APP_URL = import.meta.env.VITE_WORKER_APP_URL ?? 'http://localhost:8081';
 
@@ -20,15 +21,23 @@ const DEVICE_H = SCREEN_H + BEZEL * 2;
  * realistic iPhone. The device is a fixed 390×844 logical phone; a resize
  * observer scales it to fit the viewport, so the content inside is identical at
  * every window size / zoom level — only the frame grows or shrinks.
+ *
+ * On a phone the chrome is dropped entirely. Drawing a 390px handset inside a
+ * 390px handset — and then scaling it to 0.8 so it fits — gives a worker a
+ * shrunken, bezelled copy of an app their device could simply be running. The
+ * silhouette sells the demo to a prospect on a laptop; to someone holding a
+ * phone it is pure obstruction, so below `sm` the app goes full-bleed and the
+ * only chrome left is a back link.
  */
 export function WorkerFramePage() {
   const src = `${WORKER_APP_URL.replace(/\/$/, '')}/?demo=1`;
   const fitRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const framed = useMediaQuery(MQ_SM);
 
   useEffect(() => {
     const el = fitRef.current;
-    if (!el) return;
+    if (!el || !framed) return;
     const observer = new ResizeObserver(() => {
       const { width, height } = el.getBoundingClientRect();
       // Never upscale past 1:1 — keep the app crisp; shrink to fit otherwise.
@@ -36,10 +45,40 @@ export function WorkerFramePage() {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [framed]);
+
+  if (!framed) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden bg-background">
+        <div className="px-safe flex shrink-0 items-center justify-between gap-2 border-b border-border-subtle px-2 py-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            render={<Link to="/" />}
+          >
+            <ArrowLeft aria-hidden />
+            Back
+          </Button>
+          <Wordmark className="text-small" iconSize={18} />
+          {/* Balances the back button so the wordmark sits centred. */}
+          <span className="w-16 shrink-0" aria-hidden />
+        </div>
+
+        {/* The worker app owns the rest of the screen, including the area
+            behind the home indicator — it draws its own safe-area padding. */}
+        <iframe
+          src={src}
+          title="RosterBay worker app — demo"
+          className="min-h-0 w-full flex-1 border-0"
+          allow="geolocation; camera"
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-svh flex-col items-center gap-3 overflow-hidden bg-linear-to-b from-muted to-background px-6 py-5">
+    <div className="flex min-h-dvh flex-col items-center gap-3 overflow-hidden bg-linear-to-b from-muted to-background px-6 py-5">
       <div className="flex w-full max-w-3xl shrink-0 items-center justify-between">
         <Button variant="ghost" size="sm" className="text-muted-foreground" render={<Link to="/" />}>
           <ArrowLeft aria-hidden />

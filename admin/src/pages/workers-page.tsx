@@ -250,6 +250,13 @@ export function WorkersPage() {
           pageSize={25}
           rowKey={(row) => row.id}
           onRowClick={(row) => openWorker(row.id)}
+          renderMobileCard={(row) => (
+            <WorkerCard
+              worker={row}
+              certs={certsByWorker.get(row.id) ?? []}
+              shiftsPeak={shiftsPeak}
+            />
+          )}
           emptyState={
             <EmptyState
               icon={UsersThree}
@@ -292,5 +299,73 @@ export function WorkersPage() {
         />
       </div>
     </TooltipProvider>
+  );
+}
+
+/**
+ * One worker, as a phone card.
+ *
+ * The table's six columns become two rows: who they are and how compliant
+ * they are on top, then the numbers. Compliance keeps its pill *and* its
+ * runway spark — it is the column the page exists for, so it is the one that
+ * must not be dropped when the width is. The phone number becomes a `tel:`
+ * link rather than a copy button: on the device where this layout renders,
+ * calling is the action, and copying is not.
+ */
+function WorkerCard({
+  worker,
+  certs,
+  shiftsPeak,
+}: {
+  worker: WorkerRow;
+  certs: Views<'worker_certs_with_status'>[];
+  shiftsPeak: number;
+}) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-start gap-2.5">
+        <UserAvatar name={worker.full_name} size="sm" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{worker.full_name}</p>
+          <p className="truncate text-xs text-muted-foreground">{worker.job_title}</p>
+        </div>
+        <CompliancePill status={worker.compliance_status} />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="label-micro">Runway</span>
+          <ComplianceRunwaySpark certs={certs} />
+        </span>
+        <span className="flex shrink-0 flex-col gap-1">
+          <span className="label-micro">Shifts / wk</span>
+          <span className="flex items-center gap-1.5">
+            <span className="num text-small">{worker.shifts_this_week}</span>
+            <LoadBar value={worker.shifts_this_week} peak={shiftsPeak} />
+          </span>
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        {worker.phone ? (
+          <a
+            href={`tel:${worker.phone.replace(/\s/g, '')}`}
+            className="num -m-2 flex min-h-11 items-center p-2 text-text-secondary underline-offset-2 hover:underline"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {worker.phone}
+          </a>
+        ) : (
+          <span>—</span>
+        )}
+        <span className="truncate">
+          {worker.last_clock_in_at
+            ? `Last in ${formatDistanceToNowStrict(new Date(worker.last_clock_in_at), {
+                addSuffix: true,
+              })}`
+            : 'Never clocked in'}
+        </span>
+      </div>
+    </div>
   );
 }

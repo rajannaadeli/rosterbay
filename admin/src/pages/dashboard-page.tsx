@@ -422,9 +422,12 @@ export function DashboardPage() {
           ]}
         />
 
-        {/* Row 1: map (7) + needs attention (5), equal height. */}
-        <div className="seq-2 grid grid-cols-1 gap-4 xl:grid-cols-12">
-          <div className="e1 relative h-[380px] overflow-hidden rounded-lg xl:col-span-7">
+        {/* Row 1: map (7) + needs attention (5), equal height from `lg` up.
+            Below that they stack, and the map shortens — at 380px tall on a
+            phone it would be the entire screen, and the attention list is the
+            more useful half of this row when triaging. */}
+        <div className="seq-2 grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div className="e1 relative h-[240px] overflow-hidden rounded-lg sm:h-[320px] lg:col-span-7 lg:h-[380px]">
             {sites.data ? (
               <LiveMap
                 sites={sites.data}
@@ -447,7 +450,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <section className="e1 flex h-[380px] flex-col overflow-hidden rounded-lg xl:col-span-5">
+          <section className="e1 flex h-[360px] flex-col overflow-hidden rounded-lg lg:col-span-5 lg:h-[380px]">
             <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2.5">
               <h2 className="label-micro">Needs attention</h2>
               {attention.length > 0 && (
@@ -494,7 +497,7 @@ export function DashboardPage() {
         </div>
 
         {/* Row 2: activity, full width. */}
-        <section className="seq-3 e1 flex max-h-80 flex-col overflow-hidden rounded-lg">
+        <section className="seq-3 e1 flex max-h-96 flex-col overflow-hidden rounded-lg sm:max-h-80">
           <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2.5">
             <h2 className="label-micro">Activity</h2>
             <span className="label-micro flex items-center gap-1.5 rounded-xs bg-success-muted px-1.5 py-0.5 text-success">
@@ -565,7 +568,7 @@ export function DashboardPage() {
 function AttentionRowItem({ row, onBroadcast }: { row: AttentionRow; onBroadcast?: () => void }) {
   const SeverityIcon = row.severity === 'danger' ? XCircle : Warning;
   const body = (
-    <div className="group flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-muted/40">
+    <div className="group flex min-h-11 items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-muted/40">
       <span
         className={cn(
           'flex size-6 shrink-0 items-center justify-center rounded-lg',
@@ -576,18 +579,23 @@ function AttentionRowItem({ row, onBroadcast }: { row: AttentionRow; onBroadcast
       </span>
       <div className="min-w-0 flex-1">
         <Tooltip>
-          <TooltipTrigger render={<p className="truncate text-sm font-medium" />}>
+          <TooltipTrigger
+            render={<p className="line-clamp-2 text-sm font-medium sm:truncate" />}
+          >
             {row.title}
           </TooltipTrigger>
           <TooltipContent>{row.title}</TooltipContent>
         </Tooltip>
-        <p className="truncate text-xs text-muted-foreground">{row.subtitle}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground sm:truncate">{row.subtitle}</p>
       </div>
       {onBroadcast && (
         <Button
           size="sm"
           variant="ghost"
-          className="text-danger opacity-60 transition-opacity group-hover:opacity-100"
+          // Full opacity on touch: there is no hover to reveal it with, and
+          // broadcasting an unfilled shift is the one action this row exists
+          // to offer.
+          className="shrink-0 text-danger opacity-60 transition-opacity group-hover:opacity-100 coarse:opacity-100"
           onClick={(event) => {
             event.preventDefault();
             onBroadcast();
