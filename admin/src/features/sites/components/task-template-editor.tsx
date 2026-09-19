@@ -232,7 +232,7 @@ function SortableTaskRow({
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+        className="-m-2 cursor-grab touch-none p-2 text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
@@ -271,7 +271,7 @@ function SortableTaskRow({
         variant="ghost"
         size="icon-xs"
         aria-label={`Delete "${task.title}"`}
-        className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100"
+        className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100 coarse:opacity-100"
         onClick={onDelete}
       >
         <Trash aria-hidden />

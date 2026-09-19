@@ -82,12 +82,12 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
   const attendanceFlags = row.effective_flags.filter((flag) => flag !== 'incomplete_tasks');
 
   return (
-    <div className="grid grid-cols-1 gap-4 border-t border-border-subtle bg-surface-2/40 p-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 border-t border-border-subtle bg-surface-2/40 p-3 sm:p-4 lg:grid-cols-2">
       <div className="relative">
         {hasPoint ? (
           <>
             <FullscreenMapWrapper
-              className="h-[260px] overflow-hidden rounded-lg border border-border-subtle"
+              className="h-[200px] overflow-hidden rounded-lg border border-border-subtle sm:h-[260px]"
               hint={false}
             >
               <MapContainer
@@ -132,7 +132,7 @@ export function ReviewPanel({ row, site, workerNames, busy, onReview }: ReviewPa
             </FullscreenMapWrapper>
           </>
         ) : (
-          <div className="flex h-[260px] items-center justify-center rounded-lg border border-dashed border-border-default text-small text-text-secondary">
+          <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-border-default text-small text-text-secondary sm:h-[260px]">
             No clock-in location recorded.
           </div>
         )}

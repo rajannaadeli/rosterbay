@@ -221,7 +221,7 @@ function TaskRow({ task, editable, busy, onTogglePhoto, onRemove }: TaskRowProps
                   'shrink-0',
                   task.requires_photo
                     ? 'text-primary'
-                    : 'text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100',
+                    : 'text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 coarse:opacity-100',
                 )}
                 onClick={onTogglePhoto}
               />
@@ -256,7 +256,7 @@ function TaskRow({ task, editable, busy, onTogglePhoto, onRemove }: TaskRowProps
           variant="ghost"
           size="icon-xs"
           aria-label={`Remove "${task.title}"`}
-          className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100"
+          className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100 coarse:opacity-100"
           onClick={onRemove}
         >
           <X size={13} aria-hidden />

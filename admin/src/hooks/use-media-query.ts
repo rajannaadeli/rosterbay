@@ -13,14 +13,27 @@ import { useSyncExternalStore } from 'react';
  * layout. The server snapshot returns false, which is the mobile-first
  * assumption: the smaller layout renders, then upgrades.
  */
+// `getSnapshot` runs on every render and again during React's tear check, so
+// the MediaQueryList is cached per query rather than re-created each time.
+const lists = new Map<string, MediaQueryList>();
+
+function listFor(query: string): MediaQueryList {
+  let list = lists.get(query);
+  if (!list) {
+    list = window.matchMedia(query);
+    lists.set(query, list);
+  }
+  return list;
+}
+
 export function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(
     (onChange) => {
-      const list = window.matchMedia(query);
+      const list = listFor(query);
       list.addEventListener('change', onChange);
       return () => list.removeEventListener('change', onChange);
     },
-    () => window.matchMedia(query).matches,
+    () => listFor(query).matches,
     () => false,
   );
 }

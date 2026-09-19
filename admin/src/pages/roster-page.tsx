@@ -1,6 +1,10 @@
 import {
   DndContext,
   DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -23,6 +27,7 @@ import { useBroadcastOffer, useOffersRealtime, useOpenOffers } from '@/features/
 import { useCompany } from '@/features/company/hooks';
 import { useShiftsRealtime } from '@/features/realtime/hooks';
 import { checkAssignment } from '@/features/roster/conflict-engine';
+import { RosterAgenda } from '@/features/roster/components/roster-agenda';
 import { RosterCell } from '@/features/roster/components/roster-cell';
 import {
   ConflictDialog,
@@ -50,6 +55,7 @@ import { useWorkers } from '@/features/workers/hooks';
 import type { Tables, Views } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
 import { acstTimestamp, acstWeekStart, weekBounds, weekDays } from '@/lib/week';
+import { MQ_MD, useMediaQuery } from '@/hooks/use-media-query';
 import { usePersistentState } from '@/hooks/use-persistent-state';
 import { cn } from '@/lib/utils';
 
@@ -57,6 +63,11 @@ type Shift = Tables<'shifts'>;
 type WorkerRow = Views<'worker_overview'>;
 
 export function RosterPage() {
+  // The grid needs ~930px (day) / 1080px (week) before a shift bar is wide
+  // enough to label. Below `md` the same day renders as an agenda instead —
+  // see RosterAgenda for why that is a different view rather than a squeezed
+  // one.
+  const gridded = useMediaQuery(MQ_MD);
   const [weekOffset, setWeekOffset] = useState(0);
   const weekStart = useMemo(() => acstWeekStart(weekOffset), [weekOffset]);
   const { fromIso, toIso } = useMemo(() => weekBounds(weekStart), [weekStart]);
@@ -114,6 +125,15 @@ export function RosterPage() {
   const [broadcastShiftId, setBroadcastShiftId] = useState<string | null>(null);
   const [unfilledOnly, setUnfilledOnly] = useState(false);
   const [dragOver, setDragOver] = useState<{ shiftId: string; state: 'ok' | 'block' } | null>(null);
+
+  // dnd-kit's default sensors fire a drag on pointerdown, which on a touch
+  // screen steals every vertical scroll that starts on a worker card. The
+  // 6px activation distance lets a scroll be a scroll; `touch-drag` on the
+  // card itself (touch-action: none) lets a held drag be a drag.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const workerById = useMemo(
     () => new Map((workers.data ?? []).map((w) => [w.id, w])),
@@ -323,6 +343,8 @@ export function RosterPage() {
   }, [visibleShifts, days]);
 
   const isPending = shifts.isPending || sites.isPending || workers.isPending;
+  // The agenda always walks days; the grid walks whatever `view` says.
+  const stepsByDay = !gridded || view === 'day';
 
   return (
     <TooltipProvider delay={200}>
@@ -337,7 +359,7 @@ export function RosterPage() {
               aria-pressed={unfilledOnly}
               onClick={() => setUnfilledOnly((v) => !v)}
               className={cn(
-                'flex h-8 items-center gap-1.5 rounded-sm border px-2.5 text-small font-medium transition-colors duration-[var(--duration-micro)]',
+                'flex h-8 shrink-0 items-center gap-1.5 rounded-sm border px-2.5 text-small font-medium transition-colors duration-[var(--duration-micro)] coarse:h-11',
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                 unfilledOnly
                   ? 'border-danger/40 bg-danger-muted text-danger'
@@ -348,17 +370,22 @@ export function RosterPage() {
               Unfilled only
             </button>
 
-            <Segmented
-              label="Roster view"
-              value={view}
-              onChange={setView}
-              options={[
-                { value: 'day' as const, label: 'Day' },
-                { value: 'week' as const, label: 'Week' },
-              ]}
-            />
+            {/* Both are grid-only. The agenda is always one day, and it has
+                no time axis to zoom — offering the controls anyway would be
+                offering controls that do nothing. */}
+            {gridded && (
+              <Segmented
+                label="Roster view"
+                value={view}
+                onChange={setView}
+                options={[
+                  { value: 'day' as const, label: 'Day' },
+                  { value: 'week' as const, label: 'Week' },
+                ]}
+              />
+            )}
 
-            {view === 'day' && (
+            {gridded && view === 'day' && (
               <Segmented
                 label="Time zoom"
                 value={zoom}
@@ -371,18 +398,20 @@ export function RosterPage() {
               />
             )}
 
-            <div className="mx-1 h-5 w-px bg-border-subtle" />
+            <div className="mx-1 h-5 w-px shrink-0 bg-border-subtle" />
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label={view === 'day' ? 'Previous day' : 'Previous week'}
-              onClick={() => (view === 'day' ? stepDay(-1) : setWeekOffset((w) => w - 1))}
+              className="shrink-0"
+              aria-label={stepsByDay ? 'Previous day' : 'Previous week'}
+              onClick={() => (stepsByDay ? stepDay(-1) : setWeekOffset((w) => w - 1))}
             >
               <CaretLeft aria-hidden />
             </Button>
             <Button
               variant="outline"
               size="sm"
+              className="shrink-0"
               onClick={() => {
                 setWeekOffset(0);
                 setDayOffset(todayIndexInWeek);
@@ -393,13 +422,14 @@ export function RosterPage() {
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label={view === 'day' ? 'Next day' : 'Next week'}
-              onClick={() => (view === 'day' ? stepDay(1) : setWeekOffset((w) => w + 1))}
+              className="shrink-0"
+              aria-label={stepsByDay ? 'Next day' : 'Next week'}
+              onClick={() => (stepsByDay ? stepDay(1) : setWeekOffset((w) => w + 1))}
             >
               <CaretRight aria-hidden />
             </Button>
-            <span className="num ml-2 text-small font-medium">
-              {view === 'day'
+            <span className="num ml-2 shrink-0 text-small font-medium whitespace-nowrap">
+              {stepsByDay
                 ? formatACST(`${dayYmd}T12:00:00+09:30`, 'EEE d MMM yyyy')
                 : `${formatACST(days[0]!, 'd MMM')} – ${formatACST(days[6]!, 'd MMM yyyy')}`}
             </span>
@@ -407,7 +437,12 @@ export function RosterPage() {
           }
         />
 
-        <DndContext onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
+        >
           <div className="flex items-start gap-4">
             <WorkerPanel
               workers={workers.data}
@@ -424,6 +459,18 @@ export function RosterPage() {
                   <Skeleton key={i} className="h-16 rounded-lg" />
                 ))}
               </div>
+            ) : !gridded ? (
+              <RosterAgenda
+                ymd={dayYmd}
+                sites={sites.data ?? []}
+                shifts={visibleShifts}
+                workerById={workerById}
+                offerShiftIds={offerShiftIds}
+                proofByShift={proofByShift}
+                unfilledOnly={unfilledOnly}
+                onShiftClick={setDetailShiftId}
+                onBroadcast={setBroadcastShiftId}
+              />
             ) : view === 'day' ? (
               <TimeGrid
                 ymd={dayYmd}
@@ -443,8 +490,16 @@ export function RosterPage() {
               />
             ) : (
               <>
-              <WeekCoverageRibbon shifts={axisShifts} days={days} leftInsetPx={160} />
-              <div className="max-h-[calc(100vh-15rem)] overflow-auto rounded-lg border bg-card scrollbar-thin">
+              {/* The ribbon sits outside the grid's horizontal scroller and
+                  aligns to it by a fixed 160px inset, so it only tells the
+                  truth when the 1080px grid is not scrolled — which needs
+                  roughly 1640px of viewport. Below `xl` it is hidden rather
+                  than shown misaligned. (Pre-existing: it was already
+                  mis-registered on any laptop narrower than that.) */}
+              <div className="hidden xl:block">
+                <WeekCoverageRibbon shifts={axisShifts} days={days} leftInsetPx={160} />
+              </div>
+              <div className="scroll-x-contained max-h-[calc(100dvh-15rem)] overflow-y-auto rounded-lg border bg-card scrollbar-thin">
                 <div
                   className="grid min-w-[1080px]"
                   style={{ gridTemplateColumns: '160px repeat(7, minmax(132px, 1fr))' }}

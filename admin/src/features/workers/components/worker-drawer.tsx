@@ -88,7 +88,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
       onTabChange={setTab}
     >
       <TabsContent value="profile" className="flex flex-col gap-4 p-5">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 xs:grid-cols-3">
           {[
             { label: 'Documents', value: certs.isPending ? '…' : String(certs.data?.length ?? 0) },
             { label: 'Recent shifts', value: shifts.isPending ? '…' : String(shifts.data?.length ?? 0) },

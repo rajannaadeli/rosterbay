@@ -34,7 +34,7 @@ export function WorkerDragCard({
       {...attributes}
       {...listeners}
       className={cn(
-        'e1 group mx-0.5 flex h-14 cursor-grab items-center gap-2 rounded-sm pr-2 pl-1 select-none',
+        'touch-drag e1 group mx-0.5 flex h-14 cursor-grab items-center gap-2 rounded-sm pr-2 pl-1',
         'transition-colors duration-[var(--duration-micro)] hover:border-border-strong hover:bg-surface-2',
         'active:cursor-grabbing',
         isDragging && 'opacity-40',
@@ -117,7 +117,7 @@ export function WorkerPanel({
 
   if (collapsed) {
     return (
-      <div className="flex shrink-0 flex-col items-center rounded-lg border bg-card p-1.5">
+      <div className="hidden shrink-0 flex-col items-center rounded-lg border bg-card p-1.5 md:flex">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -131,7 +131,7 @@ export function WorkerPanel({
   }
 
   return (
-    <aside className="flex max-h-[calc(100vh-11rem)] w-64 shrink-0 flex-col gap-2.5 self-start rounded-lg border bg-card p-3">
+    <aside className="hidden max-h-[calc(100dvh-11rem)] w-56 shrink-0 flex-col gap-2.5 self-start rounded-lg border bg-card p-3 md:flex lg:w-64">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Workers</h2>
         <Button
@@ -171,7 +171,7 @@ export function WorkerPanel({
             aria-pressed={role === seg.id}
             onClick={() => setRole(seg.id)}
             className={cn(
-              'flex-1 rounded-lg py-1 text-xs font-medium transition-colors',
+              'flex-1 rounded-lg py-1 text-xs font-medium transition-colors coarse:min-h-10',
               role === seg.id
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',

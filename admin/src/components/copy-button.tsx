@@ -48,7 +48,7 @@ export function CopyButton({ value, label, className }: CopyButtonProps) {
       className={cn(
         'inline-flex size-5 shrink-0 items-center justify-center rounded-xs text-text-tertiary',
         'opacity-0 transition-[opacity,color,background-color] duration-[var(--duration-micro)]',
-        'group-hover/copy:opacity-100 focus-visible:opacity-100',
+        'group-hover/copy:opacity-100 focus-visible:opacity-100 coarse:opacity-100',
         'hover:bg-surface-2 hover:text-foreground',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         copied && 'text-success opacity-100',

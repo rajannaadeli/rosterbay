@@ -209,15 +209,22 @@
   color-scheme: dark;
 }
 
-@theme inline {
-  /* ── Breakpoints ───────────────────────────────────────────────────────
-     Tailwind's defaults (sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536) are
-     kept as-is and carry the layout. `xs` is the one addition: the smallest
-     supported width is 320px, and a handful of five-across rows (the bottom
-     tab bar, the KPI strip) need one step between "narrowest phone" and
-     "ordinary phone" that `sm` is far too late to provide. */
-  --breakpoint-xs: 23.75rem; /* 380px */
+/* ── Breakpoints ─────────────────────────────────────────────────────────
+   Tailwind's defaults (sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536) are
+   kept as-is and carry the layout. `xs` is the one addition: the smallest
+   supported width is 320px, and a handful of narrow rows (the bottom tab bar,
+   the KPI strip, two-up time fields) need one step between "narrowest phone"
+   and "ordinary phone" that `sm` is far too late to provide.
 
+   Plain `@theme`, not `@theme inline`: breakpoints registered in an inline
+   theme block are not picked up as variants, and the `xs:` utilities silently
+   vanish from the build — which is worse than not having them, because
+   `hidden xs:flex` then just means `hidden`. */
+@theme {
+  --breakpoint-xs: 23.75rem; /* 380px */
+}
+
+@theme inline {
   /* ── Typography ────────────────────────────────────────────────────────
      Two families, three roles. Mono is not decoration: every numeral, time,
      duration, distance, count, code and identifier renders in it with
