@@ -50,6 +50,7 @@ import {
   type TimesheetRow,
 } from '@/features/timesheets/hooks';
 import { useWorkers } from '@/features/workers/hooks';
+import { MQ_MD, useMediaQuery } from '@/hooks/use-media-query';
 import type { TimeEntryFlag, TimeEntryStatus } from '@/lib/database.types';
 import { formatACST } from '@/lib/format';
 import { acstWeekStart, weekDays } from '@/lib/week';
@@ -399,6 +400,10 @@ export function TimesheetsPage() {
 
   const isPending = timesheets.isPending || workers.isPending || sites.isPending;
   const rows = table.getRowModel().rows;
+  // Branch, rather than rendering both and hiding one: an expanded row carries
+  // a ReviewPanel with a Leaflet map in it, and `md:hidden` would mount two of
+  // them for the same entry.
+  const wide = useMediaQuery(MQ_MD);
 
   const countChip = (key: StatusFilter, label: string, value: number, tone: StatusTone | 'default') => (
     <button
@@ -460,7 +465,7 @@ export function TimesheetsPage() {
         {/* Count chips drive the status filter. They scroll as one row on a
             phone rather than wrapping — four short chips reading as a single
             switch is clearer than two ragged rows of two. */}
-        <div className="scroll-x-contained scrollbar-thin -mx-4 flex items-center gap-2 px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+        <div className="scrollbar-thin -mx-4 flex items-center gap-2 overflow-x-auto overscroll-x-contain px-4 sm:mx-0 sm:flex-wrap sm:overflow-x-visible sm:px-0">
           {countChip('all', 'Entries', counts.all, 'default')}
           {countChip('pending', 'Pending', counts.pending, 'warning')}
           {countChip('flagged', 'Flagged', counts.flagged, 'danger')}
@@ -549,7 +554,8 @@ export function TimesheetsPage() {
                 is. Eight columns cannot be made legible at 320px, and a
                 horizontal scroller would bury the flags — which are the only
                 reason anyone opens this screen. */}
-            <div className="flex flex-col md:hidden">
+            {!wide && (
+            <div className="flex flex-col">
               {rows.map((row, index) => {
                 const day = formatACST(row.original.shift_starts_at, 'yyyy-MM-dd');
                 const prevDay =
@@ -593,8 +599,10 @@ export function TimesheetsPage() {
                 );
               })}
             </div>
+            )}
 
-            <div className="hidden max-h-[calc(100dvh-19rem)] overflow-auto scrollbar-thin md:block">
+            {wide && (
+            <div className="max-h-[calc(100dvh-19rem)] overflow-auto scrollbar-thin">
               <table className="relative w-full caption-bottom text-sm">
                 <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
                   {table.getHeaderGroups().map((hg) => (
@@ -677,6 +685,7 @@ export function TimesheetsPage() {
                 </TableBody>
               </table>
             </div>
+            )}
           </div>
         )}
 

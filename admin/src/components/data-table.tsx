@@ -31,6 +31,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useDebounce } from '@/hooks/use-debounce';
+import { MQ_MD, useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<T> {
@@ -83,6 +84,11 @@ export function DataTable<T>({
   const [query, setQuery] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
   const globalFilter = useDebounce(query, 300);
+  // Branch on a media query rather than rendering both and hiding one with
+  // CSS: `hidden md:block` still mounts every cell, so a 25-row table would
+  // build its rows twice on every render.
+  const wide = useMediaQuery(MQ_MD);
+  const asCards = Boolean(renderMobileCard) && !wide;
 
   const table = useReactTable({
     data,
@@ -142,8 +148,8 @@ export function DataTable<T>({
 
       {/* Phone: a card per row. Rendered only when the caller supplies a card
           — tables without one keep the scroller at every width. */}
-      {renderMobileCard && (
-        <div className="flex flex-col md:hidden">
+      {asCards && renderMobileCard && (
+        <div className="flex flex-col">
           {loading ? (
             <div className="flex flex-col gap-2 p-3">
               {Array.from({ length: 5 }, (_, i) => (
@@ -185,12 +191,8 @@ export function DataTable<T>({
       {/* Scrollable table area — header sticks, body scrolls. dvh, not vh:
           on iOS Safari `100vh` overshoots the visual viewport by the height
           of the URL bar, so the bounded scroller ran off the bottom. */}
-      <div
-        className={cn(
-          'max-h-[calc(100dvh-22rem)] overflow-auto scrollbar-thin',
-          renderMobileCard && 'hidden md:block',
-        )}
-      >
+      {!asCards && (
+      <div className="max-h-[calc(100dvh-22rem)] overflow-auto scrollbar-thin">
         <table className="relative w-full caption-bottom text-sm">
           <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -269,6 +271,7 @@ export function DataTable<T>({
           </TableBody>
         </table>
       </div>
+      )}
 
       {!loading && (filteredCount > 0 || pageCount > 1) && (
         <div className="flex items-center justify-between gap-2 border-t border-border-subtle px-4 py-2 text-small text-text-secondary">

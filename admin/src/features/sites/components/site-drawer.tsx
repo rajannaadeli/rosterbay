@@ -195,7 +195,7 @@ export function SiteDrawer({ siteId, onClose }: SiteDrawerProps) {
           ) : undefined
         }
       >
-        <TabsContent value="details" className="flex flex-col gap-4 p-5">
+        <TabsContent value="details" className="flex flex-col gap-4 p-4 sm:p-5">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="site-client">Client</Label>
@@ -223,7 +223,7 @@ export function SiteDrawer({ siteId, onClose }: SiteDrawerProps) {
           />
         </TabsContent>
 
-        <TabsContent value="compliance" className="flex flex-col gap-3 p-5">
+        <TabsContent value="compliance" className="flex flex-col gap-3 p-4 sm:p-5">
           <p className="text-xs text-muted-foreground">
             Workers without a valid copy of every required certificate are blocked from assignment
             at this site.
@@ -263,7 +263,7 @@ export function SiteDrawer({ siteId, onClose }: SiteDrawerProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="tasks" className="p-5">
+        <TabsContent value="tasks" className="p-4 sm:p-5">
           {isNew ? (
             <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
               Save the site first, then build its per-shift task checklist here.

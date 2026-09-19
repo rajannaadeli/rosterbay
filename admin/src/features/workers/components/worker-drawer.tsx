@@ -87,7 +87,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
       activeTab={tab}
       onTabChange={setTab}
     >
-      <TabsContent value="profile" className="flex flex-col gap-4 p-5">
+      <TabsContent value="profile" className="flex flex-col gap-4 p-4 sm:p-5">
         <div className="grid grid-cols-1 gap-2 xs:grid-cols-3">
           {[
             { label: 'Documents', value: certs.isPending ? '…' : String(certs.data?.length ?? 0) },
@@ -112,7 +112,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
         )}
       </TabsContent>
 
-      <TabsContent value="documents" className="flex flex-col gap-3 p-5">
+      <TabsContent value="documents" className="flex flex-col gap-3 p-4 sm:p-5">
         {showUpload && w && certTypes.data ? (
           <CertUploadForm
             workerId={w.id}
@@ -139,7 +139,7 @@ export function WorkerDrawer({ workerId, onOpenChange }: WorkerDrawerProps) {
         )}
       </TabsContent>
 
-      <TabsContent value="history" className="flex flex-col gap-3 p-5">
+      <TabsContent value="history" className="flex flex-col gap-3 p-4 sm:p-5">
         <h3 className="text-sm font-semibold">Shift history</h3>
         <ShiftHistory
           shifts={shifts.data}

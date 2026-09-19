@@ -154,11 +154,13 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
                 value={`worker ${worker.full_name} ${worker.job_title ?? ''}`}
                 onSelect={() => runItem(`/app/workers?open=${worker.id}`, worker.full_name)}
               >
-                <div className="flex items-center gap-2">
-                  <User weight="duotone" className="text-muted-foreground" aria-hidden />
-                  <span>{worker.full_name}</span>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <User weight="duotone" className="shrink-0 text-muted-foreground" aria-hidden />
+                  <span className="truncate">{worker.full_name}</span>
                 </div>
-                <span className="text-right text-xs absolute right-3 text-muted-foreground">{worker.job_title}</span>
+                <span className="ml-auto shrink-0 truncate text-right text-xs text-muted-foreground">
+                  {worker.job_title}
+                </span>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -172,9 +174,11 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
                 value={`site ${site.name} ${site.client_name ?? ''}`}
                 onSelect={() => runItem(`/app/sites?site=${site.id}`, site.name)}
               >
-                <MapPin weight="duotone" className="text-muted-foreground" aria-hidden />
-                <span>{site.name}</span>
-                <span className="text-xs absolute right-3 text-muted-foreground">{site.client_name}</span>
+                <MapPin weight="duotone" className="shrink-0 text-muted-foreground" aria-hidden />
+                <span className="min-w-0 flex-1 truncate">{site.name}</span>
+                <span className="ml-auto shrink-0 truncate text-right text-xs text-muted-foreground">
+                  {site.client_name}
+                </span>
               </CommandItem>
             ))}
           </CommandGroup>
