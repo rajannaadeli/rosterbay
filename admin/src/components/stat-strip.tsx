@@ -42,6 +42,13 @@ function SegmentValue({ value, tone, animate }: { value: number; tone: keyof typ
 /**
  * Low-height stat strip: one bordered card, segments split by hairlines, each
  * optionally routing to a filtered view. Replaces tall KPI cards (spec §6).
+ *
+ * It is a grid rather than a flex row so it can reflow to 2×2 on a phone —
+ * four segments sharing 320px gives each ~74px, which is narrower than the
+ * icon plus its padding and leaves nothing for the number that is the whole
+ * point. The hairlines come from a per-cell `border-l border-t` pulled back a
+ * pixel and clipped by the container, so they land in the right places at any
+ * column count without the divider utilities needing to know the breakpoint.
  */
 export function StatStrip({
   segments,
@@ -53,11 +60,16 @@ export function StatStrip({
   className?: string;
 }) {
   return (
-    <div className={cn('e1 flex divide-x divide-border-subtle overflow-hidden rounded-lg', className)}>
+    <div
+      className={cn(
+        'e1 grid grid-cols-2 overflow-hidden rounded-lg sm:grid-cols-4',
+        className,
+      )}
+    >
       {segments.map((seg) => {
         const inner = (
           <>
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-accent-muted text-primary">
+            <div className="hidden size-8 shrink-0 items-center justify-center rounded-sm bg-accent-muted text-primary xs:flex">
               <seg.icon size={16} weight="duotone" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
@@ -79,7 +91,8 @@ export function StatStrip({
         );
         const interactive = Boolean(seg.to || seg.onClick);
         const className = cn(
-          'relative flex flex-1 items-center gap-2.5 px-4 py-2.5 text-left transition-colors duration-[var(--duration-micro)]',
+          '-mt-px -ml-px flex min-w-0 items-center gap-2 border-t border-l border-border-subtle px-3 py-2.5 text-left',
+          'relative transition-colors duration-[var(--duration-micro)] sm:gap-2.5 sm:px-4',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
           interactive && 'hover:bg-surface-2',
           seg.active &&

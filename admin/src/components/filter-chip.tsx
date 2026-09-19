@@ -30,17 +30,17 @@ export function FilterChip({ label, value, options, onChange, className }: Filte
   return (
     <div
       className={cn(
-        'flex items-center gap-1 rounded-lg border bg-background pl-2.5 transition-colors',
+        'flex min-w-0 shrink-0 items-center gap-1 rounded-lg border bg-background pl-2.5 transition-colors',
         active && 'border-primary/40 bg-primary/5',
         className,
       )}
     >
-      <span className="text-xs text-muted-foreground">{label}:</span>
+      <span className="shrink-0 text-xs text-muted-foreground">{label}:</span>
       <Select value={value} onValueChange={(v) => onChange(v ?? (options[0]?.value ?? 'all'))}>
         <SelectTrigger
           size="sm"
           aria-label={`Filter by ${label.toLowerCase()}`}
-          className="w-fit gap-1 border-0 bg-transparent pr-2 pl-1 shadow-none"
+          className="w-fit max-w-[9rem] gap-1 border-0 bg-transparent pr-2 pl-1 shadow-none *:data-[slot=select-value]:truncate"
         >
           <SelectValue />
         </SelectTrigger>

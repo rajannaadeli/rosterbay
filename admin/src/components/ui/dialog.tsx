@@ -54,7 +54,16 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           // E3 material at 16px — the modal radius step.
+          // Below `sm` this stops being a centred modal and becomes a bottom
+          // sheet: anchored to the bottom edge, full-bleed, square across the
+          // bottom, and safe-area padded. A thumb reaches the foot of a phone
+          // screen; the vertical centre of one is the hardest place to put a
+          // confirm button. Height is capped in dvh so the sheet scrolls
+          // internally instead of growing past the visual viewport when the
+          // keyboard is up.
           "e3 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl p-6 text-body text-popover-foreground duration-[var(--duration-standard)] ease-[var(--ease-out)] outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain",
+          "max-sm:top-auto max-sm:bottom-0 max-sm:max-h-[90dvh] max-sm:w-full max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-b-none max-sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
           className
         )}
         {...props}

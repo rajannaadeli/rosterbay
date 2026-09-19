@@ -68,7 +68,7 @@ export function EntityDrawer({
   const panel = (
     <>
       {/* Sticky header */}
-      <div className="flex items-start gap-3 border-b bg-muted/20 px-5 py-4">
+      <div className="flex items-start gap-3 border-b bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
         <div className="min-w-0 flex-1">{header}</div>
         <div className="flex shrink-0 items-center gap-1">
           {headerActions}
@@ -83,10 +83,12 @@ export function EntityDrawer({
         </div>
       </div>
 
-      {/* Tab bar — only when the entity has tabs */}
+      {/* Tab bar — only when the entity has tabs. Scrolls horizontally inside
+          its own bounded track on narrow screens rather than wrapping, which
+          would push the drawer body below the fold. */}
       {tabs && (
-        <div className="border-b px-4 py-2">
-          <TabsList variant="line">
+        <div className="scroll-x-contained scrollbar-thin border-b px-4 py-2">
+          <TabsList variant="line" className="w-max min-w-full">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id}>
                 {tab.label}
@@ -114,7 +116,11 @@ export function EntityDrawer({
         <SheetContent
           side="right"
           showCloseButton={false}
-          className="flex w-full min-w-[560px] flex-col gap-0 p-0 sm:max-w-[50vw]!"
+          // The 560px floor was a hard break below it: at 390px the drawer
+          // overflowed the viewport by 170px and took the page into
+          // horizontal scroll. The minimum is now a *preference* expressed
+          // above `sm`, so a phone gets a full-screen panel instead.
+          className="flex w-full flex-col gap-0 p-0 sm:min-w-[min(560px,92vw)] sm:max-w-[min(640px,92vw)]! lg:max-w-[50vw]!"
         >
           <SheetTitle className="sr-only">{srTitle}</SheetTitle>
           <SheetDescription className="sr-only">Details drawer</SheetDescription>

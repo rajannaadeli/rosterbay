@@ -27,6 +27,16 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * Touch variant. Every control in this app was sized for a mouse (32–36px,
+ * 14px type). Rather than branch on viewport width — a touch tablet at 1024px
+ * needs the same thumb-sized targets a phone does — the bumps hang off the
+ * input device itself, so a desktop pointer renders byte-identically to before
+ * and only a coarse pointer gets the 44px floor and the 16px input type that
+ * stops iOS Safari zooming on focus.
+ */
+@custom-variant coarse (@media (pointer: coarse));
+
+/*
  * ═══════════════════════════════════════════════════════════════════════════
  * RosterBay design system — Visual Transformation Phase 1
  * ═══════════════════════════════════════════════════════════════════════════
@@ -200,6 +210,14 @@
 }
 
 @theme inline {
+  /* ── Breakpoints ───────────────────────────────────────────────────────
+     Tailwind's defaults (sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536) are
+     kept as-is and carry the layout. `xs` is the one addition: the smallest
+     supported width is 320px, and a handful of five-across rows (the bottom
+     tab bar, the KPI strip) need one step between "narrowest phone" and
+     "ordinary phone" that `sm` is far too late to provide. */
+  --breakpoint-xs: 23.75rem; /* 380px */
+
   /* ── Typography ────────────────────────────────────────────────────────
      Two families, three roles. Mono is not decoration: every numeral, time,
      duration, distance, count, code and identifier renders in it with
@@ -707,5 +725,94 @@
 
   .scrollbar-thin:hover::-webkit-scrollbar-thumb {
     background: var(--border-strong);
+  }
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Responsive / touch utilities
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+@layer utilities {
+  /* Safe-area padding for anything flush to a device edge — the bottom tab
+     bar, phone-anchored dialogs, the full-screen drawer footer. `max()` so a
+     browser reporting 0 (desktop, Android without a notch) still keeps the
+     designed padding. */
+  .pb-safe {
+    padding-bottom: max(var(--safe-pad, 0px), env(safe-area-inset-bottom));
+  }
+
+  .pt-safe {
+    padding-top: max(var(--safe-pad, 0px), env(safe-area-inset-top));
+  }
+
+  .px-safe {
+    padding-left: max(var(--safe-pad, 0px), env(safe-area-inset-left));
+    padding-right: max(var(--safe-pad, 0px), env(safe-area-inset-right));
+  }
+
+  /* dnd-kit cannot distinguish a drag from a scroll on touch unless the
+     draggable opts out of native panning. Paired with an activation-distance
+     sensor, this is what makes drag-assign work on a tablet. */
+  .touch-drag {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Bounded horizontal scrollers (roster grids, wide tables) — momentum
+     scrolling inside the container without the rubber-band handing the
+     gesture up to the page. */
+  .scroll-x-contained {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Coarse-pointer floor — deliberately unlayered
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Two rules that must win outright, so they sit outside every cascade layer
+ * (unlayered declarations beat layered ones regardless of source order):
+ *
+ *  1. 16px form text. Below 16px, iOS Safari zooms the page on focus and then
+ *     leaves it zoomed — the single worst small-screen bug in the app. The
+ *     primitives variously specify 13px, 14px, or `text-base md:text-sm`,
+ *     and a utility class cannot reliably outrank all of them at every
+ *     breakpoint. This can.
+ *  2. A 44px minimum height on the things you tap to type. Buttons carry
+ *     their own `coarse:` sizes in the CVA, where they read alongside the
+ *     value being overridden.
+ *
+ * A mouse never matches `pointer: coarse`, so the desktop console renders
+ * exactly as it did before.
+ */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select,
+  [data-slot='select-trigger'] {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  [data-slot='select-trigger'] {
+    min-height: 44px;
+  }
+
+  textarea {
+    min-height: 88px;
+  }
+
+  /* Checkbox and switch already project an invisible hit area with an ::after
+     pseudo-element; on touch it grows to clear 44px in both axes. */
+  [data-slot='checkbox']::after,
+  [data-slot='switch']::after {
+    inset: -0.875rem -0.875rem;
   }
 }

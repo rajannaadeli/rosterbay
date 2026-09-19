@@ -9,6 +9,8 @@ import { Link, useLocation, useNavigate } from 'react-router';
 
 import { CommandSearch } from '@/components/command-search';
 import { NotificationsBell } from '@/components/notifications-bell';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Wordmark } from '@/components/wordmark';
 import { useSidebar } from '@/components/sidebar-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -95,19 +97,22 @@ export function AppHeader() {
     <TooltipProvider delay={200}>
       <header
         className={cn(
-          'sticky top-0 z-30 flex h-[57px] shrink-0 items-center gap-2 px-3 transition-[background-color,border-color,backdrop-filter] duration-[var(--duration-standard)]',
+          'sticky top-0 z-30 flex h-[57px] shrink-0 items-center gap-1.5 px-2 transition-[background-color,border-color,backdrop-filter] duration-[var(--duration-standard)] sm:gap-2 sm:px-3',
           scrolled
             ? 'border-b border-border-subtle bg-background/80 supports-backdrop-filter:backdrop-blur-xl'
             : 'border-b border-transparent bg-transparent',
         )}
       >
+        {/* Both are lg-only: below that there is no sidebar to collapse, and
+            the wordmark takes the slot so the app still identifies itself
+            without a rail. */}
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="shrink-0 text-muted-foreground"
+                className="hidden shrink-0 text-muted-foreground lg:inline-flex"
                 aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 onClick={() => setCollapsed((v) => !v)}
               />
@@ -118,9 +123,14 @@ export function AppHeader() {
           <TooltipContent>{collapsed ? 'Expand sidebar' : 'Collapse sidebar'}</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-[40%] my-auto" />
+        <Separator orientation="vertical" className="my-auto hidden h-[40%] lg:block" />
 
-        <Breadcrumb className="min-w-0 flex-1 ml-1">
+        <Wordmark className="shrink-0 text-base lg:hidden" iconSize={20} />
+
+        {/* The trail is desktop-only. On a phone the bottom tab bar already
+            says which module you are in, and a two-level crumb would eat the
+            row the header actions need. */}
+        <Breadcrumb className="ml-1 hidden min-w-0 flex-1 lg:block">
           <BreadcrumbList>
             {segments.map((segment, index) => {
               const isLast = index === segments.length - 1;
@@ -144,16 +154,20 @@ export function AppHeader() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex items-center gap-2">
-          <span className="num mr-2 hidden text-micro tracking-normal text-text-tertiary lg:inline">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <span className="num mr-2 hidden text-micro tracking-normal text-text-tertiary xl:inline">
             {formatACST(new Date(), 'EEE, d MMM yyyy')}
           </span>
 
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
+            aria-label="Search"
             className={cn(
-              'flex h-8 items-center gap-2 rounded-sm border border-border-default bg-surface-2 pr-1.5 pl-3 text-small text-text-secondary',
+              // Square icon button below `sm`, labelled pill above it. The
+              // coarse-pointer bump takes it to the 44px touch floor.
+              'flex h-8 w-8 items-center justify-center gap-2 rounded-sm border border-border-default bg-surface-2 text-small text-text-secondary',
+              'coarse:h-11 coarse:min-w-11 sm:w-auto sm:justify-start sm:pr-1.5 sm:pl-3',
               'transition-colors duration-[var(--duration-micro)] hover:border-border-strong hover:text-foreground',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
             )}
@@ -202,6 +216,13 @@ export function AppHeader() {
                 </Badge>
               </div>
               <DropdownMenuSeparator />
+              {/* The theme control lives at the foot of the sidebar, which is
+                  gone below `lg` — without this the demo has no way to reach
+                  dark mode on a phone. */}
+              <div className="p-1 lg:hidden">
+                <ThemeToggle />
+              </div>
+              <DropdownMenuSeparator className="lg:hidden" />
               <DropdownMenuItem disabled>
                 <UserCircle aria-hidden /> Profile — coming in this demo
               </DropdownMenuItem>

@@ -5,6 +5,10 @@ import { cn } from "@/lib/utils"
 
 /**
  * Controls are 8px-radius (`rounded-sm`), not pills. 36px default / 32px sm.
+ *
+ * Every size carries a `coarse:` twin that lifts it to the 44px touch floor
+ * under a coarse pointer. A mouse never matches that media query, so desktop
+ * metrics are unchanged.
  * Transitions run at --duration-micro; the focus ring is the accent in both
  * themes so keyboard traversal is legible on near-black.
  *
@@ -31,14 +35,17 @@ const buttonVariants = cva(
       },
       size: {
         default:
-          "h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5",
-        xs: "h-6 gap-1 rounded-xs px-2.5 text-small has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1 px-3 text-small has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        lg: "h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
-        icon: "size-9",
-        "icon-xs": "size-6 rounded-xs [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8",
-        "icon-lg": "size-10",
+          "h-9 coarse:h-11 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5",
+        xs: "h-6 coarse:h-9 gap-1 rounded-xs px-2.5 text-small has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 coarse:h-11 gap-1 px-3 text-small has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        lg: "h-10 coarse:h-12 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
+        icon: "size-9 coarse:size-11",
+        // `xs` is the inline row-affordance size (delete a task, copy a phone
+        // number). 44px would break the rows it sits in, so it gets 36px — the
+        // most that fits — and always pairs with a larger neighbouring target.
+        "icon-xs": "size-6 coarse:size-9 rounded-xs [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 coarse:size-11",
+        "icon-lg": "size-10 coarse:size-12",
       },
     },
     defaultVariants: {

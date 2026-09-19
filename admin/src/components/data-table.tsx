@@ -48,6 +48,14 @@ interface DataTableProps<T> {
   emptyState?: ReactNode;
   rowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
+  /**
+   * Phone rendering for one row. Below `md` the table is replaced by a stack
+   * of these — a six-column ops table cannot be made to work at 320px, and a
+   * horizontal scroller would hide the very columns (compliance, load) that
+   * the screen exists to show. Sorting, search and paging are unchanged; only
+   * the presentation of a row differs.
+   */
+  renderMobileCard?: (row: T) => ReactNode;
 }
 
 /**
@@ -70,6 +78,7 @@ export function DataTable<T>({
   emptyState,
   rowKey,
   onRowClick,
+  renderMobileCard,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -131,8 +140,57 @@ export function DataTable<T>({
         </div>
       )}
 
-      {/* Scrollable table area — header sticks, body scrolls */}
-      <div className="max-h-[calc(100vh-22rem)] overflow-auto scrollbar-thin">
+      {/* Phone: a card per row. Rendered only when the caller supplies a card
+          — tables without one keep the scroller at every width. */}
+      {renderMobileCard && (
+        <div className="flex flex-col md:hidden">
+          {loading ? (
+            <div className="flex flex-col gap-2 p-3">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+          ) : rows.length === 0 ? (
+            <div className="px-4 py-16 text-center">
+              {emptyState ?? <p className="text-sm text-muted-foreground">No records found.</p>}
+            </div>
+          ) : (
+            rows.map((row, rowIndex) => (
+              <div
+                key={row.id}
+                role={onRowClick ? 'button' : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                style={{ animationDelay: `${Math.min(rowIndex, 7) * 40}ms` }}
+                className={cn(
+                  'animate-[fade-up_var(--duration-standard)_var(--ease-out)_both]',
+                  'border-b border-border-subtle px-4 py-3 last:border-b-0',
+                  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
+                  onRowClick && 'cursor-pointer active:bg-surface-2',
+                )}
+                onClick={() => onRowClick?.(row.original)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onRowClick?.(row.original);
+                  }
+                }}
+              >
+                {renderMobileCard(row.original)}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Scrollable table area — header sticks, body scrolls. dvh, not vh:
+          on iOS Safari `100vh` overshoots the visual viewport by the height
+          of the URL bar, so the bounded scroller ran off the bottom. */}
+      <div
+        className={cn(
+          'max-h-[calc(100dvh-22rem)] overflow-auto scrollbar-thin',
+          renderMobileCard && 'hidden md:block',
+        )}
+      >
         <table className="relative w-full caption-bottom text-sm">
           <TableHeader className="sticky top-0 z-10 bg-surface-2 shadow-[0_1px_0_var(--border-default)]">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -213,7 +271,7 @@ export function DataTable<T>({
       </div>
 
       {!loading && (filteredCount > 0 || pageCount > 1) && (
-        <div className="flex items-center justify-between border-t border-border-subtle px-4 py-2 text-small text-text-secondary">
+        <div className="flex items-center justify-between gap-2 border-t border-border-subtle px-4 py-2 text-small text-text-secondary">
           <span>
             <span className="num">{filteredCount}</span> result{filteredCount === 1 ? '' : 's'}
           </span>

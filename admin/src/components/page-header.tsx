@@ -21,7 +21,7 @@ export function PageHeader({ title, description, actions, eyebrow, className }: 
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6',
+        'flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-6',
         className,
       )}
     >
@@ -33,7 +33,15 @@ export function PageHeader({ title, description, actions, eyebrow, className }: 
         )}
       </div>
       {actions && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
+        // `-mx-4 px-4` bleeds the scroller to the page gutter so a row of
+        // controls that overruns the screen scrolls cleanly to its last item
+        // instead of clipping against the padding. Above `lg` it wraps as
+        // before and the scroller never engages.
+        <div className="scroll-x-contained scrollbar-thin -mx-4 shrink-0 px-4 sm:-mx-5 sm:px-5 lg:mx-0 lg:overflow-visible lg:px-0">
+          <div className="flex w-max min-w-full items-center gap-2 lg:w-auto lg:flex-wrap lg:justify-end">
+            {actions}
+          </div>
+        </div>
       )}
     </div>
   );

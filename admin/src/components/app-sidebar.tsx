@@ -75,7 +75,12 @@ export function AppSidebar() {
       <nav
         aria-label="Main"
         className={cn(
-          'relative h-screen shrink-0 border-r border-border-subtle bg-surface-1 transition-[width] duration-[400ms] ease-[var(--ease-out)]',
+          // Hidden below `lg`: a 240px rail (or even the 65px one) on a 320px
+          // screen leaves no usable content column. MobileNav carries these
+          // same five destinations there, and the sign-out / theme controls
+          // that live at the foot of this rail move into the header's account
+          // menu. h-full rather than h-screen so the shell's h-dvh governs.
+          'relative hidden h-full shrink-0 border-r border-border-subtle bg-surface-1 transition-[width] duration-[400ms] ease-[var(--ease-out)] lg:block',
           collapsed ? 'w-[65px]' : 'w-60',
         )}
       >

@@ -38,7 +38,7 @@ export function Segmented<T extends string | number>({
       role="radiogroup"
       aria-label={label}
       className={cn(
-        'relative flex h-8 items-center rounded-sm border border-border-default bg-bg-base p-0.5',
+        'relative flex h-8 shrink-0 items-center rounded-sm border border-border-default bg-bg-base p-0.5 coarse:h-11',
         className,
       )}
     >
@@ -60,7 +60,7 @@ export function Segmented<T extends string | number>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'relative z-10 flex h-7 flex-1 items-center justify-center px-2.5 text-small font-medium',
+              'relative z-10 flex h-7 flex-1 items-center justify-center px-2.5 text-small font-medium coarse:h-10',
               'rounded-xs transition-colors duration-[var(--duration-micro)]',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
               active ? 'text-foreground' : 'text-text-tertiary hover:text-text-secondary',
