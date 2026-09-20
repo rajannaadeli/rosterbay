@@ -31,8 +31,8 @@
  * 14px type). Rather than branch on viewport width — a touch tablet at 1024px
  * needs the same thumb-sized targets a phone does — the bumps hang off the
  * input device itself, so a desktop pointer renders byte-identically to before
- * and only a coarse pointer gets the 44px floor and the 16px input type that
- * stops iOS Safari zooming on focus.
+ * and only a coarse pointer gets the larger controls and the 16px input type
+ * that stops iOS Safari zooming on focus.
  */
 @custom-variant coarse (@media (pointer: coarse));
 
@@ -782,44 +782,50 @@
  * Coarse-pointer floor — deliberately unlayered
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Two rules that must win outright, so they sit outside every cascade layer
+ * One rule that must win outright, so it sits outside every cascade layer
  * (unlayered declarations beat layered ones regardless of source order):
+ * 16px text in a field you can type into. Below 16px, iOS Safari zooms the
+ * page on focus and then leaves it zoomed — the single worst small-screen bug
+ * in the app. The primitives variously specify 13px, 14px, or
+ * `text-base md:text-sm`, and a utility class cannot reliably outrank all of
+ * them at every breakpoint. This can.
  *
- *  1. 16px form text. Below 16px, iOS Safari zooms the page on focus and then
- *     leaves it zoomed — the single worst small-screen bug in the app. The
- *     primitives variously specify 13px, 14px, or `text-base md:text-sm`,
- *     and a utility class cannot reliably outrank all of them at every
- *     breakpoint. This can.
- *  2. A 44px minimum height on the things you tap to type. Buttons carry
- *     their own `coarse:` sizes in the CVA, where they read alongside the
- *     value being overridden.
+ * It applies to `input` and `textarea` only. The select trigger is a base-ui
+ * button, not a native `<select>`, so nothing there can trigger the zoom —
+ * and forcing 16px on it made every filter chip in the app read a size too
+ * large for the row it sits in. There are no native selects in this codebase.
+ *
+ * Heights move one step up the ladder rather than to 44px, for the reason
+ * given on the Button variants: 44px controls read as a kiosk UI here, and
+ * the density this console is built around does not survive them. Spacing
+ * carries the touch-target argument instead.
  *
  * A mouse never matches `pointer: coarse`, so the desktop console renders
  * exactly as it did before.
  */
 @media (pointer: coarse) {
   input:not([type='checkbox']):not([type='radio']),
-  textarea,
-  select,
-  [data-slot='select-trigger'] {
+  textarea {
     font-size: 16px;
     line-height: 1.4;
   }
 
   input:not([type='checkbox']):not([type='radio']):not([type='range']),
-  select,
   [data-slot='select-trigger'] {
-    min-height: 44px;
+    min-height: 36px;
   }
 
   textarea {
-    min-height: 88px;
+    min-height: 72px;
   }
 
   /* Checkbox and switch already project an invisible hit area with an ::after
-     pseudo-element; on touch it grows to clear 44px in both axes. */
+     pseudo-element — `-inset-x-3 -inset-y-2`, i.e. 0.75rem across and 0.5rem
+     down. On touch the short axis is brought up to match the long one. Both
+     values are stated so neither can end up *smaller* than the default it is
+     meant to be expanding. */
   [data-slot='checkbox']::after,
   [data-slot='switch']::after {
-    inset: -0.875rem -0.875rem;
+    inset: -0.75rem -0.75rem;
   }
 }

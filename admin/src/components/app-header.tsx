@@ -167,7 +167,7 @@ export function AppHeader() {
               // Square icon button below `sm`, labelled pill above it. The
               // coarse-pointer bump takes it to the 44px touch floor.
               'flex h-8 w-8 items-center justify-center gap-2 rounded-sm border border-border-default bg-surface-2 text-small text-text-secondary',
-              'coarse:h-11 coarse:min-w-11 sm:w-auto sm:justify-start sm:pr-1.5 sm:pl-3',
+              'coarse:h-9 coarse:min-w-9 sm:w-auto sm:justify-start sm:pr-1.5 sm:pl-3',
               'transition-colors duration-[var(--duration-micro)] hover:border-border-strong hover:text-foreground',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
             )}

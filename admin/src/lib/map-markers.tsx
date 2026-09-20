@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { TileLayer, useMap, useMapEvents } from 'react-leaflet';
 
 import { useTheme } from '@/components/theme-provider';
-import { OSM_ATTRIBUTION, TILE_URL } from '@/lib/leaflet';
+import { OSM_ATTRIBUTION, TILE_LABEL_URL, TILE_URL } from '@/lib/leaflet';
 
 /**
  * The only map glyphs in the product — default Leaflet markers are banned.
@@ -97,20 +97,44 @@ export const DISTANCE_LINE_PATH_OPTIONS = {
  * instead of its own `<TileLayer>` so a theme swap can't leave one map on the
  * wrong tile set.
  *
+ * Esri serves streets and place labels as two layers, so this stacks the
+ * Reference tiles over the Base tiles. `labels={false}` drops the upper one
+ * for the small site-card thumbnails, where basemap text is unreadable at
+ * that size and only competes with the site marker we draw ourselves.
+ *
  * The `key` forces a remount on theme change — Leaflet caches tiles per layer
  * instance, so mutating the URL alone leaves the old tiles on screen.
  */
-export function MapTiles() {
+/**
+ * Esri's Canvas tiles stop at z16 — past that the server answers every request
+ * with an identical 2.5KB "map data not available" placeholder. `maxNativeZoom`
+ * stops Leaflet asking: it upscales the z16 tile instead, so the geofence
+ * editor can still zoom in far enough to place a pin on a building, at the
+ * cost of some softness. Without it the map simply goes blank at z17.
+ */
+const ZOOM = { maxZoom: 19, maxNativeZoom: 16 } as const;
+
+export function MapTiles({ labels = true }: { labels?: boolean }) {
   const { resolvedTheme } = useTheme();
   return (
-    <TileLayer
-      key={resolvedTheme}
-      url={TILE_URL[resolvedTheme]}
-      attribution={OSM_ATTRIBUTION}
-      // CartoDB shards across a–d; Leaflet's default is only a–c.
-      subdomains="abcd"
-      maxZoom={20}
-    />
+    <>
+      <TileLayer
+        key={`base-${resolvedTheme}`}
+        url={TILE_URL[resolvedTheme]}
+        attribution={OSM_ATTRIBUTION}
+        {...ZOOM}
+      />
+      {labels && (
+        <TileLayer
+          key={`labels-${resolvedTheme}`}
+          url={TILE_LABEL_URL[resolvedTheme]}
+          {...ZOOM}
+          // Leaflet stacks panes by z-index; without this the label layer can
+          // land under the base layer on a theme swap.
+          zIndex={2}
+        />
+      )}
+    </>
   );
 }
 

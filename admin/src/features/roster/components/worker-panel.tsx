@@ -171,7 +171,7 @@ export function WorkerPanel({
             aria-pressed={role === seg.id}
             onClick={() => setRole(seg.id)}
             className={cn(
-              'flex-1 rounded-lg py-1 text-xs font-medium transition-colors coarse:min-h-10',
+              'flex-1 rounded-lg py-1 text-xs font-medium transition-colors coarse:min-h-8',
               role === seg.id
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',

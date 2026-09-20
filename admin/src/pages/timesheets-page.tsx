@@ -410,7 +410,7 @@ export function TimesheetsPage() {
       type="button"
       onClick={() => setStatus((s) => (s === key ? 'all' : key))}
       className={cn(
-        'flex shrink-0 items-baseline gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-11 coarse:items-center',
+        'flex shrink-0 items-baseline gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-9 coarse:items-center',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         status === key ? 'border-primary bg-primary/5' : 'hover:bg-muted/50',
       )}
@@ -462,10 +462,9 @@ export function TimesheetsPage() {
           }
         />
 
-        {/* Count chips drive the status filter. They scroll as one row on a
-            phone rather than wrapping — four short chips reading as a single
-            switch is clearer than two ragged rows of two. */}
-        <div className="scrollbar-thin -mx-4 flex items-center gap-2 overflow-x-auto overscroll-x-contain px-4 sm:mx-0 sm:flex-wrap sm:overflow-x-visible sm:px-0">
+        {/* Count chips drive the status filter — they wrap rather than scroll,
+            so the fourth one is never hidden off the right edge. */}
+        <div className="flex flex-wrap items-center gap-2">
           {countChip('all', 'Entries', counts.all, 'default')}
           {countChip('pending', 'Pending', counts.pending, 'warning')}
           {countChip('flagged', 'Flagged', counts.flagged, 'danger')}
@@ -502,7 +501,7 @@ export function TimesheetsPage() {
                 type="button"
                 onClick={() => setPreset(p)}
                 className={cn(
-                  'shrink-0 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-11 coarse:px-3',
+                  'shrink-0 rounded-lg border px-2.5 py-1 text-xs transition-colors coarse:min-h-9 coarse:px-3',
                   'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                   preset === p ? 'border-primary bg-primary/5 text-primary' : 'hover:bg-muted/50',
                 )}

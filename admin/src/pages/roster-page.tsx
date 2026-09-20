@@ -359,7 +359,7 @@ export function RosterPage() {
               aria-pressed={unfilledOnly}
               onClick={() => setUnfilledOnly((v) => !v)}
               className={cn(
-                'flex h-8 shrink-0 items-center gap-1.5 rounded-sm border px-2.5 text-small font-medium transition-colors duration-[var(--duration-micro)] coarse:h-11',
+                'flex h-8 shrink-0 items-center gap-1.5 rounded-sm border px-2.5 text-small font-medium transition-colors duration-[var(--duration-micro)] coarse:h-9',
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                 unfilledOnly
                   ? 'border-danger/40 bg-danger-muted text-danger'
@@ -398,7 +398,7 @@ export function RosterPage() {
               />
             )}
 
-            <div className="mx-1 h-5 w-px shrink-0 bg-border-subtle" />
+            <div className="mx-1 hidden h-5 w-px shrink-0 bg-border-subtle lg:block" />
             <Button
               variant="outline"
               size="icon-sm"
@@ -428,7 +428,7 @@ export function RosterPage() {
             >
               <CaretRight aria-hidden />
             </Button>
-            <span className="num ml-2 shrink-0 text-small font-medium whitespace-nowrap">
+            <span className="num shrink-0 text-small font-medium whitespace-nowrap lg:ml-2">
               {stepsByDay
                 ? formatACST(`${dayYmd}T12:00:00+09:30`, 'EEE d MMM yyyy')
                 : `${formatACST(days[0]!, 'd MMM')} – ${formatACST(days[6]!, 'd MMM yyyy')}`}

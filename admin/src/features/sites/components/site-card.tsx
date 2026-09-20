@@ -46,7 +46,7 @@ export function SiteCard({ site, certTypes, taskCount, weekCover, onOpen }: Site
             keyboard={false}
             attributionControl={false}
           >
-            <MapTiles />
+            <MapTiles labels={false} />
             <Circle center={[site.lat, site.lng]} radius={site.geofence_radius_m} pathOptions={GEOFENCE_PATH_OPTIONS} />
             <Marker position={[site.lat, site.lng]} icon={siteIcon(site.name, { label: false })} />
           </MapContainer>

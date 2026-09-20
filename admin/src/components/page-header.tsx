@@ -33,14 +33,13 @@ export function PageHeader({ title, description, actions, eyebrow, className }: 
         )}
       </div>
       {actions && (
-        // `-mx-4 px-4` bleeds the scroller to the page gutter so a row of
-        // controls that overruns the screen scrolls cleanly to its last item
-        // instead of clipping against the padding. Above `lg` it wraps as
-        // before and the scroller never engages.
-        <div className="scrollbar-thin -mx-4 shrink-0 overflow-x-auto overscroll-x-contain px-4 sm:-mx-5 sm:px-5 lg:mx-0 lg:overflow-x-visible lg:px-0">
-          <div className="flex w-max min-w-full items-center gap-2 lg:w-auto lg:flex-wrap lg:justify-end">
-            {actions}
-          </div>
+        // Wraps at every width. This was a horizontal scroller on phones,
+        // which meant the roster's leading control sat half off-screen with
+        // nothing to say it was there — a row you have to discover by
+        // swiping is a row that gets missed. Two short rows of controls are
+        // plainly better than one hidden one.
+        <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
+          {actions}
         </div>
       )}
     </div>
