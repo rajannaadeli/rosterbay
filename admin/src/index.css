@@ -742,9 +742,21 @@
  */
 @layer utilities {
   /* Safe-area padding for anything flush to a device edge — the bottom tab
-     bar, phone-anchored dialogs, the full-screen drawer footer. `max()` so a
-     browser reporting 0 (desktop, Android without a notch) still keeps the
-     designed padding. */
+     bar, phone-anchored dialogs, the full-screen drawer footer.
+     `max()` so a browser reporting 0 (desktop, Android without a notch) still
+     keeps the designed padding.
+
+     ⚠ These SET padding, they do not add to it, and because they are
+     hand-written they are emitted after Tailwind's generated utilities — so
+     `px-safe px-4` silently resolves to zero padding, not 16px. Never pair
+     one with a `p-*` utility on the same element. Give it its base through
+     `--safe-pad` instead, which is breakpoint-sortable like any other
+     utility:
+
+         class="px-safe [--safe-pad:1rem] sm:[--safe-pad:1.5rem]"
+
+     (This is not hypothetical: the entry page shipped with `px-safe px-4`
+     and rendered edge-to-edge on every phone without a notch.) */
   .pb-safe {
     padding-bottom: max(var(--safe-pad, 0px), env(safe-area-inset-bottom));
   }

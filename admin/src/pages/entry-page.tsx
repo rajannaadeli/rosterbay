@@ -7,7 +7,7 @@ import { useTheme } from '@/components/theme-provider';
 import { Wordmark } from '@/components/wordmark';
 import { Button } from '@/components/ui/button';
 import { useSignInAsAdmin } from '@/features/auth/hooks';
-import { MQ_SM, useMediaQuery } from '@/hooks/use-media-query';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { useWorkerAppRelease } from '@/features/release/hooks';
 import { APK_DOWNLOAD_PATH } from '@/lib/release-target';
 
@@ -18,20 +18,27 @@ const APK_URL = import.meta.env.VITE_APK_URL || APK_DOWNLOAD_PATH;
 const PORTFOLIO_URL = import.meta.env.VITE_PORTFOLIO_URL ?? 'https://rajanna.dev';
 const UPWORK_URL = import.meta.env.VITE_UPWORK_URL ?? '#';
 
+/** `sm` and up, and tall enough for the hero to be worth drawing. */
+const HERO_MQ = '(min-width: 40rem) and (min-height: 34rem)';
+
 export function EntryPage() {
   const navigate = useNavigate();
   const signIn = useSignInAsAdmin();
   const apk = useWorkerAppRelease();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-  // The two hero shots are ~1200px wide and there are two of them (one per
-  // theme, stacked for an instant crossfade). `hidden sm:block` stops them
-  // being *seen* on a phone but not from being fetched, which is the entire
-  // cost. Gating the render means a phone never asks for them.
-  const showHero = useMediaQuery(MQ_SM);
+  // Rendered conditionally rather than hidden with `hidden sm:block`, for two
+  // reasons. The shots are ~1200px wide and there are two of them (one per
+  // theme, stacked for an instant crossfade), and `display: none` stops them
+  // being *seen* on a phone but not from being fetched — which is the entire
+  // cost. And the query tests height as well as width: the hero is capped at
+  // 46dvh, so a landscape phone gets ~165px of which 34px is browser chrome,
+  // and a 130px sliver of screenshot reads as a broken image rather than as a
+  // page continuing below the fold.
+  const showHero = useMediaQuery(HERO_MQ);
 
   return (
-    <div className="px-safe relative flex min-h-dvh flex-col overflow-hidden px-4 pt-10 pb-8 sm:px-6 sm:pt-14 sm:pb-10">
+    <div className="px-safe [--safe-pad:1rem] sm:[--safe-pad:1.5rem] relative flex min-h-dvh flex-col overflow-hidden pt-10 pb-8 sm:pt-14 sm:pb-10">
       {/* Accent-derived wash. Two soft radials rather than a linear gradient:
           a linear ramp reads as a template background, where an off-centre
           glow reads as light falling on something. */}
@@ -63,7 +70,7 @@ export function EntryPage() {
       <div className="flex w-full max-w-sm flex-col gap-3">
         <Button
           size="lg"
-          className="h-12 text-base whitespace-normal"
+          className="h-12 text-base whitespace-normal coarse:h-12"
           disabled={signIn.isPending}
           onClick={() => {
             signIn.mutate(undefined, { onSuccess: () => void navigate('/app') });
@@ -78,7 +85,11 @@ export function EntryPage() {
           size="lg"
           // `h-auto min-h-12` + wrapping: at 320px this label is two lines,
           // and a fixed-height button would clip its own second line.
-          className="h-auto min-h-12 py-2 text-center text-base whitespace-normal"
+          // `coarse:h-auto` is load-bearing — tailwind-merge drops the size
+          // variant's `h-10` in favour of `h-auto`, but leaves its
+          // `coarse:h-11` standing, and that sorts last. Without this the
+          // button is 44px tall on exactly the screens where it wraps.
+          className="h-auto min-h-12 py-2 text-center text-base whitespace-normal coarse:h-auto"
           onClick={() => void navigate('/worker')}
         >
           <DeviceMobile size={20} weight="duotone" aria-hidden />
@@ -115,9 +126,9 @@ export function EntryPage() {
       </div>
 
       {/* The product itself, tilted just enough to read as an object on a
-          surface rather than a flat inline image. Hidden below `sm` — at
-          phone width the frame would be illegible and the buttons are the
-          point there.
+          surface rather than a flat inline image. Skipped on small or short
+          viewports (see `showHero`) — at phone width the frame would be
+          illegible and the buttons are the point there.
 
           Both light and dark hero screenshots are always rendered and stacked;
           only opacity toggles, so the crossfade is instant on switch with no
@@ -147,7 +158,7 @@ export function EntryPage() {
 
       {/* Not fixed: the page scrolls now that the hero shot is below the
           fold, and a pinned footer sat on top of it. */}
-      <footer className="pb-safe mx-auto mt-10 flex max-w-2xl flex-col items-center gap-1 px-2 text-center text-small text-text-secondary sm:mt-14 sm:px-6">
+      <footer className="pb-safe [--safe-pad:0.5rem] mx-auto mt-10 flex max-w-2xl flex-col items-center gap-1 text-center text-small text-text-secondary sm:mt-14">
         <p>
           RosterBay is a demonstration platform built by Rajanna Adeli — full-stack developer
           specialising in workforce management software.

@@ -50,7 +50,7 @@ export function WorkerFramePage() {
   if (!framed) {
     return (
       <div className="flex h-dvh flex-col overflow-hidden bg-background">
-        <div className="px-safe flex shrink-0 items-center justify-between gap-2 border-b border-border-subtle px-2 py-1.5">
+        <div className="px-safe [--safe-pad:0.5rem] flex shrink-0 items-center justify-between gap-2 border-b border-border-subtle py-1.5">
           <Button
             variant="ghost"
             size="sm"
